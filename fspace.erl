@@ -59,7 +59,7 @@ loadLines(_, Dict, 26) ->
 loadLines(File, Dict, Y) ->
 	Line = io:get_line(File, ''),
 	if
-		(Line =:= eof) andalso (Y < 26) ->
+		(Line =:= eof) orelse (Y > 25) ->
 			Dict;
 		true ->
 			NewDict = loadChars(Dict, Y, 0, Line),
