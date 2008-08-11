@@ -1,0 +1,37 @@
+-module(fstack).
+%% Funge-like stack in Erlang
+-export([push/2, peek/1, pop/1, dup/1, swap/1]).
+
+%% Stack is a list, access at list head
+%% push(stack, value) -> new_stack
+%% peek(stack) -> value
+%% pop(stack) -> {new_stack, value}
+%% dup(stack) -> new_stack
+%% swap(stack) -> new_stack
+
+push([], V) ->
+	[V];
+push(L, V) when is_list(L) ->
+	[V|L].
+
+peek([]) ->
+	0;
+peek([H|_]) ->
+	H.
+
+pop([]) ->
+	{[], 0};
+pop([H|T]) ->
+	{T, H}.
+
+dup([]) ->
+	[0, 0];
+dup([H|T]) ->
+	[H, H|T].
+
+swap([]) ->
+	[0, 0];
+swap([H1, H2|T]) ->
+	[H2, H1|T];
+swap([H|_]) ->
+	[0,H].
