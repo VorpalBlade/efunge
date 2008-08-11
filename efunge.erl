@@ -99,7 +99,7 @@ processInstruction($\\, #fst{} = State, Stack, Space) ->
 	{S1,V1} = pop(Stack),
 	{S2,V2} = pop(S1),
 	if
-		V2 =:= 0 -> {State, push(S2, 0), Space};
+		V1 =:= 0 -> {State, push(S2, 0), Space};
 		true     -> {State, push(S2, V2 div V1), Space}
 	end;
 
@@ -108,7 +108,7 @@ processInstruction($%, #fst{} = State, Stack, Space) ->
 	{S1,V1} = pop(Stack),
 	{S2,V2} = pop(S1),
 	if
-		V2 =:= 0 -> {State, push(S2, 0), Space};
+		V1 =:= 0 -> {State, push(S2, 0), Space};
 		true     -> {State, push(S2, V2 rem V1), Space}
 	end;
 
