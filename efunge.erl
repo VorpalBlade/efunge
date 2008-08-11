@@ -2,7 +2,7 @@
 -export([main/1]).
 -include("fstate.hrl").
 -import(fspace, [set/3, fetch/2]).
--import(fstack, [push/2, peek/1, pop/1, dup/1, swap/1]).
+-import(fstack, [push/2, peek/1, pop/1, popVec/1, dup/1, swap/1]).
 
 %% Loads file and starts main loop.
 main([A]) ->
@@ -30,6 +30,10 @@ getNewPos(#fst{} = State) ->
 %% Returns: New state
 setDelta(#fst{} = State, X, Y) ->
 	State#fst{ dx = X, dy = Y }.
+%% Returns: New state
+revDelta(#fst{} = State) ->
+	#fst{dx=DX, dy=DY} = State,
+	State#fst{ dx = -DX, dy = -DY }.
 
 %% Runs main loop
 loop(#fst{} = State, Stack, FungeSpace) ->
@@ -67,6 +71,20 @@ processInstruction(Instr, #fst{} = State, Stack, Space) when (Instr >= $0) andal
 processInstruction($\s, #fst{} = State, Stack, Space) ->
 	{State, Stack, Space};
 
+%% p Put
+processInstruction($p, #fst{} = State, Stack, Space) ->
+	{S1, C} = popVec(Stack),
+	{S2, V} = pop(S1),
+	NewSpace = set(Space, C, V),
+	{State, S2, NewSpace};
+
+%% g Get
+processInstruction($g, #fst{} = State, Stack, Space) ->
+	{S1, C} = popVec(Stack),
+	V = fetch(Space, C),
+	{State, push(S1, V), Space};
+
+
 %% + Plus
 processInstruction($+, #fst{} = State, Stack, Space) ->
 	{S1,V1} = pop(Stack), {S2,V2} = pop(S1), {State, push(S2, V1 + V2), Space};
@@ -75,11 +93,24 @@ processInstruction($-, #fst{} = State, Stack, Space) ->
 	{S1,V1} = pop(Stack), {S2,V2} = pop(S1), {State, push(S2, V1 - V2), Space};
 %% * Multiplication
 processInstruction($*, #fst{} = State, Stack, Space) ->
-	{S1,V1} = pop(Stack), {S2,V2} = pop(S1), {State, push(S2, V1 * V2), Space};
+	{S1,V1} = pop(Stack), {S2,V2} = pop(S1), {State, push(S2, V2 * V1), Space};
 %% / Integer division
 processInstruction($\\, #fst{} = State, Stack, Space) ->
-	{S1,V1} = pop(Stack), {S2,V2} = pop(S1), {State, push(S2, V1 div V2), Space};
+	{S1,V1} = pop(Stack),
+	{S2,V2} = pop(S1),
+	if
+		V2 =:= 0 -> {State, push(S2, 0), Space};
+		true     -> {State, push(S2, V2 div V1), Space}
+	end;
 
+%% % Reminder
+processInstruction($%, #fst{} = State, Stack, Space) ->
+	{S1,V1} = pop(Stack),
+	{S2,V2} = pop(S1),
+	if
+		V2 =:= 0 -> {State, push(S2, 0), Space};
+		true     -> {State, push(S2, V2 rem V1), Space}
+	end;
 
 %% " String mode
 processInstruction($", #fst{} = State, Stack, Space) ->
@@ -101,6 +132,10 @@ processInstruction($v, #fst{} = State, Stack, Space) ->
 %% : Dup
 processInstruction($:, #fst{} = State, Stack, Space) ->
 	{State, dup(Stack), Space};
+%% $ Pop
+processInstruction($$, #fst{} = State, Stack, Space) ->
+	{S1, _} = pop(Stack),
+	{State, S1, Space};
 
 %% # Jump
 processInstruction($#, #fst{} = State, Stack, Space) ->
@@ -115,12 +150,35 @@ processInstruction($_, #fst{} = State, Stack, Space) ->
 		true ->
 			{setDelta(State, -1, 0), NewStack, Space}
 	end;
+%% | Vertical if
+processInstruction($|, #fst{} = State, Stack, Space) ->
+	{NewStack, Val} = pop(Stack),
+	if
+		Val =:= 0 ->
+			{setDelta(State, 0, 1), NewStack, Space};
+		true ->
+			{setDelta(State, 0, -1), NewStack, Space}
+	end;
 
 %% , Put char
-processInstruction($,, #fst{} = State, Stack, Space) ->
+processInstruction($, , #fst{} = State, Stack, Space) ->
 	{NewStack, Val} = pop(Stack),
 	io:format("~c", [Val]),
 	{State, NewStack, Space};
+%% . Put number
+processInstruction($., #fst{} = State, Stack, Space) ->
+	{NewStack, Val} = pop(Stack),
+	io:format("~w ", [Val]),
+	{State, NewStack, Space};
+%% ~ Get char
+processInstruction($~, #fst{} = State, Stack, Space) ->
+	S = io:get_chars("", 1),
+	if
+		S =:= eof -> {revDelta(State), Stack, Space};
+		true ->
+			[I] = S,
+			{State, push(Stack, I), Space}
+	end;
 
 %% @ Exit
 processInstruction($@, _, _, _) ->
