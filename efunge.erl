@@ -9,7 +9,7 @@ main([A]) ->
 	{R1,R2,R3} = now(),
 	random:seed(R1, R2, R3),
 	Space = fspace:load(A),
-	loop(#fst{}, [], Space).
+	loop(#fst{}, fstack:new(), Space).
 
 %% getNewPos -> NewState
 getNewPos(#fst{} = State) ->
@@ -43,14 +43,17 @@ loop(#fst{} = State, Stack, FungeSpace) ->
 	case State#fst.isStringMode of
 		true ->
 			{NewState, NewStack} = handleStringMode(Instr, State, Stack),
-			NewFungeSpace = FungeSpace;
+			loop(getNewPos(NewState), NewStack, FungeSpace);
 		false ->
-			{NewState, NewStack, NewFungeSpace} =
-				processInstruction(Instr, State, Stack, FungeSpace)
-	end,
-	
-	loop(getNewPos(NewState), NewStack, NewFungeSpace).
-
+			if
+				Instr =:= $@ ->
+					noreply;
+				true ->
+					{NewState, NewStack, NewFungeSpace} =
+						processInstruction(Instr, State, Stack, FungeSpace),
+					loop(getNewPos(NewState), NewStack, NewFungeSpace)
+			end
+	end.
 
 %% Returns:
 %%   {NewState, NewStack}
@@ -203,6 +206,7 @@ processInstruction($., #fst{} = State, Stack, Space) ->
 	{NewStack, Val} = pop(Stack),
 	io:format("~w ", [Val]),
 	{State, NewStack, Space};
+
 %% ~ Get char
 processInstruction($~, #fst{} = State, Stack, Space) ->
 	Result = io:fread("", "~1c"),
@@ -222,12 +226,9 @@ processInstruction($&, #fst{} = State, Stack, Space) ->
 			{State, push(Stack, I), Space}
 	end;
 
-%% @ Exit
-processInstruction($@, _, _, _) ->
-	exit(normal);
 
 %% unimplemented
-processInstruction(Instr, #fst{} = State, Stack, Space) ->
+processInstruction(_Instr, #fst{} = State, Stack, Space) ->
 	%%io:format("Instruction ~c is not implemented (at x=~w y=~w).~n",
-	%%          [Instr, State#fst.x, State#fst.y]),
+	%%          [_Instr, State#fst.x, State#fst.y]),
 	{revDelta(State), Stack, Space}.

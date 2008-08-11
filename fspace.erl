@@ -30,8 +30,10 @@ fetch(D, {_,_} = Coord) ->
 
 
 load(Filename) when is_list(Filename) ->
-	{ok, File} = file:open(Filename, read),
-	loadLines(File, dict:new(), 0).
+	{ok, File} = file:open(Filename, [read]),
+	D = loadLines(File, dict:new(), 0),
+	file:close(File),
+	D.
 
 dump(Dict) ->
 	F = fun(Y) -> dumpLine(Dict, Y, 0), io:format("~n", []) end,
