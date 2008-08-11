@@ -6,6 +6,8 @@
 
 %% Loads file and starts main loop.
 main([A]) ->
+	{R1,R2,R3} = now(),
+	random:seed(R1, R2, R3),
 	Space = fspace:load(A),
 	loop(#fst{}, [], Space).
 
@@ -87,29 +89,29 @@ processInstruction($g, #fst{} = State, Stack, Space) ->
 
 %% + Plus
 processInstruction($+, #fst{} = State, Stack, Space) ->
-	{S1,V1} = pop(Stack), {S2,V2} = pop(S1), {State, push(S2, V1 + V2), Space};
+	{S1,B} = pop(Stack), {S2,A} = pop(S1), {State, push(S2, A + B), Space};
 %% - Minus
 processInstruction($-, #fst{} = State, Stack, Space) ->
-	{S1,V1} = pop(Stack), {S2,V2} = pop(S1), {State, push(S2, V1 - V2), Space};
+	{S1,B} = pop(Stack), {S2,A} = pop(S1), {State, push(S2, A - B), Space};
 %% * Multiplication
 processInstruction($*, #fst{} = State, Stack, Space) ->
-	{S1,V1} = pop(Stack), {S2,V2} = pop(S1), {State, push(S2, V2 * V1), Space};
+	{S1,B} = pop(Stack), {S2,A} = pop(S1), {State, push(S2, A * B), Space};
 %% / Integer division
-processInstruction($\\, #fst{} = State, Stack, Space) ->
-	{S1,V1} = pop(Stack),
-	{S2,V2} = pop(S1),
+processInstruction($/, #fst{} = State, Stack, Space) ->
+	{S1,B} = pop(Stack),
+	{S2,A} = pop(S1),
 	if
-		V1 =:= 0 -> {State, push(S2, 0), Space};
-		true     -> {State, push(S2, V2 div V1), Space}
+		B =:= 0 -> {State, push(S2, 0), Space};
+		true     -> {State, push(S2, A div B), Space}
 	end;
 
 %% % Reminder
 processInstruction($%, #fst{} = State, Stack, Space) ->
-	{S1,V1} = pop(Stack),
-	{S2,V2} = pop(S1),
+	{S1,B} = pop(Stack),
+	{S2,A} = pop(S1),
 	if
-		V1 =:= 0 -> {State, push(S2, 0), Space};
-		true     -> {State, push(S2, V2 rem V1), Space}
+		B =:= 0 -> {State, push(S2, 0), Space};
+		true     -> {State, push(S2, A rem B), Space}
 	end;
 
 %% " String mode
@@ -128,10 +130,41 @@ processInstruction($^, #fst{} = State, Stack, Space) ->
 %% v South
 processInstruction($v, #fst{} = State, Stack, Space) ->
 	{setDelta(State, 0, 1), Stack, Space};
+%% ? Random direction
+processInstruction($?, #fst{} = State, Stack, Space) ->
+	R = random:uniform(4),
+	case R of
+		1 -> {setDelta(State, -1,  0), Stack, Space};
+		2 -> {setDelta(State,  1,  0), Stack, Space};
+		3 -> {setDelta(State,  0, -1), Stack, Space};
+		4 -> {setDelta(State,  0,  1), Stack, Space}
+	end;
+
+%% ! Not
+processInstruction($!, #fst{} = State, Stack, Space) ->
+	{S1, V} = pop(Stack),
+	if
+		V =:= 0 -> R = 1;
+		true    -> R = 0
+	end,
+	{State, push(S1, R), Space};
+
+%% ` Greater than
+processInstruction($`, #fst{} = State, Stack, Space) ->
+	{S1,B} = pop(Stack),
+	{S2,A} = pop(S1),
+	if
+		A > B -> R = 1;
+		true  -> R = 0
+	end,
+	{State, push(S2, R), Space};
 
 %% : Dup
 processInstruction($:, #fst{} = State, Stack, Space) ->
 	{State, dup(Stack), Space};
+%% \ Swap
+processInstruction($\\, #fst{} = State, Stack, Space) ->
+	{State, swap(Stack), Space};
 %% $ Pop
 processInstruction($$, #fst{} = State, Stack, Space) ->
 	{S1, _} = pop(Stack),
@@ -172,11 +205,20 @@ processInstruction($., #fst{} = State, Stack, Space) ->
 	{State, NewStack, Space};
 %% ~ Get char
 processInstruction($~, #fst{} = State, Stack, Space) ->
-	S = io:get_chars("", 1),
+	Result = io:fread("", "~1c"),
 	if
-		S =:= eof -> {revDelta(State), Stack, Space};
+		Result =:= eof -> {revDelta(State), Stack, Space};
 		true ->
-			[I] = S,
+			{ok, [[I]]} = Result,
+			{State, push(Stack, I), Space}
+	end;
+%% & Get int
+processInstruction($&, #fst{} = State, Stack, Space) ->
+	Result = io:fread("", "~d"),
+	if
+		Result =:= eof -> {revDelta(State), Stack, Space};
+		true ->
+			{ok, [I]} = Result,
 			{State, push(Stack, I), Space}
 	end;
 
@@ -185,7 +227,8 @@ processInstruction($@, _, _, _) ->
 	exit(normal);
 
 %% unimplemented
-processInstruction(Instr, #fst{} = State, _, _) ->
+processInstruction(Instr, #fst{} = State, Stack, Space) ->
 	io:format("Instruction ~c is not implemented (at x=~w y=~w).~n",
 	          [Instr, State#fst.x, State#fst.y]),
+	{revDelta(State), Stack, Space},
 	exit(notImplemented).
