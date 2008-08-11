@@ -228,7 +228,6 @@ processInstruction($@, _, _, _) ->
 
 %% unimplemented
 processInstruction(Instr, #fst{} = State, Stack, Space) ->
-	io:format("Instruction ~c is not implemented (at x=~w y=~w).~n",
-	          [Instr, State#fst.x, State#fst.y]),
-	{revDelta(State), Stack, Space},
-	exit(notImplemented).
+	%%io:format("Instruction ~c is not implemented (at x=~w y=~w).~n",
+	%%          [Instr, State#fst.x, State#fst.y]),
+	{revDelta(State), Stack, Space}.
