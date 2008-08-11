@@ -27,8 +27,8 @@ pop([H|T]) ->
 
 popVec([]) ->
 	{[], {0, 0}};
-popVec([Y,X]) ->
-	{[], {X, Y}};
+popVec([Y]) ->
+	{[], {0, Y}};
 popVec([Y,X|T]) ->
 	{T, {X, Y}}.
 
