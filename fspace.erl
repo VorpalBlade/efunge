@@ -75,6 +75,7 @@ dumpLine(Dict, Y, X) ->
 	io:format("~c", [fetch(Dict, {X,Y})]),
 	dumpLine(Dict, Y, X+1).
 
+%% These are based on examples in Programming Erlang.
 for(Max, Max, F) ->
 	F(Max);
 for(I, Max, F)   ->

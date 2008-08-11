@@ -1,14 +1,14 @@
 -module(efunge).
--export([main/1]).
+-export([start/1]).
 -include("fstate.hrl").
 -import(fspace, [set/3, fetch/2]).
 -import(fstack, [push/2, peek/1, pop/1, popVec/1, dup/1, swap/1]).
 
 %% Loads file and starts main loop.
-main([A]) ->
+start(Filename) when is_list(Filename) ->
 	{R1,R2,R3} = now(),
 	random:seed(R1, R2, R3),
-	Space = fspace:load(A),
+	Space = fspace:load(Filename),
 	loop(#fst{}, fstack:new(), Space).
 
 %% getNewPos -> NewState
@@ -47,7 +47,7 @@ loop(#fst{} = State, Stack, FungeSpace) ->
 		false ->
 			if
 				Instr =:= $@ ->
-					noreply;
+					quit;
 				true ->
 					{NewState, NewStack, NewFungeSpace} =
 						processInstruction(Instr, State, Stack, FungeSpace),

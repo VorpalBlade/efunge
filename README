@@ -1,0 +1,36 @@
+efunge
+======
+This is a simple Befunge-93 interpreter coded in what I aim to make idiomatic
+Erlang. As this is my first "real" Erlang project I'm sure there are lot of
+code that is done the wrong way.
+
+To run this you will need to have Erlang installed and erlc in your PATH.
+You will also need make to build the project (or you could use c() in erl).
+
+Building instructions:
+* Run "make" (without the quotes) in your shell while you are in the efunge
+  directory.
+
+Running instructions:
+* Run "erl" (without the quotes) in your shell while you are in the efunge
+  directory.
+* Run:
+    efunge:start("path/to/befunge/program.bf").
+  Note that the dot after the statement is important, do not try to use a
+  semi-colon or such, just use a dot.
+* Enjoy the program
+* To exit the Erlang shell run:
+    q().
+  Again use a dot at the end, not something else.
+
+
+Known bugs and limitations:
+* I have not yet found out how to make starting from a shell script work.
+* It will print "quit" at the end of the program, this is because every function
+  in erlang must have a value, and the shell will print that value at exit.
+  Only way to fix it, is by starting from a shell script.
+* Input is kind of buggy currently.
+* It is slow, but that will not be fixed, if you want a fast Befunge interpreter
+  try cfunge (http://rage.kuonet.org/~anmaster/cfunge/) that is coded in C.
+  It also handles Funge-98 and Funge-108.
+  However, cfunge only works on POSIX platforms.
