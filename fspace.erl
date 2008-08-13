@@ -2,39 +2,30 @@
 %% Handle Funge Space.
 -export([load/1, set/3, fetch/2, dump/1]).
 
-%% External:
-%%  set(Dict, {X, Y}, Value) -> dict
-%%  fetch(Dict, {X, Y}) -> value
-%%  dump(Dict) -> noreply
-%%    Side effect: print out funge space for debugging.
-%%  load(Filename) -> dict
-%% Internal:
-%%  loadChars(Dict, Y, X, Line) -> filled in line
-%%  loadLines(File, Dict, Y) -> filled dict
-%%  for(I, Max, F) -> noreply.
-%%    A for loop.
-
-
 %% Public functions
 
+%% set(D::dictionary(), Coord::tuple(), V::int()) -> dictionary().
 set(D, {_,_} = Coord, V) ->
 	dict:store(Coord, V, D).
 
 
-%% Use dict:find/2?
+%% fetch(D::dictionary(), Coord::tuple()) -> int().
 fetch(D, {_,_} = Coord) ->
+	%% Use dict:find/2?
 	case dict:is_key(Coord, D) of
 		true  -> dict:fetch(Coord, D);
 		false -> $\s
 	end.
 
-
-load(Filename) when is_list(Filename) ->
+%% load(Filename::string())-> dictionary().
+load(Filename) ->
 	{ok, File} = file:open(Filename, [read]),
 	D = loadLines(File, dict:new(), 0),
 	file:close(File),
 	D.
 
+%% dump(Dict::dictionary())-> noreply.
+%%   Side effect: print out funge space for debugging.
 dump(Dict) ->
 	F = fun(Y) -> dumpLine(Dict, Y, 0), io:format("~n", []) end,
 	for(0, 25, F),
@@ -43,6 +34,9 @@ dump(Dict) ->
 
 
 %% Private functions
+
+%% loadChars(Dict::dictionary(), Y:int(), X:int(), string())-> NewDict::dictionary().
+%%   Load everything from one line.
 loadChars(Dict, _, _, []) ->
 	Dict;
 loadChars(Dict, Y, X, [H|T]) ->
@@ -55,7 +49,8 @@ loadChars(Dict, Y, X, [H|T]) ->
 			loadChars(NewDict, Y, X+1, T)
 	end.
 
-
+%% loadLines(File, Dict:dictionary(), Y:int())-> NewDict::dictionary().
+%%   Load a line at the the time, then tail recursive call to load the next one.
 loadLines(_, Dict, 26) ->
 	Dict;
 loadLines(File, Dict, Y) ->

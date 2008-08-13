@@ -29,15 +29,16 @@ getNewPos(#fst{} = State) ->
 	NewState = State#fst{ x=NewX2, y=NewY2 },
 	NewState.
 
-%% Returns: New state
+%% setDelta(tuple(), int(), int()) -> NewState::tuple().
 setDelta(#fst{} = State, X, Y) ->
 	State#fst{ dx = X, dy = Y }.
-%% Returns: New state
+
+%% revDelta(tuple()) -> NewState::tuple().
 revDelta(#fst{} = State) ->
 	#fst{dx=DX, dy=DY} = State,
 	State#fst{ dx = -DX, dy = -DY }.
 
-%% Runs main loop
+%% loop(tuple(), list(), dictionary()) -> quit.
 loop(#fst{} = State, Stack, FungeSpace) ->
 	Instr = fetch(FungeSpace, {State#fst.x, State#fst.y}),
 	case State#fst.isStringMode of
@@ -55,8 +56,8 @@ loop(#fst{} = State, Stack, FungeSpace) ->
 			end
 	end.
 
-%% Returns:
-%%   {NewState, NewStack}
+%% handleStringMode(int(), tuple(), list()) ->
+%%       {NewState::tuple(), NewStack::list()}.
 handleStringMode(Instr, #fst{} = State, Stack) ->
 	if
 		Instr =:= $" ->
@@ -67,6 +68,9 @@ handleStringMode(Instr, #fst{} = State, Stack) ->
 
 %% Finally, process instruction:
 %% Returns: {NewState, NewStack, NewFungeSpace}
+
+%% processInstruction(Instr::int(), State::tuple(), Space::list()) ->
+%%       {NewState::tuple(), NewStack::list(), NewFungeSpace::dictionary()}.
 
 %% 0-9 Any number. 
 processInstruction(Instr, #fst{} = State, Stack, Space) when (Instr >= $0) andalso (Instr =< $9) ->
