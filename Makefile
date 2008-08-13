@@ -1,6 +1,7 @@
+EFLAGS ?=
 .SUFFIXES: .erl .beam
 .erl.beam:
-	erlc -W $<
+	erlc -W $(EFLAGS) $<
 ERL = erl -boot start_clean
 MODS = efunge fspace fstack
 all: compile

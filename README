@@ -4,6 +4,10 @@ This is a simple Befunge-93 interpreter coded in what I aim to make idiomatic
 Erlang. As this is my first "real" Erlang project I'm sure there are lot of
 code that is done the wrong way.
 
+Efunge uses arbitrary-sized integers, this is a side effect of Erlang using that
+by default. This means that Efunge is Turing complete unlike "normal"
+Befunge-93.
+
 To run this you will need to have Erlang installed and erlc in your PATH.
 You will also need make to build the project (or you could use c() in erl).
 
