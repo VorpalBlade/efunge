@@ -54,7 +54,7 @@ fillBuffer(#fst{} = State) ->
 			{ok, State}
 	end.
 
-%% readChar(State) -> {NewState, Char}
+%% readNextChar(State) -> {NewState, Char}
 readNextChar(#fst{} = State) ->
 	{Status, NewState} = fillBuffer(State),
 	case Status of
@@ -63,6 +63,39 @@ readNextChar(#fst{} = State) ->
 			StringBuf = NewState#fst.stringBuffer,
 			[H|T] = StringBuf,
 			{NewState#fst{ stringBuffer=T }, H}
+	end.
+
+parseInteger([]) -> error;
+parseInteger(String) ->
+	Result = string:to_integer(String),
+	case Result of
+		{error, _Reason} ->
+			[_H|T] = String,
+			parseInteger(T);
+		{Int, Rest} ->
+			[H|T] = Rest,
+			case H of
+				$\n -> {Int, T};
+				_ -> Result
+			end
+	end.
+
+
+%% readNextInteger(State) -> {NewState, Integer}
+readNextInteger(#fst{} = State) ->
+	{Status, NewState} = fillBuffer(State),
+	case Status of
+		eof -> {State, eof};
+		ok ->
+			StringBuf = NewState#fst.stringBuffer,
+			Result = parseInteger(StringBuf),
+			case Result of
+				%% Try again!
+				error ->
+					readNextInteger(NewState#fst{ stringBuffer=[] });
+				{Int, Rest} ->
+					{NewState#fst{ stringBuffer=Rest }, Int}
+			end
 	end.
 
 %% loop(tuple(), list(), dictionary()) -> quit.
@@ -248,14 +281,12 @@ processInstruction($~, #fst{} = State, Stack, Space) ->
 	end;
 %% & Get int
 processInstruction($&, #fst{} = State, Stack, Space) ->
-	Result = io:fread('', "~d"),
+	{NewState, Result} = readNextInteger(State),
 	if
 		Result =:= eof -> {revDelta(State), Stack, Space};
 		true ->
-			{ok, [I]} = Result,
-			{State, push(Stack, I), Space}
+			{NewState, push(Stack, Result), Space}
 	end;
-
 
 %% unimplemented
 processInstruction(_Instr, #fst{} = State, Stack, Space) ->
