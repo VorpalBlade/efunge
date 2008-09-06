@@ -38,6 +38,24 @@ revDelta(#fst{} = State) ->
 	#fst{dx=DX, dy=DY} = State,
 	State#fst{ dx = -DX, dy = -DY }.
 
+
+%% readChar(State) -> {State, Char}
+readNextChar(#fst{} = State) ->
+	StringBuf = State#fst.stringBuffer,
+	if
+		StringBuf =:= [] ->
+			String = io:get_line(''),
+			if
+				String =:= eof -> {State, eof};
+				true ->
+					[H|T] = String,
+					{State#fst{ stringBuffer=T }, H}
+			end;
+		true ->
+			[H|T] = StringBuf,
+			{State#fst{ stringBuffer=T }, H}
+	end.
+
 %% loop(tuple(), list(), dictionary()) -> quit.
 loop(#fst{} = State, Stack, FungeSpace) ->
 	Instr = fetch(FungeSpace, {State#fst.x, State#fst.y}),
@@ -213,16 +231,15 @@ processInstruction($., #fst{} = State, Stack, Space) ->
 
 %% ~ Get char
 processInstruction($~, #fst{} = State, Stack, Space) ->
-	Result = io:fread("", "~1c"),
+	{NewState, Result} = readNextChar(State),
 	if
 		Result =:= eof -> {revDelta(State), Stack, Space};
 		true ->
-			{ok, [[I]]} = Result,
-			{State, push(Stack, I), Space}
+			{NewState, push(Stack, Result), Space}
 	end;
 %% & Get int
 processInstruction($&, #fst{} = State, Stack, Space) ->
-	Result = io:fread("", "~d"),
+	Result = io:fread('', "~d"),
 	if
 		Result =:= eof -> {revDelta(State), Stack, Space};
 		true ->

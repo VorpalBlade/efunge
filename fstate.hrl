@@ -3,5 +3,6 @@
 	y = 0,
 	dx = 1,
 	dy = 0,
-	isStringMode = false
+	isStringMode = false,
+	stringBuffer = []
 }).
