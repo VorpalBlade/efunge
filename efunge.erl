@@ -39,21 +39,30 @@ revDelta(#fst{} = State) ->
 	State#fst{ dx = -DX, dy = -DY }.
 
 
-%% readChar(State) -> {State, Char}
-readNextChar(#fst{} = State) ->
+%% fillBuffer(State) -> {ok, NewState} || {eof, NewState}
+fillBuffer(#fst{} = State) ->
 	StringBuf = State#fst.stringBuffer,
 	if
 		StringBuf =:= [] ->
 			String = io:get_line(''),
 			if
-				String =:= eof -> {State, eof};
+				String =:= eof -> {eof, State};
 				true ->
-					[H|T] = String,
-					{State#fst{ stringBuffer=T }, H}
+					{ok, State#fst{ stringBuffer=String }}
 			end;
 		true ->
+			{ok, State}
+	end.
+
+%% readChar(State) -> {NewState, Char}
+readNextChar(#fst{} = State) ->
+	{Status, NewState} = fillBuffer(State),
+	case Status of
+		eof -> {State, eof};
+		ok ->
+			StringBuf = NewState#fst.stringBuffer,
 			[H|T] = StringBuf,
-			{State#fst{ stringBuffer=T }, H}
+			{NewState#fst{ stringBuffer=T }, H}
 	end.
 
 %% loop(tuple(), list(), dictionary()) -> quit.
