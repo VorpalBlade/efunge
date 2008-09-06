@@ -65,6 +65,7 @@ readNextChar(#fst{} = State) ->
 			{NewState#fst{ stringBuffer=T }, H}
 	end.
 
+%% parseInteger(string()) -> {Int, Rest} || error
 parseInteger([]) -> error;
 parseInteger(String) ->
 	Result = string:to_integer(String),

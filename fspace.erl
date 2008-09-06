@@ -35,7 +35,7 @@ dump(Dict) ->
 
 %% Private functions
 
-%% loadChars(Dict::dictionary(), Y:int(), X:int(), string())-> NewDict::dictionary().
+%% loadChars(Dict::dictionary(), Y:int(), X:int(), string()) -> NewDict::dictionary().
 %%   Load everything from one line.
 loadChars(Dict, _, _, []) ->
 	Dict;
@@ -49,7 +49,7 @@ loadChars(Dict, Y, X, [H|T]) ->
 			loadChars(NewDict, Y, X+1, T)
 	end.
 
-%% loadLines(File, Dict:dictionary(), Y:int())-> NewDict::dictionary().
+%% loadLines(File, Dict:dictionary(), Y:int()) -> NewDict::dictionary().
 %%   Load a line at the the time, then tail recursive call to load the next one.
 loadLines(_, Dict, 26) ->
 	Dict;
