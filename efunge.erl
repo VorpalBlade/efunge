@@ -132,7 +132,7 @@ handleStringMode(Instr, #fst{} = State, Stack) ->
 %% processInstruction(Instr::int(), State::tuple(), Space::list()) ->
 %%       {NewState::tuple(), NewStack::list(), NewFungeSpace::dictionary()}.
 
-%% 0-9 Any number. 
+%% 0-9 Any number.
 processInstruction(Instr, #fst{} = State, Stack, Space) when (Instr >= $0) andalso (Instr =< $9) ->
 	{State, push(Stack, Instr - $0), Space};
 
