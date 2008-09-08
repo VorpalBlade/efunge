@@ -49,8 +49,8 @@ loadChars(Dict, Y, X, [H|T]) ->
 
 %% loadLines(File, Dict:dictionary(), Y:int()) -> true.
 %%   Load a line at the the time, then tail recursive call to load the next one.
-loadLines(_, Dict, 26) ->
-	Dict;
+loadLines(_, _, 26) ->
+	true;
 loadLines(File, Dict, Y) ->
 	Line = io:get_line(File, ''),
 	if
