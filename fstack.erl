@@ -12,9 +12,9 @@ new() ->
 
 %% push(stack(), int()) -> stack().
 %%   Push a value on a stack.
-push([], V) when is_number(V) ->
+push([], V) ->
 	[V];
-push(L, V) when is_list(L) andalso is_number(V) ->
+push(L, V) ->
 	[V|L].
 
 %% peek(stack()) -> int().
