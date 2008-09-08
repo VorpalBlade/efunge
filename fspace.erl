@@ -1,14 +1,13 @@
 -module(fspace).
 %% Handle Funge Space.
 %% Format of tuples in table is {{X,Y},Value}
--export([load/1, set/3, fetch/2, dump/1, delete/1]).
+-export([load/1, set/3, fetch/2, delete/1]).
 
 %% Public functions
 
 %% set(Table, Coord::tuple(), V::int()) -> Table.
 set(Table, {_,_} = Coord, V) ->
-	ets:insert(Table, {Coord, V}),
-	Table.
+	ets:insert(Table, {Coord, V}).
 
 
 %% fetch(Table, Coord::tuple()) -> int().
@@ -19,41 +18,36 @@ fetch(Table, {_,_} = Coord) ->
 		[{{_,_},Value}] -> Value
 	end.
 
-%% load(Filename::string())-> dictionary().
+%% load(Filename::string()) -> dictionary().
 load(Filename) ->
 	{ok, File} = file:open(Filename, [read]),
-	D = loadLines(File, ets:new(fungespace, [set, private]), 0),
+	D = ets:new(fungespace, [set, private]),
+	loadLines(File, D, 0),
 	file:close(File),
 	D.
 
-%% dump(Dict::dictionary())-> noreply.
-%%   Side effect: print out funge space for debugging.
-dump(Dict) ->
-	F = fun(Y) -> dumpLine(Dict, Y, 0), io:format("~n", []) end,
-	for(0, 25, F),
-	noreply.
-
+%% delete(Table) -> true.
 delete(Table) ->
 	ets:delete(Table).
 
 
 %% Private functions
 
-%% loadChars(Dict::dictionary(), Y:int(), X:int(), string()) -> NewDict::dictionary().
+%% loadChars(Dict::dictionary(), Y:int(), X:int(), string()) -> true.
 %%   Load everything from one line.
-loadChars(Dict, _, _, []) ->
-	Dict;
+loadChars(_, _, _, []) ->
+	true;
 loadChars(Dict, Y, X, [H|T]) ->
 	if
 		(H =:= $\n) orelse (H =:= $\r) ->
 			%% May contain ending newlines...
-			Dict;
+			true;
 		true ->
-			NewDict = set(Dict, {X, Y}, H),
-			loadChars(NewDict, Y, X+1, T)
+			set(Dict, {X, Y}, H),
+			loadChars(Dict, Y, X+1, T)
 	end.
 
-%% loadLines(File, Dict:dictionary(), Y:int()) -> NewDict::dictionary().
+%% loadLines(File, Dict:dictionary(), Y:int()) -> true.
 %%   Load a line at the the time, then tail recursive call to load the next one.
 loadLines(_, Dict, 26) ->
 	Dict;
@@ -61,22 +55,8 @@ loadLines(File, Dict, Y) ->
 	Line = io:get_line(File, ''),
 	if
 		(Line =:= eof) orelse (Y > 25) ->
-			Dict;
+			true;
 		true ->
-			NewDict = loadChars(Dict, Y, 0, Line),
-			loadLines(File, NewDict, Y+1)
+			loadChars(Dict, Y, 0, Line),
+			loadLines(File, Dict, Y+1)
 	end.
-
-
-dumpLine(_, _, 81) ->
-	noreply;
-dumpLine(Dict, Y, X) ->
-	io:format("~c", [fetch(Dict, {X,Y})]),
-	dumpLine(Dict, Y, X+1).
-
-%% These are based on examples in Programming Erlang.
-for(Max, Max, F) ->
-	F(Max);
-for(I, Max, F)   ->
-	F(I),
-	for(I+1, Max, F).
