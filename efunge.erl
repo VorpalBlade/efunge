@@ -109,6 +109,7 @@ loop(#fst{} = State, Stack, FungeSpace) ->
 		false ->
 			if
 				Instr =:= $@ ->
+					fspace:delete(FungeSpace),
 					quit;
 				true ->
 					{NewState, NewStack, NewFungeSpace} =

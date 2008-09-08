@@ -1,26 +1,28 @@
 -module(fspace).
 %% Handle Funge Space.
--export([load/1, set/3, fetch/2, dump/1]).
+%% Format of tuples in table is {{X,Y},Value}
+-export([load/1, set/3, fetch/2, dump/1, delete/1]).
 
 %% Public functions
 
-%% set(D::dictionary(), Coord::tuple(), V::int()) -> dictionary().
-set(D, {_,_} = Coord, V) ->
-	dict:store(Coord, V, D).
+%% set(Table, Coord::tuple(), V::int()) -> Table.
+set(Table, {_,_} = Coord, V) ->
+	ets:insert(Table, {Coord, V}),
+	Table.
 
 
-%% fetch(D::dictionary(), Coord::tuple()) -> int().
-fetch(D, {_,_} = Coord) ->
-	%% Use dict:find/2?
-	case dict:is_key(Coord, D) of
-		true  -> dict:fetch(Coord, D);
-		false -> $\s
+%% fetch(Table, Coord::tuple()) -> int().
+fetch(Table, {_,_} = Coord) ->
+	Result = ets:lookup(Table, Coord),
+	case Result of
+		[] -> $\s;
+		[{{_,_},Value}] -> Value
 	end.
 
 %% load(Filename::string())-> dictionary().
 load(Filename) ->
 	{ok, File} = file:open(Filename, [read]),
-	D = loadLines(File, dict:new(), 0),
+	D = loadLines(File, ets:new(fungespace, [set, private]), 0),
 	file:close(File),
 	D.
 
@@ -31,6 +33,8 @@ dump(Dict) ->
 	for(0, 25, F),
 	noreply.
 
+delete(Table) ->
+	ets:delete(Table).
 
 
 %% Private functions
