@@ -1,11 +1,11 @@
-#!/usr/bin/env sh
+#!/bin/sh
 # Path of efunge, set to where you install the compiled beam files.
 EFUNGE_ROOT=.
 # Filename of efunge to check for
 EFUNGENAME=efunge.beam
 
 # Sanity checks
-if [ $# -le 1 ]; then
+if [ $# -ne 1 ]; then
 	echo "Too few or too many arguments!"
 	echo
 	echo "Usage: $0 filename"

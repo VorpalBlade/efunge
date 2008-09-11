@@ -27,10 +27,10 @@ You can run efunge in two ways:
 * Using the wrapper script efunge, by default it will only work when run inside
   build directory. Change $EFUNGE_ROOT at the top to an absolute path if you
   want to run it elsewhere.
-* Using 'efunge:start("path/to/befunge/program.bf").' (without the single-
+* Using 'efunge:start("path/to/befunge/program.bf").' (without the single
   quotes) inside the Erlang shell. Note that the dot after the statement is
   important, do not try to use a semi-colon or such, just use a dot.
-  Use 'q().' (wihtout the single-quotes) to exit the Erlang shell.
+  Use 'q().' (wihtout the single quotes) to exit the Erlang shell.
 
 Known bugs and limitations:
 * It is slow, but that will not be fixed, if you want a fast Befunge interpreter
