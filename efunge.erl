@@ -1,10 +1,15 @@
 -module(efunge).
--export([start/1]).
+-export([start/1, run/1]).
 -include("fstate.hrl").
 -import(fspace, [set/3, fetch/2]).
 -import(fstack, [push/2, peek/1, pop/1, popVec/1, dup/1, swap/1]).
 
-%% Loads file and starts main loop.
+%% Handler for -run
+run([Filename]) when is_list(Filename) ->
+	Retval = start(Filename),
+	init:stop(Retval).
+
+%% Load file, set up PRNG, start main loop.
 start(Filename) when is_list(Filename) ->
 	{R1,R2,R3} = now(),
 	random:seed(R1, R2, R3),
@@ -107,10 +112,11 @@ loop(#fst{} = State, Stack, FungeSpace) ->
 			{NewState, NewStack} = handleStringMode(Instr, State, Stack),
 			loop(getNewPos(NewState), NewStack, FungeSpace);
 		false ->
+			%% Handle @ specically since we need to end loop then.
 			if
 				Instr =:= $@ ->
 					fspace:delete(FungeSpace),
-					quit;
+					0;
 				true ->
 					{NewState, NewStack} =
 						processInstruction(Instr, State, Stack, FungeSpace),

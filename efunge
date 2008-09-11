@@ -1,0 +1,32 @@
+#!/usr/bin/env sh
+# Path of efunge, set to where you install the compiled beam files.
+EFUNGE_ROOT=.
+# Filename of efunge to check for
+EFUNGENAME=efunge.beam
+
+# Sanity checks
+if [ $# -le 1 ]; then
+	echo "Too few or too many arguments!"
+	echo
+	echo "Usage: $0 filename"
+	exit 1
+fi
+if [ ! -e "$1" ] || [ ! -r "$1" ]; then
+	echo "Can not process the given file, check that it exists and that its"
+	echo "permissions are correct."
+	exit 1
+fi
+if [ ! -d "$EFUNGE_ROOT" ]; then
+	echo "efunge directory not found"
+	exit 1
+fi
+if [ ! -e "$EFUNGE_ROOT/$EFUNGENAME" ]; then
+	echo "efunge.beam not found. Did you forget make?"
+	exit 1
+fi
+if ! type erl > /dev/null 2>&1; then
+	echo "erl not found in your PATH, can't run efunge without it!"
+	exit 1
+fi
+# Run it then...
+exec erl -noshell -pa "$EFUNGE_ROOT" -run efunge run "$@"
