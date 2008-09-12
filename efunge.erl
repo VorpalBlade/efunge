@@ -4,19 +4,25 @@
 -import(fspace, [set/3, fetch/2]).
 -import(fstack, [push/2, peek/1, pop/1, popVec/1, dup/1, swap/1]).
 
-%% Handler for -run
+%% @type state() = #fst{}.
+%%    The IP and Funge state. See fstate.hrl.
+
+%% @spec run([Filename::string()]) -> none()
+%% @doc Handler for -run
 run([Filename]) when is_list(Filename) ->
 	Retval = start(Filename),
 	init:stop(Retval).
 
-%% Load file, set up PRNG, start main loop.
+%% @spec start(string()) -> int()
+%% @doc Load file, set up PRNG, start main loop.
 start(Filename) when is_list(Filename) ->
 	{R1,R2,R3} = now(),
 	random:seed(R1, R2, R3),
 	Space = fspace:load(Filename),
 	loop(#fst{}, fstack:new(), Space).
 
-%% getNewPos -> NewState
+%% @spec getNewPos(state()) -> NewState::state()
+%% @doc Move IP forward one step.
 getNewPos(#fst{} = State) ->
 	#fst{x=X, y=Y, dx=DX, dy=DY} = State,
 	NewX = X+DX,
@@ -34,17 +40,20 @@ getNewPos(#fst{} = State) ->
 	NewState = State#fst{ x=NewX2, y=NewY2 },
 	NewState.
 
-%% setDelta(tuple(), int(), int()) -> NewState::tuple().
+%% @spec setDelta(state(), int(), int()) -> NewState::state()
+%% @doc Set delta in state.
 setDelta(#fst{} = State, X, Y) ->
 	State#fst{ dx = X, dy = Y }.
 
-%% revDelta(tuple()) -> NewState::tuple().
+%% @spec revDelta(state()) -> NewState::state()
+%% @doc Reverse IP.
 revDelta(#fst{} = State) ->
 	#fst{dx=DX, dy=DY} = State,
 	State#fst{ dx = -DX, dy = -DY }.
 
 
-%% fillBuffer(State) -> {ok, NewState} || {eof, NewState}
+%% @spec fillBuffer(state()) -> {ok, NewState::state()} | {eof, NewState::state()}
+%% @doc Fill up the input line buffer if needed.
 fillBuffer(#fst{} = State) ->
 	StringBuf = State#fst.stringBuffer,
 	if
@@ -59,7 +68,8 @@ fillBuffer(#fst{} = State) ->
 			{ok, State}
 	end.
 
-%% readNextChar(State) -> {NewState, Char}
+%% @spec readNextChar(state()) -> {NewState, Char}
+%% @doc Get a letter from the string buffer.
 readNextChar(#fst{} = State) ->
 	{Status, NewState} = fillBuffer(State),
 	case Status of
@@ -70,7 +80,9 @@ readNextChar(#fst{} = State) ->
 			{NewState#fst{ stringBuffer=T }, H}
 	end.
 
-%% parseInteger(string()) -> {Int, Rest} || error
+%% @spec parseInteger(string()) -> {int(), Rest::string()} | error
+%% @doc Parse an integer in a string, return what is left after the end of the
+%%      integer, discarding a newlines if there is one directly after the integer.
 parseInteger([]) -> error;
 parseInteger(String) ->
 	Result = string:to_integer(String),
@@ -87,7 +99,8 @@ parseInteger(String) ->
 	end.
 
 
-%% readNextInteger(State) -> {NewState, Integer}
+%% @spec readNextInteger(state()) -> {NewState::state(), int()}
+%% @doc Get an integer from the string buffer.
 readNextInteger(#fst{} = State) ->
 	{Status, NewState} = fillBuffer(State),
 	case Status of
@@ -104,7 +117,8 @@ readNextInteger(#fst{} = State) ->
 			end
 	end.
 
-%% loop(tuple(), list(), dictionary()) -> quit.
+%% @spec loop(state(), stack(), tid()) -> int()
+%% @doc Main loop
 loop(#fst{} = State, Stack, FungeSpace) ->
 	Instr = fetch(FungeSpace, {State#fst.x, State#fst.y}),
 	case State#fst.isStringMode of
@@ -124,8 +138,8 @@ loop(#fst{} = State, Stack, FungeSpace) ->
 			end
 	end.
 
-%% handleStringMode(int(), tuple(), list()) ->
-%%       {NewState::tuple(), NewStack::list()}.
+%% @spec handleStringMode(int(), state(), stack()) -> {state(), stack()}
+%% @doc Handle reading stuff in string mode.
 handleStringMode(Instr, #fst{} = State, Stack) ->
 	if
 		Instr =:= $" ->
@@ -135,10 +149,9 @@ handleStringMode(Instr, #fst{} = State, Stack) ->
 	end.
 
 %% Finally, process instruction:
-%% Returns: {NewState, NewStack, NewFungeSpace}
 
-%% processInstruction(Instr::int(), State::tuple(), Space::list()) ->
-%%       {NewState::tuple(), NewStack::list(), NewFungeSpace::dictionary()}.
+%% @spec processInstruction(int(), state(), stack(), Space) -> {state(), stack()}
+%% @doc Process an instruction.
 
 %% 0-9 Any number.
 processInstruction(Instr, #fst{} = State, Stack, _Space) when (Instr >= $0) andalso (Instr =< $9) ->
@@ -177,7 +190,7 @@ processInstruction($/, #fst{} = State, Stack, _Space) ->
 	{S2,A} = pop(S1),
 	if
 		B =:= 0 -> {State, push(S2, 0)};
-		true     -> {State, push(S2, A div B)}
+		true    -> {State, push(S2, A div B)}
 	end;
 
 %% % Reminder
@@ -186,7 +199,7 @@ processInstruction($%, #fst{} = State, Stack, _Space) ->
 	{S2,A} = pop(S1),
 	if
 		B =:= 0 -> {State, push(S2, 0)};
-		true     -> {State, push(S2, A rem B)}
+		true    -> {State, push(S2, A rem B)}
 	end;
 
 %% " String mode
@@ -284,16 +297,14 @@ processInstruction($~, #fst{} = State, Stack, _Space) ->
 	{NewState, Result} = readNextChar(State),
 	if
 		Result =:= eof -> {revDelta(State), Stack};
-		true ->
-			{NewState, push(Stack, Result)}
+		true           -> {NewState, push(Stack, Result)}
 	end;
 %% & Get int
 processInstruction($&, #fst{} = State, Stack, _Space) ->
 	{NewState, Result} = readNextInteger(State),
 	if
 		Result =:= eof -> {revDelta(State), Stack};
-		true ->
-			{NewState, push(Stack, Result)}
+		true           -> {NewState, push(Stack, Result)}
 	end;
 
 %% unimplemented

@@ -1,16 +1,25 @@
+%% @doc Handle Funge Space.
+%%
+%% Format of tuples in table is {{X,Y},Value}. The current implementation use
+%% ETS tables, but that may change without prior notice.
 -module(fspace).
-%% Handle Funge Space.
-%% Format of tuples in table is {{X,Y},Value}
 -export([load/1, set/3, fetch/2, delete/1]).
 
 %% Public functions
 
-%% set(Table, Coord::tuple(), V::int()) -> Table.
+%% @type coord() = {X::int(), Y::int()}.
+%%   Funge Space coordinates.
+%% @type fungespace() = tid().
+%%   A Funge Space.
+
+%% @spec set(fungespace(), coord(), V::int()) -> true
+%% @doc Set a cell in Funge Space.
 set(Table, {_,_} = Coord, V) ->
 	ets:insert(Table, {Coord, V}).
 
 
-%% fetch(Table, Coord::tuple()) -> int().
+%% @spec fetch(fungespace(), coord()) -> int()
+%% @doc Get a cell from a specific Funge Space.
 fetch(Table, {_,_} = Coord) ->
 	Result = ets:lookup(Table, Coord),
 	case Result of
@@ -18,7 +27,9 @@ fetch(Table, {_,_} = Coord) ->
 		[{{_,_},Value}] -> Value
 	end.
 
-%% load(Filename::string()) -> dictionary().
+
+%% @spec load(Filename::string()) -> tid()
+%% @doc Create a Funge Space from a file.
 load(Filename) ->
 	{ok, File} = file:open(Filename, [read]),
 	D = ets:new(fungespace, [set, private]),
@@ -26,37 +37,38 @@ load(Filename) ->
 	file:close(File),
 	D.
 
-%% delete(Table) -> true.
+%% @spec delete(fungespace()) -> true
+%% @doc Destroy a Funge Space.
 delete(Table) ->
 	ets:delete(Table).
 
 
 %% Private functions
 
-%% loadChars(Dict::dictionary(), Y:int(), X:int(), string()) -> true.
-%%   Load everything from one line.
+%% @spec loadChars(fungespace(), Y::int(), X::int(), string()) -> true
+%% @doc Load everything from one line.
 loadChars(_, _, _, []) ->
 	true;
-loadChars(Dict, Y, X, [H|T]) ->
+loadChars(Table, Y, X, [H|T]) ->
 	if
 		(H =:= $\n) orelse (H =:= $\r) ->
 			%% May contain ending newlines...
 			true;
 		true ->
-			set(Dict, {X, Y}, H),
-			loadChars(Dict, Y, X+1, T)
+			set(Table, {X, Y}, H),
+			loadChars(Table, Y, X+1, T)
 	end.
 
-%% loadLines(File, Dict:dictionary(), Y:int()) -> true.
-%%   Load a line at the the time, then tail recursive call to load the next one.
+%% @spec loadLines(File, fungespace(), Y::int()) -> true
+%% @doc Load a line at the the time, then tail recursive call to load the next one.
 loadLines(_, _, 26) ->
 	true;
-loadLines(File, Dict, Y) ->
+loadLines(File, Table, Y) ->
 	Line = io:get_line(File, ''),
 	if
 		(Line =:= eof) orelse (Y > 25) ->
 			true;
 		true ->
-			loadChars(Dict, Y, 0, Line),
-			loadLines(File, Dict, Y+1)
+			loadChars(Table, Y, 0, Line),
+			loadLines(File, Table, Y+1)
 	end.

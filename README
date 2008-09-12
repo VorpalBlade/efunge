@@ -20,7 +20,6 @@ Building instructions
   Note that your erlang needs HIPE support for this, and debugging is near
   impossible in such a build.
 
-
 Running instructions
 --------------------
 You can run efunge in two ways:
