@@ -15,6 +15,7 @@
 -spec loop(ip(), stack(), fungespace()) -> integer().
 loop(#fip{} = State, Stack, #fspace{} = FungeSpace) ->
 	Instr = fetch(FungeSpace, {State#fip.x, State#fip.y}),
+	%io:format("~c (x=~w y=~w)~n", [Instr, State#fip.x, State#fip.y]),
 	case State#fip.isStringMode of
 		true ->
 			{NewState, NewStack} = handleStringMode(Instr, State, Stack),
@@ -263,9 +264,14 @@ processInstruction($w, #fip{} = State, Stack, _Space) ->
 
 %% x Absolute delta
 processInstruction($x, #fip{} = State, Stack, _Space) ->
-	{S1, Y} = pop(Stack),
-	{S2, X} = pop(S1),
-	{setDelta(State, X,  Y), S2};
+	{S1, {X, Y}} = popVec(Stack),
+	{setDelta(State, X,  Y), S1};
+
+%% j Jump
+processInstruction($j, #fip{} = State, Stack, Space) ->
+	{S1, Dist} = pop(Stack),
+	{fip:jump(State, Space, Dist), S1};
+
 
 %% r Reflect
 processInstruction($r, #fip{} = State, Stack, _Space) ->

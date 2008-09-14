@@ -1,6 +1,6 @@
 %% @doc Handles manipulation functions for IP.
 -module(fip).
--export([getNewPos/2,
+-export([getNewPos/2, jump/3,
          setDelta/3, revDelta/1,
          turnDeltaLeft/1, turnDeltaRight/1,
          findNextMatch/3, findNextNonSpace/2
@@ -13,20 +13,24 @@
 %% @doc Move IP forward one step.
 -spec getNewPos(ip(), fungespace()) -> ip().
 getNewPos(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
-	{{MinX, MinY}, {MaxX, MaxY}} = fspace:getBounds(FungeSpace),
+	Bounds = fspace:getBounds(FungeSpace),
 	NewX = X+DX,
 	NewY = Y+DY,
-	if
-		NewX < MinX -> NewX2 = MaxX+1;
-		NewX > MaxX -> NewX2 = MinX-1;
-		true        -> NewX2 = NewX
-	end,
-	if
-		NewY < MinY -> NewY2 = MaxY+1;
-		NewY > MaxY -> NewY2 = MinY-1;
-		true        -> NewY2 = NewY
-	end,
-	IP#fip{ x=NewX2, y=NewY2 }.
+	NewIP = IP#fip{ x=NewX, y=NewY },
+	case isInRange(NewX, NewY, Bounds) of
+		true -> NewIP;
+		false ->
+			case isDeltaCardinal(IP) of
+				true -> getNewPosCardinal(NewIP, Bounds);
+				false -> getNewPosFlying(revDelta(IP), Bounds)
+			end
+	end.
+
+-spec jump(ip(), fungespace(), integer()) -> ip().
+jump(#fip{dx=DX, dy=DY} = IP, FungeSpace, Distance) ->
+	IPNewDelta = IP#fip{ dx = DX * Distance, dy = DY * Distance},
+	IPNewPos = getNewPos(IPNewDelta, FungeSpace),
+	IPNewPos#fip{ dx = DX, dy = DY }.
 
 %% @spec setDelta(ip(), integer(), integer()) -> NewState::ip()
 %% @doc Set delta in state.
@@ -71,4 +75,50 @@ findNextNonSpace(#fip{x=X, y=Y} = IP, FungeSpace) ->
 			findNextNonSpace(getNewPos(IP2, FungeSpace), FungeSpace);
 		true ->
 			{IP#fip{x = X, y = Y}, Value}
+	end.
+
+%% Private functions
+
+%% @doc Check if IP is cardinal
+isDeltaCardinal(#fip{dx=DX, dy=DY}) ->
+	case {DX, DY} of
+		{ 0,  1} -> true;
+		{ 0, -1} -> true;
+		{ 1,  0} -> true;
+		{-1,  0} -> true;
+		_ -> false
+	end.
+
+%% @doc Move forward for Cardinal IPs
+getNewPosCardinal(#fip{x=X, y=Y} = IP, {{MinX, MinY}, {MaxX, MaxY}}) ->
+	if
+		X < MinX -> NewX = MaxX+1;
+		X > MaxX -> NewX = MinX-1;
+		true     -> NewX = X
+	end,
+	if
+		Y < MinY -> NewY = MaxY+1;
+		Y > MaxY -> NewY = MinY-1;
+		true     -> NewY = Y
+	end,
+	IP#fip{ x=NewX, y=NewY }.
+
+%% @doc Is X, Y in range?
+isInRange(X, Y, {{MinX, MinY}, {MaxX, MaxY}}) ->
+	if
+		X < MinX -> false;
+		X > MaxX -> false;
+		true     ->
+			if
+				Y < MinY -> false;
+				Y > MaxY -> false;
+				true     -> true
+			end
+	end.
+
+%% @doc Move forward for flying IPs.
+getNewPosFlying(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, Bounds) ->
+	case isInRange(X, Y, Bounds) of
+		false -> revDelta(IP);
+		true -> getNewPosFlying(IP#fip{ x=X+DX, y=Y+DY }, Bounds)
 	end.
