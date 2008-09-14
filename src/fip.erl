@@ -1,3 +1,4 @@
+%% @doc Handles manipulation functions for IP.
 -module(fip).
 -export([getNewPos/1, setDelta/3, revDelta/1]).
 -include("fip.hrl").

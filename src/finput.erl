@@ -1,3 +1,4 @@
+%% @doc Handles input buffer stuff.
 -module(finput).
 -export([readNextChar/1, readNextInteger/1]).
 -include("fip.hrl").

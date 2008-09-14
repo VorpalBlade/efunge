@@ -1,5 +1,7 @@
+%% @doc Handles main loop, and will handle exeuting an instruction from
+%% elsewhere.
 -module(finterpreter).
--export([loop/3, processInstruction/4]).
+-export([loop/3]).
 -include("fip.hrl").
 -include("funge_types.hrl").
 -import(fspace, [set/3, fetch/2]).
@@ -35,7 +37,7 @@ loop(#fip{} = State, Stack, FungeSpace) ->
 handleStringMode(Instr, #fip{} = State, Stack) ->
 	if
 		Instr =:= $" ->
-			{State#fip{ isStringMode= false }, Stack};
+			{State#fip{ isStringMode=false }, Stack};
 		true ->
 			{State, push(Stack, Instr)}
 	end.

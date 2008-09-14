@@ -1,4 +1,4 @@
-%% @doc Funge-like stack in Erlang
+%% @doc Funge stack in Erlang
 -module(fstack).
 -include("fip.hrl").
 -include("funge_types.hrl").
