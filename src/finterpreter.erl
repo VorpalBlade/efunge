@@ -301,7 +301,8 @@ processInstruction(_Instr, #fip{} = State, Stack, _Space) ->
 	{revDelta(State), Stack}.
 
 
-% Iterate helper:
+%% @doc Iterate helper
+-spec iterate(non_neg_integer(),integer(),ip(),stack(),fungespace()) -> {ip(),stack()}.
 iterate(0, _Instr, IP, Stack, _Space) ->
 	{IP, Stack};
 iterate(Count, Instr, IP, Stack, Space) ->

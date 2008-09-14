@@ -17,7 +17,7 @@ getNewPos(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
 	NewX = X+DX,
 	NewY = Y+DY,
 	NewIP = IP#fip{ x=NewX, y=NewY },
-	case isInRange(NewX, NewY, Bounds) of
+	case isInRange({NewX, NewY}, Bounds) of
 		true -> NewIP;
 		false ->
 			case isDeltaCardinal(IP) of
@@ -80,6 +80,7 @@ findNextNonSpace(#fip{x=X, y=Y} = IP, FungeSpace) ->
 %% Private functions
 
 %% @doc Check if IP is cardinal
+-spec isDeltaCardinal(ip()) -> bool().
 isDeltaCardinal(#fip{dx=DX, dy=DY}) ->
 	case {DX, DY} of
 		{ 0,  1} -> true;
@@ -90,6 +91,7 @@ isDeltaCardinal(#fip{dx=DX, dy=DY}) ->
 	end.
 
 %% @doc Move forward for Cardinal IPs
+-spec getNewPosCardinal(ip(),{coord(),coord()}) -> ip().
 getNewPosCardinal(#fip{x=X, y=Y} = IP, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	if
 		X < MinX -> NewX = MaxX+1;
@@ -104,7 +106,8 @@ getNewPosCardinal(#fip{x=X, y=Y} = IP, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	IP#fip{ x=NewX, y=NewY }.
 
 %% @doc Is X, Y in range?
-isInRange(X, Y, {{MinX, MinY}, {MaxX, MaxY}}) ->
+-spec isInRange(coord(),{coord(),coord()}) -> bool().
+isInRange({X, Y}, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	if
 		X < MinX -> false;
 		X > MaxX -> false;
@@ -117,8 +120,9 @@ isInRange(X, Y, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	end.
 
 %% @doc Move forward for flying IPs.
+-spec getNewPosFlying(ip(),{coord(),coord()}) -> ip().
 getNewPosFlying(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, Bounds) ->
-	case isInRange(X, Y, Bounds) of
+	case isInRange({X, Y}, Bounds) of
 		false -> revDelta(IP);
 		true -> getNewPosFlying(IP#fip{ x=X+DX, y=Y+DY }, Bounds)
 	end.
