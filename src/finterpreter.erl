@@ -26,6 +26,10 @@ loop(#fip{} = State, Stack, #fspace{} = FungeSpace) ->
 				Instr =:= $@ ->
 					fspace:delete(FungeSpace),
 					0;
+				Instr =:= $q ->
+					{_, Retval} = pop(Stack),
+					fspace:delete(FungeSpace),
+					Retval;
 				true ->
 					{NewState, NewStack} =
 						processInstruction(Instr, State, Stack, FungeSpace),

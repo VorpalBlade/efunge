@@ -21,7 +21,7 @@ getNewPos(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
 		true -> NewIP;
 		false ->
 			case isDeltaCardinal(IP) of
-				true -> getNewPosCardinal(NewIP, Bounds);
+				true ->  getNewPosCardinal(NewIP, Bounds);
 				false -> getNewPosFlying(revDelta(IP), Bounds)
 			end
 	end.
