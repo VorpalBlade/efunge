@@ -15,6 +15,7 @@
 -spec loop(ip(), stackstack(), fungespace()) -> integer().
 loop(#fip{} = IP, Stack, #fspace{} = FungeSpace) ->
 	Instr = fspace:fetch(FungeSpace, {IP#fip.x, IP#fip.y}),
+	%io:format("~c", [Instr]),
 	%io:format("~c (x=~w y=~w)~n", [Instr, IP#fip.x, IP#fip.y]),
 	case IP#fip.isStringMode of
 		true ->
