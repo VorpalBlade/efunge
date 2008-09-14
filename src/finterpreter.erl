@@ -5,7 +5,7 @@
 -include("fip.hrl").
 -include("fspace.hrl").
 -include("funge_types.hrl").
--import(fspace, [set/3, fetch/2]).
+-import(fspace, [set/4, fetch/3]).
 -import(fstackstack, [push/2, peek/1, pop/1, popVec/1, pushVec/2, dup/1, swap/1]).
 -import(finput, [readNextChar/1, readNextInteger/1]).
 -import(fip, [getNewPos/2, setDelta/3, setOffset/3, revDelta/1, turnDeltaLeft/1, turnDeltaRight/1]).
@@ -14,7 +14,7 @@
 %% @doc Main loop
 -spec loop(ip(), stackstack(), fungespace()) -> integer().
 loop(#fip{} = IP, Stack, #fspace{} = FungeSpace) ->
-	Instr = fetch(FungeSpace, {IP#fip.x, IP#fip.y}),
+	Instr = fspace:fetch(FungeSpace, {IP#fip.x, IP#fip.y}),
 	%io:format("~c (x=~w y=~w)~n", [Instr, IP#fip.x, IP#fip.y]),
 	case IP#fip.isStringMode of
 		true ->
@@ -66,13 +66,13 @@ processInstruction($\s, #fip{} = IP, Stack, _Space) ->
 processInstruction($p, #fip{} = IP, Stack, #fspace{} = Space) ->
 	{S1, C} = popVec(Stack),
 	{S2, V} = pop(S1),
-	set(Space, C, V),
+	set(Space, IP, C, V),
 	{IP, S2};
 
 %% g Get
 processInstruction($g, #fip{} = IP, Stack, #fspace{} = Space) ->
 	{S1, C} = popVec(Stack),
-	V = fetch(Space, C),
+	V = fetch(Space, IP, C),
 	{IP, push(S1, V)};
 
 
@@ -238,14 +238,14 @@ processInstruction($k, #fip{} = IP, Stack, Space) ->
 %% ' Fetch char
 processInstruction($', #fip{} = IP, Stack, Space) ->
 	#fip{ x = X, y = Y} = NewIP = getNewPos(IP, Space),
-	Value = fetch(Space, {X, Y}),
+	Value = fspace:fetch(Space, {X, Y}),
 	{NewIP, push(Stack, Value)};
 
 %% s Set char
 processInstruction($s, #fip{} = IP, Stack, Space) ->
 	#fip{ x = X, y = Y} = NewIP = getNewPos(IP, Space),
 	{S1, Value} = pop(Stack),
-	set(Space, {X, Y}, Value),
+	fspace:set(Space, {X, Y}, Value),
 	{NewIP, S1};
 
 
@@ -287,16 +287,30 @@ processInstruction($z, #fip{} = IP, Stack, _Space) ->
 %% { Begin Stack
 processInstruction(${, #fip{ x = X, y = Y, dx = DX, dy = DY, offX = OX, offY = OY} = IP, StackStack, _Space) ->
 	{S1, N} = pop(StackStack),
-	S2 = pushVec(S1, {OX, OY}),
-	S3 = fstackstack:ssBegin(S2, N),
+	S2 = fstackstack:ssBegin(S1, abs(N)),
+	S3 = fstackstack:pushVecSOSS(S2, {OX, OY}),
 	IP2 = setOffset(IP, X+DX, Y+DY),
 	{IP2, S3};
-% %% } End Stack
-% processInstruction(${, #fip{} = IP, Stack, _Space) ->
-% 	{IP, Stack};
-% %% u Stack under Stack
-% processInstruction(${, #fip{} = IP, Stack, _Space) ->
-% 	{IP, Stack};
+%% } End Stack
+processInstruction($}, #fip{} = IP, StackStack, _Space) ->
+	{S1, N} = pop(StackStack),
+	try
+		{S2, {OX, OY}} = fstackstack:popVecSOSS(S1),
+		S3 = fstackstack:ssEnd(S2, abs(N)),
+		IP2 = setOffset(IP, OX, OY),
+		{IP2, S3}
+	catch
+		throw:oneStack -> {revDelta(IP), StackStack}
+	end;
+%% u Stack under Stack
+processInstruction($u, #fip{} = IP, StackStack, _Space) ->
+	{S1, Count} = pop(StackStack),
+	try
+		S2 = fstackstack:ssUnder(S1, Count),
+		{IP, S2}
+	catch
+		throw:oneStack -> {revDelta(IP), StackStack}
+	end;
 
 
 
