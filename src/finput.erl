@@ -4,9 +4,9 @@
 -include("fip.hrl").
 -include("funge_types.hrl").
 
-%% @spec fillBuffer(state()) -> {ok, NewState::state()} | {eof, NewState::state()}
+%% @spec fillBuffer(ip()) -> {ok, NewState::ip()} | {eof, NewState::ip()}
 %% @doc Fill up the input line buffer if needed.
--spec fillBuffer(state()) -> {ok, state()} | {eof, state()}.
+-spec fillBuffer(ip()) -> {ok, ip()} | {eof, ip()}.
 fillBuffer(#fip{} = State) ->
 	StringBuf = State#fip.stringBuffer,
 	if
@@ -21,9 +21,9 @@ fillBuffer(#fip{} = State) ->
 			{ok, State}
 	end.
 
-%% @spec readNextChar(state()) -> {NewState, Char}
+%% @spec readNextChar(ip()) -> {NewState, Char}
 %% @doc Get a letter from the string buffer.
--spec readNextChar(state()) -> {state(), char() | eof}.
+-spec readNextChar(ip()) -> {ip(), char() | eof}.
 readNextChar(#fip{} = State) ->
 	{Status, NewState} = fillBuffer(State),
 	case Status of
@@ -54,9 +54,9 @@ parseInteger(String) ->
 	end.
 
 
-%% @spec readNextInteger(state()) -> {NewState::state(), eof | integer()}
+%% @spec readNextInteger(ip()) -> {NewState::ip(), eof | integer()}
 %% @doc Get an integer from the string buffer.
--spec readNextInteger(state()) -> {state(), eof | integer()}.
+-spec readNextInteger(ip()) -> {ip(), eof | integer()}.
 readNextInteger(#fip{} = State) ->
 	{Status, NewState} = fillBuffer(State),
 	case Status of

@@ -4,9 +4,9 @@
 -include("fip.hrl").
 -include("funge_types.hrl").
 
-%% @spec getNewPos(state()) -> NewState::state()
+%% @spec getNewPos(ip()) -> NewState::ip()
 %% @doc Move IP forward one step.
--spec getNewPos(state()) -> state().
+-spec getNewPos(ip()) -> ip().
 getNewPos(#fip{} = State) ->
 	#fip{x=X, y=Y, dx=DX, dy=DY} = State,
 	NewX = X+DX,
@@ -23,15 +23,15 @@ getNewPos(#fip{} = State) ->
 	end,
 	State#fip{ x=NewX2, y=NewY2 }.
 
-%% @spec setDelta(state(), integer(), integer()) -> NewState::state()
+%% @spec setDelta(ip(), integer(), integer()) -> NewState::ip()
 %% @doc Set delta in state.
--spec setDelta(state(), integer(), integer()) -> state().
+-spec setDelta(ip(), integer(), integer()) -> ip().
 setDelta(#fip{} = State, X, Y) ->
 	State#fip{ dx = X, dy = Y }.
 
-%% @spec revDelta(state()) -> NewState::state()
+%% @spec revDelta(ip()) -> NewState::ip()
 %% @doc Reverse IP.
--spec revDelta(state()) -> state().
+-spec revDelta(ip()) -> ip().
 revDelta(#fip{} = State) ->
 	#fip{dx=DX, dy=DY} = State,
 	State#fip{ dx = -DX, dy = -DY }.

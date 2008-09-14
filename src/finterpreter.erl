@@ -3,15 +3,16 @@
 -module(finterpreter).
 -export([loop/3]).
 -include("fip.hrl").
+-include("fspace.hrl").
 -include("funge_types.hrl").
 -import(fspace, [set/3, fetch/2]).
 -import(fstack, [push/2, peek/1, pop/1, popVec/1, dup/1, swap/1]).
 -import(finput, [readNextChar/1, readNextInteger/1]).
 -import(fip, [getNewPos/1, setDelta/3, revDelta/1]).
 
-%% @spec loop(state(), stack(), tid()) -> integer()
+%% @spec loop(ip(), stack(), tid()) -> integer()
 %% @doc Main loop
--spec loop(state(), stack(), integer()) -> integer().
+-spec loop(ip(), stack(), integer()) -> integer().
 loop(#fip{} = State, Stack, FungeSpace) ->
 	Instr = fetch(FungeSpace, {State#fip.x, State#fip.y}),
 	case State#fip.isStringMode of
@@ -31,9 +32,9 @@ loop(#fip{} = State, Stack, FungeSpace) ->
 			end
 	end.
 
-%% @spec handleStringMode(integer(), state(), stack()) -> {state(), stack()}
+%% @spec handleStringMode(integer(), ip(), stack()) -> {ip(), stack()}
 %% @doc Handle reading stuff in string mode.
--spec handleStringMode(integer(),state(),stack()) -> {state(),stack()}.
+-spec handleStringMode(integer(),ip(),stack()) -> {ip(),stack()}.
 handleStringMode(Instr, #fip{} = State, Stack) ->
 	if
 		Instr =:= $" ->
@@ -44,9 +45,9 @@ handleStringMode(Instr, #fip{} = State, Stack) ->
 
 %% Finally, process instruction:
 
-%% @spec processInstruction(integer(), state(), stack(), Space) -> {state(), stack()}
+%% @spec processInstruction(integer(), ip(), stack(), Space) -> {ip(), stack()}
 %% @doc Process an instruction.
--spec processInstruction(integer(),state(),stack(), fungespace()) -> {state(),stack()}.
+-spec processInstruction(integer(),ip(),stack(), fungespace()) -> {ip(),stack()}.
 
 %%   Space
 processInstruction($\s, #fip{} = State, Stack, _Space) ->
