@@ -1,20 +1,24 @@
 -module(efunge).
 -export([start/1, run/1]).
 -include("fstate.hrl").
+-include("funge_types.hrl").
 -import(fspace, [set/3, fetch/2]).
 -import(fstack, [push/2, peek/1, pop/1, popVec/1, dup/1, swap/1]).
 
 %% @type state() = #fst{}.
 %%    The IP and Funge state. See fstate.hrl.
+-type state() :: #fst{}.
 
 %% @spec run([Filename::string()]) -> none()
 %% @doc Handler for -run
+-spec run([string(),...]) -> ok.
 run([Filename]) when is_list(Filename) ->
 	Retval = start(Filename),
 	init:stop(Retval).
 
-%% @spec start(string()) -> int()
+%% @spec start(string()) -> integer()
 %% @doc Load file, set up PRNG, start main loop.
+-spec start(string()) -> integer().
 start(Filename) when is_list(Filename) ->
 	{R1,R2,R3} = now(),
 	random:seed(R1, R2, R3),
@@ -23,6 +27,7 @@ start(Filename) when is_list(Filename) ->
 
 %% @spec getNewPos(state()) -> NewState::state()
 %% @doc Move IP forward one step.
+-spec getNewPos(state()) -> state().
 getNewPos(#fst{} = State) ->
 	#fst{x=X, y=Y, dx=DX, dy=DY} = State,
 	NewX = X+DX,
@@ -37,16 +42,17 @@ getNewPos(#fst{} = State) ->
 		NewY > 25 -> NewY2 = 0;
 		true      -> NewY2 = NewY
 	end,
-	NewState = State#fst{ x=NewX2, y=NewY2 },
-	NewState.
+	State#fst{ x=NewX2, y=NewY2 }.
 
-%% @spec setDelta(state(), int(), int()) -> NewState::state()
+%% @spec setDelta(state(), integer(), integer()) -> NewState::state()
 %% @doc Set delta in state.
+-spec setDelta(state(), integer(), integer()) -> state().
 setDelta(#fst{} = State, X, Y) ->
 	State#fst{ dx = X, dy = Y }.
 
 %% @spec revDelta(state()) -> NewState::state()
 %% @doc Reverse IP.
+-spec revDelta(state()) -> state().
 revDelta(#fst{} = State) ->
 	#fst{dx=DX, dy=DY} = State,
 	State#fst{ dx = -DX, dy = -DY }.
@@ -54,6 +60,7 @@ revDelta(#fst{} = State) ->
 
 %% @spec fillBuffer(state()) -> {ok, NewState::state()} | {eof, NewState::state()}
 %% @doc Fill up the input line buffer if needed.
+-spec fillBuffer(state()) -> {ok, state()} | {eof, state()}.
 fillBuffer(#fst{} = State) ->
 	StringBuf = State#fst.stringBuffer,
 	if
@@ -70,6 +77,7 @@ fillBuffer(#fst{} = State) ->
 
 %% @spec readNextChar(state()) -> {NewState, Char}
 %% @doc Get a letter from the string buffer.
+-spec readNextChar(state()) -> {state(), char() | eof}.
 readNextChar(#fst{} = State) ->
 	{Status, NewState} = fillBuffer(State),
 	case Status of
@@ -80,9 +88,10 @@ readNextChar(#fst{} = State) ->
 			{NewState#fst{ stringBuffer=T }, H}
 	end.
 
-%% @spec parseInteger(string()) -> {int(), Rest::string()} | error
+%% @spec parseInteger(string()) -> {integer(), Rest::string()} | error
 %% @doc Parse an integer in a string, return what is left after the end of the
 %%      integer, discarding a newlines if there is one directly after the integer.
+-spec parseInteger(string()) -> 'error' | {integer(),string()}.
 parseInteger([]) -> error;
 parseInteger(String) ->
 	Result = string:to_integer(String),
@@ -99,8 +108,9 @@ parseInteger(String) ->
 	end.
 
 
-%% @spec readNextInteger(state()) -> {NewState::state(), int()}
+%% @spec readNextInteger(state()) -> {NewState::state(), eof | integer()}
 %% @doc Get an integer from the string buffer.
+-spec readNextInteger(state()) -> {state(), eof | integer()}.
 readNextInteger(#fst{} = State) ->
 	{Status, NewState} = fillBuffer(State),
 	case Status of
@@ -117,8 +127,9 @@ readNextInteger(#fst{} = State) ->
 			end
 	end.
 
-%% @spec loop(state(), stack(), tid()) -> int()
+%% @spec loop(state(), stack(), tid()) -> integer()
 %% @doc Main loop
+-spec loop(state(), stack(), integer()) -> integer().
 loop(#fst{} = State, Stack, FungeSpace) ->
 	Instr = fetch(FungeSpace, {State#fst.x, State#fst.y}),
 	case State#fst.isStringMode of
@@ -138,8 +149,9 @@ loop(#fst{} = State, Stack, FungeSpace) ->
 			end
 	end.
 
-%% @spec handleStringMode(int(), state(), stack()) -> {state(), stack()}
+%% @spec handleStringMode(integer(), state(), stack()) -> {state(), stack()}
 %% @doc Handle reading stuff in string mode.
+-spec handleStringMode(integer(),state(),stack()) -> {state(),stack()}.
 handleStringMode(Instr, #fst{} = State, Stack) ->
 	if
 		Instr =:= $" ->
@@ -150,12 +162,9 @@ handleStringMode(Instr, #fst{} = State, Stack) ->
 
 %% Finally, process instruction:
 
-%% @spec processInstruction(int(), state(), stack(), Space) -> {state(), stack()}
+%% @spec processInstruction(integer(), state(), stack(), Space) -> {state(), stack()}
 %% @doc Process an instruction.
-
-%% 0-9 Any number.
-processInstruction(Instr, #fst{} = State, Stack, _Space) when (Instr >= $0) andalso (Instr =< $9) ->
-	{State, push(Stack, Instr - $0)};
+-spec processInstruction(integer(),state(),stack(), fungespace()) -> {state(),stack()}.
 
 %%   Space
 processInstruction($\s, #fst{} = State, Stack, _Space) ->
@@ -306,6 +315,10 @@ processInstruction($&, #fst{} = State, Stack, _Space) ->
 		Result =:= eof -> {revDelta(State), Stack};
 		true           -> {NewState, push(Stack, Result)}
 	end;
+
+%% 0-9 Any number.
+processInstruction(Instr, #fst{} = State, Stack, _Space) when (Instr >= $0) andalso (Instr =< $9) ->
+	{State, push(Stack, Instr - $0)};
 
 %% unimplemented
 processInstruction(_Instr, #fst{} = State, Stack, _Space) ->

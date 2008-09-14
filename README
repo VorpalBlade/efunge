@@ -11,12 +11,15 @@ Befunge-93.
 To run this you will need to have Erlang installed and erlc in your PATH.
 You will also need make to build the project (or you could use c() in erl).
 
+efunge has been tested on Erlang/OTP R12B-4. It may or may not work on other
+versions.
+
 Building instructions
 ---------------------
 * Run "make" (without the quotes) in your shell while you are in the efunge
   directory.
 * To build a high performance build use:
-    EFLAGS=+native make
+   ERL_COMPILER_OPTIONS='[inline,native,{hipe,[o3]}]' make
   Note that your erlang needs HIPE support for this, and debugging is near
   impossible in such a build.
 
