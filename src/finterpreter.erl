@@ -35,12 +35,16 @@ loop(#fip{} = State, Stack, #fspace{} = FungeSpace) ->
 %% @spec handleStringMode(integer(), ip(), stack()) -> {ip(), stack()}
 %% @doc Handle reading stuff in string mode.
 -spec handleStringMode(integer(),ip(),stack()) -> {ip(),stack()}.
-handleStringMode(Instr, #fip{} = IP, Stack) ->
+handleStringMode(Instr, #fip{ lastWasSpace = LastSpace } = IP, Stack) ->
 	if
+		Instr =:= $\s andalso not LastSpace ->
+			{IP#fip{ lastWasSpace=true }, push(Stack, Instr)};
+		Instr =:= $\s ->
+			{IP, Stack};
 		Instr =:= $" ->
-			{IP#fip{ isStringMode=false }, Stack};
+			{IP#fip{ isStringMode=false, lastWasSpace=false }, Stack};
 		true ->
-			{IP, push(Stack, Instr)}
+			{IP#fip{ lastWasSpace=false }, push(Stack, Instr)}
 	end.
 
 %% Finally, process instruction:
@@ -211,7 +215,32 @@ processInstruction($], #fip{} = State, Stack, _Space) ->
 
 %% ;
 processInstruction($;, #fip{} = State, Stack, Space) ->
-	{fip:findNext(getNewPos(State, Space), $;, Space), Stack};
+	{fip:findNextMatch(getNewPos(State, Space), $;, Space), Stack};
+
+%% k Iterate
+processInstruction($k, #fip{} = State, Stack, Space) ->
+	{S1, Count} = pop(Stack),
+	if
+		Count < 0 ->
+			{revDelta(State), S1};
+		Count =:= 0 ->
+			{getNewPos(State, Space), S1};
+		true ->
+			{_, Instr} = fip:findNextNonSpace(getNewPos(State, Space), Space),
+			iterate(Count, Instr, State, S1, Space)
+	end;
+
+
+%% n Clear Stack
+processInstruction($n, #fip{} = State, _Stack, _Space) ->
+	{State, fstack:new()};
+
+%% r Reflect
+processInstruction($r, #fip{} = State, Stack, _Space) ->
+	{revDelta(State), Stack};
+
+
+%% Handle ranges and unimplemented.
 
 %% 0-9 Any number.
 processInstruction(Instr, #fip{} = State, Stack, _Space) when (Instr >= $0) andalso (Instr =< $9) ->
@@ -225,3 +254,11 @@ processInstruction(_Instr, #fip{} = State, Stack, _Space) ->
 	io:format("Instruction ~c is not implemented (at x=~w y=~w).~n",
 	          [_Instr, State#fip.x, State#fip.y]),
 	{revDelta(State), Stack}.
+
+
+% Iterate helper:
+iterate(0, _Instr, IP, Stack, _Space) ->
+	{IP, Stack};
+iterate(Count, Instr, IP, Stack, Space) ->
+	{IP2, Stack2} = processInstruction(Instr, IP, Stack, Space),
+	iterate(Count-1, Instr, IP2, Stack2, Space).

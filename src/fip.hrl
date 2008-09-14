@@ -5,6 +5,7 @@
 		dx = 1 :: integer(),
 		dy = 0 :: integer(),
 		isStringMode = false :: bool(),
+		lastWasSpace = false :: bool(),
 		stringBuffer = [] :: list()
 	}
 ).

@@ -3,7 +3,7 @@
 -export([getNewPos/2,
          setDelta/3, revDelta/1,
          turnDeltaLeft/1, turnDeltaRight/1,
-         findNext/3
+         findNextMatch/3, findNextNonSpace/2
         ]).
 -include("fip.hrl").
 -include("fspace.hrl").
@@ -51,10 +51,24 @@ turnDeltaRight(#fip{dx=DX, dy=DY} = IP) ->
 	IP#fip{ dx = -DY, dy = DX }.
 
 %% @doc Search in IP's path for the next time value shows up.
--spec findNext(ip(),integer(),fungespace()) -> ip().
-findNext(#fip{x=X, y=Y} = IP, Match, FungeSpace) ->
+-spec findNextMatch(ip(),integer(),fungespace()) -> ip().
+findNextMatch(#fip{x=X, y=Y} = IP, Match, FungeSpace) ->
 	Value = fspace:fetch(FungeSpace, {X, Y}),
 	if
 		Value =:= Match -> IP#fip{x = X, y = Y};
-		true -> findNext(getNewPos(IP, FungeSpace), Match, FungeSpace)
+		true -> findNextMatch(getNewPos(IP, FungeSpace), Match, FungeSpace)
+	end.
+
+%% @doc Find next one that isn't a whitespace, and isn't in ;;.
+-spec findNextNonSpace(ip(),fungespace()) -> {ip(), integer()}.
+findNextNonSpace(#fip{x=X, y=Y} = IP, FungeSpace) ->
+	Value = fspace:fetch(FungeSpace, {X, Y}),
+	if
+		Value =:= $\s ->
+			findNextNonSpace(getNewPos(IP, FungeSpace), FungeSpace);
+		Value =:= $; ->
+			IP2 = findNextMatch(getNewPos(IP, FungeSpace), $;, FungeSpace),
+			findNextNonSpace(getNewPos(IP2, FungeSpace), FungeSpace);
+		true ->
+			{IP#fip{x = X, y = Y}, Value}
 	end.
