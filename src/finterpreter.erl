@@ -202,9 +202,12 @@ processInstruction($&, #fip{} = State, Stack, #fspace{} = _Space) ->
 %% 0-9 Any number.
 processInstruction(Instr, #fip{} = State, Stack, #fspace{} = _Space) when (Instr >= $0) andalso (Instr =< $9) ->
 	{State, push(Stack, Instr - $0)};
+%% a-f Hexdecimal numbers.
+processInstruction(Instr, #fip{} = State, Stack, #fspace{} = _Space) when (Instr >= $a) andalso (Instr =< $f) ->
+	{State, push(Stack, Instr - $a + 10)};
 
 %% unimplemented
 processInstruction(_Instr, #fip{} = State, Stack, #fspace{} = _Space) ->
-	%%io:format("Instruction ~c is not implemented (at x=~w y=~w).~n",
-	%%          [_Instr, State#fip.x, State#fip.y]),
+% 	io:format("Instruction ~c is not implemented (at x=~w y=~w).~n",
+% 	          [_Instr, State#fip.x, State#fip.y]),
 	{revDelta(State), Stack}.
