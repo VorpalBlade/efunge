@@ -8,7 +8,7 @@
 -import(fspace, [set/3, fetch/2]).
 -import(fstack, [push/2, peek/1, pop/1, popVec/1, dup/1, swap/1]).
 -import(finput, [readNextChar/1, readNextInteger/1]).
--import(fip, [getNewPos/2, setDelta/3, revDelta/1]).
+-import(fip, [getNewPos/2, setDelta/3, revDelta/1, turnDeltaLeft/1, turnDeltaRight/1]).
 
 %% @spec loop(ip(), stack(), tid()) -> integer()
 %% @doc Main loop
@@ -208,10 +208,10 @@ processInstruction($&, #fip{} = State, Stack, _Space) ->
 
 %% [ Turn Left
 processInstruction($[, #fip{} = State, Stack, _Space) ->
-	{fip:turnDeltaLeft(State), Stack};
+	{turnDeltaLeft(State), Stack};
 %% ] Turn Right
 processInstruction($], #fip{} = State, Stack, _Space) ->
-	{fip:turnDeltaRight(State), Stack};
+	{turnDeltaRight(State), Stack};
 
 %% ;
 processInstruction($;, #fip{} = State, Stack, Space) ->
@@ -230,14 +230,49 @@ processInstruction($k, #fip{} = State, Stack, Space) ->
 			iterate(Count, Instr, State, S1, Space)
 	end;
 
+%% ' Fetch char
+processInstruction($', #fip{} = State, Stack, Space) ->
+	#fip{ x = X, y = Y} = NewState = getNewPos(State, Space),
+	Value = fetch(Space, {X, Y}),
+	{NewState, push(Stack, Value)};
+
+%% s Set char
+processInstruction($s, #fip{} = State, Stack, Space) ->
+	#fip{ x = X, y = Y} = NewState = getNewPos(State, Space),
+	{S1, Value} = pop(Stack),
+	set(Space, {X, Y}, Value),
+	{NewState, S1};
+
 
 %% n Clear Stack
 processInstruction($n, #fip{} = State, _Stack, _Space) ->
 	{State, fstack:new()};
 
+%% w Compare
+processInstruction($w, #fip{} = State, Stack, _Space) ->
+	{S1, B} = pop(Stack),
+	{S2, A} = pop(S1),
+	if
+		A < B ->
+			{turnDeltaLeft(State), S2};
+		A > B ->
+			{turnDeltaRight(State), S2};
+		true ->
+			{State, S2}
+	end;
+
+%% x Absolute delta
+processInstruction($x, #fip{} = State, Stack, _Space) ->
+	{S1, Y} = pop(Stack),
+	{S2, X} = pop(S1),
+	{setDelta(State, X,  Y), S2};
+
 %% r Reflect
 processInstruction($r, #fip{} = State, Stack, _Space) ->
 	{revDelta(State), Stack};
+%% z NOP
+processInstruction($z, #fip{} = State, Stack, _Space) ->
+	{State, Stack};
 
 
 %% Handle ranges and unimplemented.
