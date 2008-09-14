@@ -3,6 +3,7 @@
 %% Format of tuples in table is {{X,Y},Value}. The current implementation use
 %% ETS tables, but that may change without prior notice.
 -module(fspace).
+-include("fip.hrl").
 -include("funge_types.hrl").
 -export([load/1, set/3, fetch/2, delete/1]).
 

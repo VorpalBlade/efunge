@@ -1,5 +1,6 @@
 ERL = erl -boot start_clean
+RM = rm -rf
 all:
 	$(ERL) -noshell -eval "make:all(), init:stop()."
 clean:
-	rm -rf *.beam *~ erl_crash.dump
+	$(RM) *.beam *~ */*~ erl_crash.dump

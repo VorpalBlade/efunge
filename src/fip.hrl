@@ -1,4 +1,4 @@
--record(fst,
+-record(fip,
 	{
 		x = 0 :: integer(),
 		y = 0 :: integer(),

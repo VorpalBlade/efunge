@@ -1,5 +1,6 @@
 %% @doc Funge-like stack in Erlang
 -module(fstack).
+-include("fip.hrl").
 -include("funge_types.hrl").
 -export([new/0, push/2, peek/1, pop/1, popVec/1, dup/1, swap/1]).
 
