@@ -1,0 +1,15 @@
+This file details design for the 98 version of efunge:
+
+Modules:
+* efunge         - Should handle command line arguments only.
+* fstack         - Funge stack.
+* fspace         - Funge space.
+* finput         - STDIO in the Funge way. Can be used from fingerprints too.
+* fip            - IP functions, like reverse, also things like getting and
+                   setting fingerprint specific data. IP specific state.
+* finterpreter   - Handle core instructions, loop over ips. Also global shared
+                   state.
+                   Note that some like k and y may be in separate files.
+* ffingermanager - Handle the details of finding fingerprints, opcode stacks.
+* fingerprints/  - Fingerprints should be in a subdirectory. One per file.
+
