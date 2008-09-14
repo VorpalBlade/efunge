@@ -1,25 +1,27 @@
 %% @doc Handles manipulation functions for IP.
 -module(fip).
--export([getNewPos/1, setDelta/3, revDelta/1]).
+-export([getNewPos/2, setDelta/3, revDelta/1]).
 -include("fip.hrl").
+-include("fspace.hrl").
 -include("funge_types.hrl").
 
 %% @spec getNewPos(ip()) -> NewState::ip()
 %% @doc Move IP forward one step.
--spec getNewPos(ip()) -> ip().
-getNewPos(#fip{} = State) ->
+-spec getNewPos(ip(), fungespace()) -> ip().
+getNewPos(#fip{} = State, FungeSpace) ->
 	#fip{x=X, y=Y, dx=DX, dy=DY} = State,
+	{{MinX, MinY}, {MaxX, MaxY}} = fspace:getBounds(FungeSpace),
 	NewX = X+DX,
 	NewY = Y+DY,
 	if
-		NewX < 0  -> NewX2 = 80;
-		NewX > 80 -> NewX2 = 0;
-		true      -> NewX2 = NewX
+		NewX < MinX -> NewX2 = MaxX;
+		NewX > MaxX -> NewX2 = MinX;
+		true        -> NewX2 = NewX
 	end,
 	if
-		NewY < 0  -> NewY2 = 25;
-		NewY > 25 -> NewY2 = 0;
-		true      -> NewY2 = NewY
+		NewY < MinY -> NewY2 = MaxY;
+		NewY > MaxY -> NewY2 = MinY;
+		true        -> NewY2 = NewY
 	end,
 	State#fip{ x=NewX2, y=NewY2 }.
 

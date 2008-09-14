@@ -8,7 +8,7 @@
 -import(fspace, [set/3, fetch/2]).
 -import(fstack, [push/2, peek/1, pop/1, popVec/1, dup/1, swap/1]).
 -import(finput, [readNextChar/1, readNextInteger/1]).
--import(fip, [getNewPos/1, setDelta/3, revDelta/1]).
+-import(fip, [getNewPos/2, setDelta/3, revDelta/1]).
 
 %% @spec loop(ip(), stack(), tid()) -> integer()
 %% @doc Main loop
@@ -18,7 +18,7 @@ loop(#fip{} = State, Stack, #fspace{} = FungeSpace) ->
 	case State#fip.isStringMode of
 		true ->
 			{NewState, NewStack} = handleStringMode(Instr, State, Stack),
-			loop(getNewPos(NewState), NewStack, FungeSpace);
+			loop(getNewPos(NewState, FungeSpace), NewStack, FungeSpace);
 		false ->
 			%% Handle @ specically since we need to end loop then.
 			if
@@ -28,7 +28,7 @@ loop(#fip{} = State, Stack, #fspace{} = FungeSpace) ->
 				true ->
 					{NewState, NewStack} =
 						processInstruction(Instr, State, Stack, FungeSpace),
-					loop(getNewPos(NewState), NewStack, FungeSpace)
+					loop(getNewPos(NewState, FungeSpace), NewStack, FungeSpace)
 			end
 	end.
 
@@ -151,8 +151,8 @@ processInstruction($$, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{State, S1};
 
 %% # Jump
-processInstruction($#, #fip{} = State, Stack, #fspace{} = _Space) ->
-	{getNewPos(State), Stack};
+processInstruction($#, #fip{} = State, Stack, #fspace{} = Space) ->
+	{getNewPos(State, Space), Stack};
 
 %% _ Horisontal if
 processInstruction($_, #fip{} = State, Stack, #fspace{} = _Space) ->
