@@ -12,21 +12,21 @@
 
 %% @type coord() = {X::integer(), Y::integer()}.
 %%   Funge Space coordinates.
-%% @type fungespace() = tid().
+%% @type fungespace() = #fspace{}.
 %%   A Funge Space.
 
 %% @spec set(fungespace(), coord(), V::integer()) -> true
 %% @doc Set a cell in Funge Space.
 -spec set(fungespace(), coord(), integer()) -> true.
-set(Table, {_X,_Y} = Coord, V) ->
-	ets:insert(Table, {Coord, V}).
+set(#fspace{} = Fungespace, {_X,_Y} = Coord, V) ->
+	ets:insert(Fungespace#fspace.space, {Coord, V}).
 
 
 %% @spec fetch(fungespace(), coord()) -> integer()
 %% @doc Get a cell from a specific Funge Space.
--spec fetch(fungespace(), coord()) -> fungespace().
-fetch(Table, {_X,_Y} = Coord) ->
-	Result = ets:lookup(Table, Coord),
+-spec fetch(fungespace(), coord()) -> integer().
+fetch(#fspace{} = Fungespace, {_X,_Y} = Coord) ->
+	Result = ets:lookup(Fungespace#fspace.space, Coord),
 	case Result of
 		[] -> $\s;
 		[{{_,_},Value}] -> Value
@@ -35,19 +35,19 @@ fetch(Table, {_X,_Y} = Coord) ->
 
 %% @spec load(Filename::string()) -> tid()
 %% @doc Create a Funge Space from a file.
--spec load(string()) -> integer().
+-spec load(string()) -> fungespace().
 load(Filename) ->
 	{ok, File} = file:open(Filename, [read]),
-	Tab = ets:new(fungespace, [set, private]),
-	loadLines(File, Tab, 0),
+	FungeSpace = #fspace{ space = ets:new(fungespace, [set, private])},
+	loadLines(File, FungeSpace, 0),
 	file:close(File),
-	Tab.
+	FungeSpace.
 
 %% @spec delete(fungespace()) -> true
 %% @doc Destroy a Funge Space.
 -spec delete(fungespace()) -> true.
-delete(Table) ->
-	ets:delete(Table).
+delete(#fspace{} = Fungespace) ->
+	ets:delete(Fungespace#fspace.space).
 
 
 %% Private functions
@@ -56,26 +56,26 @@ delete(Table) ->
 %% @doc Load everything from one line.
 loadChars(_, _, _, []) ->
 	true;
-loadChars(Table, Y, X, [H|T]) ->
+loadChars(FungeSpace, Y, X, [H|T]) ->
 	if
 		(H =:= $\n) orelse (H =:= $\r) ->
 			%% May contain ending newlines...
 			true;
 		true ->
-			set(Table, {X, Y}, H),
-			loadChars(Table, Y, X+1, T)
+			set(FungeSpace, {X, Y}, H),
+			loadChars(FungeSpace, Y, X+1, T)
 	end.
 
 %% @spec loadLines(File, fungespace(), Y::integer()) -> true
 %% @doc Load a line at the the time, then tail recursive call to load the next one.
 loadLines(_, _, 26) ->
 	true;
-loadLines(File, Table, Y) ->
+loadLines(File, FungeSpace, Y) ->
 	Line = io:get_line(File, ''),
 	if
 		(Line =:= eof) orelse (Y > 25) ->
 			true;
 		true ->
-			loadChars(Table, Y, 0, Line),
-			loadLines(File, Table, Y+1)
+			loadChars(FungeSpace, Y, 0, Line),
+			loadLines(File, FungeSpace, Y+1)
 	end.

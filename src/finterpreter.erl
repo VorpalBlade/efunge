@@ -12,8 +12,8 @@
 
 %% @spec loop(ip(), stack(), tid()) -> integer()
 %% @doc Main loop
--spec loop(ip(), stack(), integer()) -> integer().
-loop(#fip{} = State, Stack, FungeSpace) ->
+-spec loop(ip(), stack(), fungespace()) -> integer().
+loop(#fip{} = State, Stack, #fspace{} = FungeSpace) ->
 	Instr = fetch(FungeSpace, {State#fip.x, State#fip.y}),
 	case State#fip.isStringMode of
 		true ->
@@ -35,12 +35,12 @@ loop(#fip{} = State, Stack, FungeSpace) ->
 %% @spec handleStringMode(integer(), ip(), stack()) -> {ip(), stack()}
 %% @doc Handle reading stuff in string mode.
 -spec handleStringMode(integer(),ip(),stack()) -> {ip(),stack()}.
-handleStringMode(Instr, #fip{} = State, Stack) ->
+handleStringMode(Instr, #fip{} = IP, Stack) ->
 	if
 		Instr =:= $" ->
-			{State#fip{ isStringMode=false }, Stack};
+			{IP#fip{ isStringMode=false }, Stack};
 		true ->
-			{State, push(Stack, Instr)}
+			{IP, push(Stack, Instr)}
 	end.
 
 %% Finally, process instruction:
@@ -50,34 +50,34 @@ handleStringMode(Instr, #fip{} = State, Stack) ->
 -spec processInstruction(integer(),ip(),stack(), fungespace()) -> {ip(),stack()}.
 
 %%   Space
-processInstruction($\s, #fip{} = State, Stack, _Space) ->
+processInstruction($\s, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{State, Stack};
 
 %% p Put
-processInstruction($p, #fip{} = State, Stack, Space) ->
+processInstruction($p, #fip{} = State, Stack, #fspace{} = Space) ->
 	{S1, C} = popVec(Stack),
 	{S2, V} = pop(S1),
 	set(Space, C, V),
 	{State, S2};
 
 %% g Get
-processInstruction($g, #fip{} = State, Stack, Space) ->
+processInstruction($g, #fip{} = State, Stack, #fspace{} = Space) ->
 	{S1, C} = popVec(Stack),
 	V = fetch(Space, C),
 	{State, push(S1, V)};
 
 
 %% + Plus
-processInstruction($+, #fip{} = State, Stack, _Space) ->
+processInstruction($+, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{S1,B} = pop(Stack), {S2,A} = pop(S1), {State, push(S2, A + B)};
 %% - Minus
-processInstruction($-, #fip{} = State, Stack, _Space) ->
+processInstruction($-, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{S1,B} = pop(Stack), {S2,A} = pop(S1), {State, push(S2, A - B)};
 %% * Multiplication
-processInstruction($*, #fip{} = State, Stack, _Space) ->
+processInstruction($*, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{S1,B} = pop(Stack), {S2,A} = pop(S1), {State, push(S2, A * B)};
 %% / Integer division
-processInstruction($/, #fip{} = State, Stack, _Space) ->
+processInstruction($/, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{S1,B} = pop(Stack),
 	{S2,A} = pop(S1),
 	if
@@ -86,7 +86,7 @@ processInstruction($/, #fip{} = State, Stack, _Space) ->
 	end;
 
 %% % Reminder
-processInstruction($%, #fip{} = State, Stack, _Space) ->
+processInstruction($%, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{S1,B} = pop(Stack),
 	{S2,A} = pop(S1),
 	if
@@ -95,23 +95,23 @@ processInstruction($%, #fip{} = State, Stack, _Space) ->
 	end;
 
 %% " String mode
-processInstruction($", #fip{} = State, Stack, _Space) ->
+processInstruction($", #fip{} = State, Stack, #fspace{} = _Space) ->
 	{State#fip{ isStringMode=true }, Stack};
 
 %% > East
-processInstruction($>, #fip{} = State, Stack, _Space) ->
+processInstruction($>, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{setDelta(State, 1, 0), Stack};
 %% < West
-processInstruction($<, #fip{} = State, Stack, _Space) ->
+processInstruction($<, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{setDelta(State, -1, 0), Stack};
 %% ^ North
-processInstruction($^, #fip{} = State, Stack, _Space) ->
+processInstruction($^, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{setDelta(State, 0, -1), Stack};
 %% v South
-processInstruction($v, #fip{} = State, Stack, _Space) ->
+processInstruction($v, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{setDelta(State, 0, 1), Stack};
 %% ? Random direction
-processInstruction($?, #fip{} = State, Stack, _Space) ->
+processInstruction($?, #fip{} = State, Stack, #fspace{} = _Space) ->
 	R = random:uniform(4),
 	case R of
 		1 -> {setDelta(State, -1,  0), Stack};
@@ -121,7 +121,7 @@ processInstruction($?, #fip{} = State, Stack, _Space) ->
 	end;
 
 %% ! Not
-processInstruction($!, #fip{} = State, Stack, _Space) ->
+processInstruction($!, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{S1, V} = pop(Stack),
 	if
 		V =:= 0 -> R = 1;
@@ -130,7 +130,7 @@ processInstruction($!, #fip{} = State, Stack, _Space) ->
 	{State, push(S1, R)};
 
 %% ` Greater than
-processInstruction($`, #fip{} = State, Stack, _Space) ->
+processInstruction($`, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{S1,B} = pop(Stack),
 	{S2,A} = pop(S1),
 	if
@@ -140,22 +140,22 @@ processInstruction($`, #fip{} = State, Stack, _Space) ->
 	{State, push(S2, R)};
 
 %% : Dup
-processInstruction($:, #fip{} = State, Stack, _Space) ->
+processInstruction($:, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{State, dup(Stack)};
 %% \ Swap
-processInstruction($\\, #fip{} = State, Stack, _Space) ->
+processInstruction($\\, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{State, swap(Stack)};
 %% $ Pop
-processInstruction($$, #fip{} = State, Stack, _Space) ->
+processInstruction($$, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{S1, _} = pop(Stack),
 	{State, S1};
 
 %% # Jump
-processInstruction($#, #fip{} = State, Stack, _Space) ->
+processInstruction($#, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{getNewPos(State), Stack};
 
 %% _ Horisontal if
-processInstruction($_, #fip{} = State, Stack, _Space) ->
+processInstruction($_, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{NewStack, Val} = pop(Stack),
 	if
 		Val =:= 0 ->
@@ -164,7 +164,7 @@ processInstruction($_, #fip{} = State, Stack, _Space) ->
 			{setDelta(State, -1, 0), NewStack}
 	end;
 %% | Vertical if
-processInstruction($|, #fip{} = State, Stack, _Space) ->
+processInstruction($|, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{NewStack, Val} = pop(Stack),
 	if
 		Val =:= 0 ->
@@ -174,25 +174,25 @@ processInstruction($|, #fip{} = State, Stack, _Space) ->
 	end;
 
 %% , Put char
-processInstruction($, , #fip{} = State, Stack, _Space) ->
+processInstruction($, , #fip{} = State, Stack, #fspace{} = _Space) ->
 	{NewStack, Val} = pop(Stack),
 	io:format("~c", [Val]),
 	{State, NewStack};
 %% . Put number
-processInstruction($., #fip{} = State, Stack, _Space) ->
+processInstruction($., #fip{} = State, Stack, #fspace{} = _Space) ->
 	{NewStack, Val} = pop(Stack),
 	io:format("~w ", [Val]),
 	{State, NewStack};
 
 %% ~ Get char
-processInstruction($~, #fip{} = State, Stack, _Space) ->
+processInstruction($~, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{NewState, Result} = readNextChar(State),
 	if
 		Result =:= eof -> {revDelta(State), Stack};
 		true           -> {NewState, push(Stack, Result)}
 	end;
 %% & Get int
-processInstruction($&, #fip{} = State, Stack, _Space) ->
+processInstruction($&, #fip{} = State, Stack, #fspace{} = _Space) ->
 	{NewState, Result} = readNextInteger(State),
 	if
 		Result =:= eof -> {revDelta(State), Stack};
@@ -200,11 +200,11 @@ processInstruction($&, #fip{} = State, Stack, _Space) ->
 	end;
 
 %% 0-9 Any number.
-processInstruction(Instr, #fip{} = State, Stack, _Space) when (Instr >= $0) andalso (Instr =< $9) ->
+processInstruction(Instr, #fip{} = State, Stack, #fspace{} = _Space) when (Instr >= $0) andalso (Instr =< $9) ->
 	{State, push(Stack, Instr - $0)};
 
 %% unimplemented
-processInstruction(_Instr, #fip{} = State, Stack, _Space) ->
+processInstruction(_Instr, #fip{} = State, Stack, #fspace{} = _Space) ->
 	%%io:format("Instruction ~c is not implemented (at x=~w y=~w).~n",
 	%%          [_Instr, State#fip.x, State#fip.y]),
 	{revDelta(State), Stack}.

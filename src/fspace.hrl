@@ -1,11 +1,11 @@
 -type fungespace_table() :: integer().
--record(fungespace,
+-record(fspace,
 	{
-		x :: integer(),
-		y :: integer(),
-		maxx :: integer(),
-		maxy :: integer(),
+		x = undefined :: integer() | undefined,
+		y = undefined :: integer() | undefined,
+		maxx = undefined :: integer() | undefined,
+		maxy = undefined :: integer() | undefined,
 		space :: fungespace_table()
 	}
 ).
--type fungespace() :: #fungespace{}.
+-type fungespace() :: #fspace{}.
