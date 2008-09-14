@@ -204,12 +204,14 @@ processInstruction($&, #fip{} = State, Stack, _Space) ->
 
 %% [ Turn Left
 processInstruction($[, #fip{} = State, Stack, _Space) ->
-	{fip:ipTurnLeft(State), Stack};
+	{fip:turnDeltaLeft(State), Stack};
 %% ] Turn Right
 processInstruction($], #fip{} = State, Stack, _Space) ->
-	{fip:ipTurnRight(State), Stack};
+	{fip:turnDeltaRight(State), Stack};
 
-
+%% ;
+processInstruction($;, #fip{} = State, Stack, Space) ->
+	{fip:findNext(getNewPos(State, Space), $;, Space), Stack};
 
 %% 0-9 Any number.
 processInstruction(Instr, #fip{} = State, Stack, _Space) when (Instr >= $0) andalso (Instr =< $9) ->
