@@ -6,7 +6,7 @@
 -include("fip.hrl").
 -include("fspace.hrl").
 -include("funge_types.hrl").
--export([load/1, set/3, fetch/2, delete/1, getBounds/1]).
+-export([load/1, set/3, set/4, fetch/2, fetch/3, delete/1, getBounds/1]).
 
 %% Public functions
 
@@ -14,6 +14,12 @@
 %%   Funge Space coordinates.
 %% @type fungespace() = #fspace{}.
 %%   A Funge Space.
+
+%% @spec set(fungespace(), ip(), coord(), V::integer()) -> true
+%% @doc Set a cell in Funge Space with offset.
+-spec set(fungespace(), ip(), coord(), integer()) -> true.
+set(#fspace{} = Fungespace, #fip{offX = OffX, offY = OffY}, {X,Y}, V) ->
+	set(Fungespace, {X+OffX, Y+OffY}, V).
 
 %% @spec set(fungespace(), coord(), V::integer()) -> true
 %% @doc Set a cell in Funge Space.
@@ -23,6 +29,11 @@ set(#fspace{} = Fungespace, {_X,_Y} = Coord, V) ->
 	ets:insert(Table, {Coord, V}),
 	updateBounds(Table, Coord).
 
+%% @spec fetch(fungespace(), ip(), coord()) -> integer()
+%% @doc Get a cell from a specific Funge Space.
+-spec fetch(fungespace(), ip(), coord()) -> integer().
+fetch(#fspace{} = Fungespace, #fip{offX = OffX, offY = OffY}, {X,Y}) ->
+	fetch(Fungespace, {X+OffX, Y+OffY}).
 
 %% @spec fetch(fungespace(), coord()) -> integer()
 %% @doc Get a cell from a specific Funge Space.

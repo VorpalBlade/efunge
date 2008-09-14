@@ -20,4 +20,4 @@ start(Filename) when is_list(Filename) ->
 	{R1,R2,R3} = now(),
 	random:seed(R1, R2, R3),
 	Space = fspace:load(Filename),
-	finterpreter:loop(#fip{}, fstack:new(), Space).
+	finterpreter:loop(#fip{}, fstackstack:new(), Space).

@@ -2,7 +2,7 @@
 -module(fstack).
 -include("fip.hrl").
 -include("funge_types.hrl").
--export([new/0, push/2, peek/1, pop/1, popVec/1, dup/1, swap/1]).
+-export([new/0, push/2, peek/1, pop/1, popVec/1, pushVec/2, dup/1, swap/1]).
 
 
 %% @type stack() = [] | list(integer()).
@@ -47,6 +47,14 @@ popVec([Y]) ->
 	{[], {0, Y}};
 popVec([Y,X|T])->
 	{T, {X, Y}}.
+
+%% @spec pushVec(stack(), {integer(), integer()}) -> stack()
+%% @doc Pop a Funge vector from a stack.
+-spec pushVec(stack(), {integer(), integer()}) -> stack().
+pushVec([], {X, Y}) ->
+	[Y,X];
+pushVec(S, {X, Y})->
+	[Y, X|S].
 
 %% @spec dup(stack()) -> stack()
 %% @doc Duplicate the top value on a stack.

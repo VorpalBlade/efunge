@@ -1,7 +1,7 @@
 %% @doc Handles manipulation functions for IP.
 -module(fip).
 -export([getNewPos/2, jump/3,
-         setDelta/3, revDelta/1,
+         setDelta/3, revDelta/1, setOffset/3,
          turnDeltaLeft/1, turnDeltaRight/1,
          findNextMatch/3, findNextNonSpace/2
         ]).
@@ -9,7 +9,7 @@
 -include("fspace.hrl").
 -include("funge_types.hrl").
 
-%% @spec getNewPos(ip()) -> NewState::ip()
+%% @spec getNewPos(ip()) -> NewIP::ip()
 %% @doc Move IP forward one step.
 -spec getNewPos(ip(), fungespace()) -> ip().
 getNewPos(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
@@ -21,7 +21,7 @@ getNewPos(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
 		true -> NewIP;
 		false ->
 			case isDeltaCardinal(IP) of
-				true ->  getNewPosCardinal(NewIP, Bounds);
+				true -> getNewPosCardinal(NewIP, Bounds);
 				false -> getNewPosFlying(revDelta(IP), Bounds)
 			end
 	end.
@@ -43,6 +43,13 @@ setDelta(#fip{} = IP, X, Y) ->
 -spec revDelta(ip()) -> ip().
 revDelta(#fip{dx=DX, dy=DY} = IP) ->
 	IP#fip{ dx = -DX, dy = -DY }.
+
+
+%% @spec setOffset(ip(), integer(), integer()) -> NewState::ip()
+%% @doc Set delta in state.
+-spec setOffset(ip(), integer(), integer()) -> ip().
+setOffset(#fip{} = IP, X, Y) ->
+	IP#fip{ offX = X, offY = Y }.
 
 %% @doc Turn IP left.
 -spec turnDeltaLeft(ip()) -> ip().
