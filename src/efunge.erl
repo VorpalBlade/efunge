@@ -5,6 +5,7 @@
 -import(fspace, [set/3, fetch/2]).
 -import(fstack, [push/2, peek/1, pop/1, popVec/1, dup/1, swap/1]).
 -import(finput, [readNextChar/1, readNextInteger/1]).
+-import(fip, [getNewPos/1, setDelta/3, revDelta/1]).
 
 %% @type state() = #fip{}.
 %%    The IP and Funge state. See fstate.hrl.
@@ -24,38 +25,6 @@ start(Filename) when is_list(Filename) ->
 	random:seed(R1, R2, R3),
 	Space = fspace:load(Filename),
 	loop(#fip{}, fstack:new(), Space).
-
-%% @spec getNewPos(state()) -> NewState::state()
-%% @doc Move IP forward one step.
--spec getNewPos(state()) -> state().
-getNewPos(#fip{} = State) ->
-	#fip{x=X, y=Y, dx=DX, dy=DY} = State,
-	NewX = X+DX,
-	NewY = Y+DY,
-	if
-		NewX < 0  -> NewX2 = 80;
-		NewX > 80 -> NewX2 = 0;
-		true      -> NewX2 = NewX
-	end,
-	if
-		NewY < 0  -> NewY2 = 25;
-		NewY > 25 -> NewY2 = 0;
-		true      -> NewY2 = NewY
-	end,
-	State#fip{ x=NewX2, y=NewY2 }.
-
-%% @spec setDelta(state(), integer(), integer()) -> NewState::state()
-%% @doc Set delta in state.
--spec setDelta(state(), integer(), integer()) -> state().
-setDelta(#fip{} = State, X, Y) ->
-	State#fip{ dx = X, dy = Y }.
-
-%% @spec revDelta(state()) -> NewState::state()
-%% @doc Reverse IP.
--spec revDelta(state()) -> state().
-revDelta(#fip{} = State) ->
-	#fip{dx=DX, dy=DY} = State,
-	State#fip{ dx = -DX, dy = -DY }.
 
 %% @spec loop(state(), stack(), tid()) -> integer()
 %% @doc Main loop
