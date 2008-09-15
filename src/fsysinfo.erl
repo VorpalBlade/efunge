@@ -88,8 +88,13 @@ sysInfo(RequestID, #fip{} = IP, [TOSS|_] = StackStack, FungeSpace) ->
 	if
 		% Pick
 		Len < RequestID ->
-			V = lists:nth(RequestID-Len, TOSS),
-			fstackstack:push(StackStack, V);
+			try
+				V = lists:nth(RequestID-Len, TOSS),
+				fstackstack:push(StackStack, V)
+			%% Handle case of too short list.
+			catch
+				error:function_clause -> stackstack:push(StackStack, 0)
+			end;
 		true ->
 			Tmp3 = fstackstack:popAndDrop(RequestID-1, Tmp2),
 			{_, V} = fstack:pop(Tmp3),
