@@ -316,6 +316,19 @@ processInstruction($y, #fip{} = IP, Stack, Space) ->
 	{S1, N} = pop(Stack),
 	{IP, fsysinfo:sysInfo(N, IP, S1, Space)};
 
+%% ( Load fingerprint
+processInstruction($(, #fip{} = IP, StackStack, _Space) ->
+	{S1, N} = pop(StackStack),
+	if
+		N < 0 -> {revDelta(IP), S1};
+		true ->
+			[TOSS|T] = S1,
+			TOSS2 = fstackstack:popAndDrop(N, TOSS),
+			{revDelta(IP), [TOSS2|T]}
+	end;
+%% ) Unload fingerprint
+processInstruction($), #fip{} = IP, StackStack, Space) ->
+	processInstruction($(, IP, StackStack, Space);
 
 
 %% Handle ranges and unimplemented.
