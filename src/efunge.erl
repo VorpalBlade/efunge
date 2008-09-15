@@ -21,7 +21,7 @@ start(Filename) when is_list(Filename) ->
 
 %% @spec start(string(), list(string())) -> integer()
 %% @doc Load file, set up PRNG, start main loop.
--spec start(string(), [string(),...]) -> integer().
+-spec start(string(), [] | [string(),...]) -> integer().
 start(Filename, Parameters) when is_list(Filename) andalso is_list(Parameters) ->
 	{R1,R2,R3} = now(),
 	put(efungeargs, [Filename|Parameters]),

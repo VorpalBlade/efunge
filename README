@@ -1,6 +1,6 @@
 efunge
 ======
-This is a simple Befunge-93 interpreter coded in what I aim to make idiomatic
+This is a simple Befunge-98 interpreter coded in what I aim to make idiomatic
 Erlang. As this is my first "real" Erlang project I'm sure there are lot of
 code that is done the wrong way.
 
@@ -34,8 +34,16 @@ You can run efunge in two ways:
   important, do not try to use a semi-colon or such, just use a dot.
   Use 'q().' (wihtout the single quotes) to exit the Erlang shell.
 
-Known bugs and limitations:
+If you want to report a bug with a backtrace, compile with:
+   ERL_COMPILER_OPTIONS='[debug_info]' make clean all
+Then run the resulting program from *inside* erl as shown in example two. The
+backtrace produced when running the interpreter freestanding is much less
+detailed.
+
+Known bugs and limitations
+--------------------------
 * It is slow, but that will not be fixed, if you want a fast Befunge interpreter
   try cfunge (http://rage.kuonet.org/~anmaster/cfunge/) that is coded in C.
-  It also handles Funge-98 and Funge-108. However, cfunge only works on POSIX
-  platforms.
+  cfunge also handles Funge-108. However, cfunge only works on POSIX platforms.
+* The code is rather unreadable in many places, a clean up would be a good idea.
+* Better code documentation would be useful.
