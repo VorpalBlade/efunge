@@ -311,6 +311,10 @@ processInstruction($u, #fip{} = IP, StackStack, _Space) ->
 	catch
 		throw:oneStack -> {revDelta(IP), S1}
 	end;
+%% y System Info
+processInstruction($y, #fip{} = IP, Stack, Space) ->
+	{S1, N} = pop(Stack),
+	{IP, fsysinfo:sysInfo(N, IP, S1, Space)};
 
 
 

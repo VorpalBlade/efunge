@@ -6,7 +6,8 @@
          new/0, ssBegin/2, ssEnd/2, ssUnder/2,
          push/2, peek/1, pop/1, popVec/1, pushVec/2, dup/1, swap/1,
          clear/1,
-         popVecSOSS/1, pushVecSOSS/2
+         popVecSOSS/1, pushVecSOSS/2,
+         popAndDrop/2, stackToStack/3
         ]).
 
 
@@ -109,13 +110,8 @@ ssUnder([TOSS,SOSS|Tail], Count) ->
 	[NewTOSS, NewSOSS|Tail].
 
 
-%% Private functions
-pushNZero(0, Stack) ->
-	Stack;
-pushNZero(N, Stack) ->
-	NewStack = fstack:push(Stack, 0),
-	pushNZero(N-1, NewStack).
-
+%% @doc Pop N items from a stack.
+-spec popAndDrop(non_neg_integer(), stack()) -> stack().
 popAndDrop(0, Stack) ->
 	Stack;
 popAndDrop(N, Stack) ->
@@ -131,3 +127,11 @@ stackToStack(Count, Stack1, Stack2) ->
 	{NewStack1, Item} = fstack:pop(Stack1),
 	NewStack2 = fstack:push(Stack2, Item),
 	stackToStack(Count-1, NewStack1, NewStack2).
+
+
+%% Private functions
+pushNZero(0, Stack) ->
+	Stack;
+pushNZero(N, Stack) ->
+	NewStack = fstack:push(Stack, 0),
+	pushNZero(N-1, NewStack).
