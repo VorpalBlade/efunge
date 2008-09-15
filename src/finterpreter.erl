@@ -342,8 +342,8 @@ processInstruction(Instr, #fip{} = IP, Stack, _Space) when (Instr >= $a) andalso
 
 %% unimplemented
 processInstruction(_Instr, #fip{} = IP, Stack, _Space) ->
-	io:format("Instruction ~c is not implemented (at x=~w y=~w).~n",
-	          [_Instr, IP#fip.x, IP#fip.y]),
+	%io:format("Instruction ~c is not implemented (at x=~w y=~w).~n",
+	%          [_Instr, IP#fip.x, IP#fip.y]),
 	{revDelta(IP), Stack}.
 
 
