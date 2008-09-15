@@ -7,6 +7,8 @@
         ]).
 -include("fip.hrl").
 -include("funge_types.hrl").
+%% @type ip() = #fip{}.
+%%    The IP state. See fip.hrl.
 
 %% @spec getNewPos(ip(), fungespace()) -> NewIP::ip()
 %% @doc Move IP forward one step.

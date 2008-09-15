@@ -2,6 +2,9 @@
 %%
 %% Format of tuples in table is {{X,Y},Value}. The current implementation use
 %% ETS tables, but that may change without prior notice.
+%%
+%% The current implementation also use some special keys to store metadata like
+%% bounds of the Funge-Space.
 -module(fspace).
 -include("fip.hrl").
 -include("funge_types.hrl").

@@ -54,7 +54,7 @@ handleStringMode(Instr, #fip{ lastWasSpace = LastSpace } = IP, Stack) ->
 
 %% Finally, process instruction:
 
-%% @spec processInstruction(integer(), ip(), stack(), Space) -> {ip(), stack()}
+%% @spec processInstruction(integer(), ip(), stackstack(), Space) -> {ip(), stack()}
 %% @doc Process an instruction.
 -spec processInstruction(integer(),ip(),stackstack(), fungespace()) -> {ip(),stack()}.
 

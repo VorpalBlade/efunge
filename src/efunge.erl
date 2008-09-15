@@ -3,9 +3,6 @@
 -include("fip.hrl").
 -include("funge_types.hrl").
 
-%% @type state() = #fip{}.
-%%    The IP and Funge state. See fstate.hrl.
-
 %% @spec run([Filename::string()]) -> none()
 %% @doc Handler for -run
 -spec run([string(),...]) -> ok.
