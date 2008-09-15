@@ -3,7 +3,6 @@
 -module(finterpreter).
 -export([loop/3]).
 -include("fip.hrl").
--include("fspace.hrl").
 -include("funge_types.hrl").
 -import(fspace, [set/4, fetch/3]).
 -import(fstackstack, [push/2, pop/1, popVec/1, dup/1, swap/1]).
@@ -13,7 +12,7 @@
 %% @spec loop(ip(), stackstack(), tid()) -> integer()
 %% @doc Main loop
 -spec loop(ip(), stackstack(), fungespace()) -> integer().
-loop(#fip{} = IP, Stack, #fspace{} = FungeSpace) ->
+loop(#fip{} = IP, Stack, FungeSpace) ->
 	Instr = fspace:fetch(FungeSpace, {IP#fip.x, IP#fip.y}),
 	%io:format("~c", [Instr]),
 	%io:format("~c (x=~w y=~w)~n", [Instr, IP#fip.x, IP#fip.y]),
@@ -64,14 +63,14 @@ processInstruction($\s, #fip{} = IP, Stack, _Space) ->
 	{IP, Stack};
 
 %% p Put
-processInstruction($p, #fip{} = IP, Stack, #fspace{} = Space) ->
+processInstruction($p, #fip{} = IP, Stack, Space) ->
 	{S1, C} = popVec(Stack),
 	{S2, V} = pop(S1),
 	set(Space, IP, C, V),
 	{IP, S2};
 
 %% g Get
-processInstruction($g, #fip{} = IP, Stack, #fspace{} = Space) ->
+processInstruction($g, #fip{} = IP, Stack, Space) ->
 	{S1, C} = popVec(Stack),
 	V = fetch(Space, IP, C),
 	{IP, push(S1, V)};
@@ -161,7 +160,7 @@ processInstruction($$, #fip{} = IP, Stack, _Space) ->
 	{IP, S1};
 
 %% # Jump
-processInstruction($#, #fip{} = IP, Stack, #fspace{} = Space) ->
+processInstruction($#, #fip{} = IP, Stack, Space) ->
 	{getNewPos(IP, Space), Stack};
 
 %% _ Horisontal if

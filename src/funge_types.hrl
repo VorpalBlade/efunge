@@ -3,3 +3,4 @@
 -type stackstack() :: [] | [stack()].
 -type coord() :: {integer(), integer()}.
 -type ip() :: #fip{}.
+-type fungespace() :: integer().

@@ -2,7 +2,6 @@
 -module(fsysinfo).
 -export([sysInfo/4]).
 -include("fip.hrl").
--include("fspace.hrl").
 -include("funge_types.hrl").
 -import(fstack, [push/2, pushVec/2]).
 -define(MAX_FUNGE98, 20).

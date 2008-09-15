@@ -6,7 +6,6 @@
          findNextMatch/3, findNextNonSpace/2
         ]).
 -include("fip.hrl").
--include("fspace.hrl").
 -include("funge_types.hrl").
 
 %% @spec getNewPos(ip(), fungespace()) -> NewIP::ip()
