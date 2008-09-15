@@ -70,10 +70,12 @@ pushRequest(18, #fip{} = _IP, StackStack, _FungeSpace, PushStack) ->
 % 19 Cmd line args
 pushRequest(19, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	Args = lists:reverse(get(efungeargs)),
-	fstack:pushGnirtses(PushStack, Args);
+	PushStack2 = push(push(PushStack, 0), 0),
+	fstack:pushGnirtses(PushStack2, Args);
 % 20 Environment
 pushRequest(20, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
-	push(PushStack, 0).
+	push(PushStack, 0),
+	fstack:pushGnirtses(PushStack, os:getenv()).
 
 -spec sysInfo(integer(),ip(),stackstack(), fungespace()) -> stackstack().
 
