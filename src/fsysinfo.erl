@@ -7,6 +7,8 @@
 -import(fstack, [push/2, pushVec/2]).
 -define(MAX_FUNGE98, 20).
 
+
+-spec pushRequest(1..20,ip(),stackstack(),fungespace(),stack()) -> stack().
 % 1 Flags
 pushRequest(1, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	push(PushStack, 0);
@@ -67,7 +69,8 @@ pushRequest(18, #fip{} = _IP, StackStack, _FungeSpace, PushStack) ->
 	pushStackLengths(StackStack, PushStack);
 % 19 Cmd line args
 pushRequest(19, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
-	push(PushStack, 0);
+	Args = lists:reverse(get(efungeargs)),
+	fstack:pushGnirtses(PushStack, Args);
 % 20 Environment
 pushRequest(20, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	push(PushStack, 0).
@@ -93,7 +96,7 @@ sysInfo(RequestID, #fip{} = IP, [TOSS|_] = StackStack, FungeSpace) ->
 				fstackstack:push(StackStack, V)
 			%% Handle case of too short list.
 			catch
-				error:function_clause -> stackstack:push(StackStack, 0)
+				error:function_clause -> fstackstack:push(StackStack, 0)
 			end;
 		true ->
 			Tmp3 = fstackstack:popAndDrop(RequestID-1, Tmp2),
@@ -103,6 +106,7 @@ sysInfo(RequestID, #fip{} = IP, [TOSS|_] = StackStack, FungeSpace) ->
 
 % Various helper functions
 
+-spec pushAll(1..20,ip(),stackstack(),fungespace(),stack()) -> stack().
 pushAll(0, _, _, _, PushStack) ->
 	PushStack;
 pushAll(RequestID, #fip{} = IP, StackStack, FungeSpace, PushStack) ->
@@ -112,6 +116,7 @@ pushAll(RequestID, #fip{} = IP, StackStack, FungeSpace, PushStack) ->
 
 % Helper functions for use in pushRequest()
 
+-spec pushStackLengths(stackstack(),stack()) -> stack().
 pushStackLengths([], PushStack) ->
 	PushStack;
 pushStackLengths([H|T], PushStack) ->

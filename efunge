@@ -5,10 +5,10 @@ EFUNGE_ROOT=.
 EFUNGENAME=efunge.beam
 
 # Sanity checks
-if [ $# -ne 1 ]; then
-	echo "Too few or too many arguments!"
+if [ $# -lt 1 ]; then
+	echo "Too few arguments!"
 	echo
-	echo "Usage: $0 filename"
+	echo "Usage: $0 filename [ARGS]"
 	exit 1
 fi
 if [ ! -e "$1" ] || [ ! -r "$1" ]; then

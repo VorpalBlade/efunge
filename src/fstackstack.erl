@@ -4,7 +4,7 @@
 -include("funge_types.hrl").
 -export([
          new/0, ssBegin/2, ssEnd/2, ssUnder/2,
-         push/2, peek/1, pop/1, popVec/1, pushVec/2, dup/1, swap/1,
+         push/2, peek/1, pop/1, popVec/1, pushVec/2, pushList/2, dup/1, swap/1,
          clear/1,
          popVecSOSS/1, pushVecSOSS/2,
          popAndDrop/2, stackToStack/3
@@ -44,6 +44,11 @@ dup([TOSS|T]) ->
 swap([TOSS|T]) ->
 	NewTOSS = fstack:swap(TOSS),
 	[NewTOSS|T].
+-spec pushList(stackstack(), [integer(),...]) -> stack().
+pushList([TOSS|T], V) ->
+	NewTOSS = fstack:pushList(TOSS, V),
+	[NewTOSS|T].
+
 -spec clear(stackstack()) -> stackstack().
 clear([_|T]) ->
 	NewTOSS = fstack:new(),
@@ -130,6 +135,9 @@ stackToStack(Count, Stack1, Stack2) ->
 
 
 %% Private functions
+
+%% @doc Push N zeros on a stack.
+-spec pushNZero(non_neg_integer(),stack()) -> stack().
 pushNZero(0, Stack) ->
 	Stack;
 pushNZero(N, Stack) ->

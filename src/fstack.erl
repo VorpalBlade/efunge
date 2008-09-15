@@ -2,7 +2,7 @@
 -module(fstack).
 -include("fip.hrl").
 -include("funge_types.hrl").
--export([new/0, push/2, peek/1, pop/1, popVec/1, pushVec/2, dup/1, swap/1]).
+-export([new/0, push/2, peek/1, pop/1, popVec/1, pushVec/2, pushList/2, pushGnirtses/2, dup/1, swap/1]).
 
 
 %% @type stack() = [] | list(integer()).
@@ -55,6 +55,24 @@ pushVec([], {X, Y}) ->
 	[Y,X];
 pushVec(S, {X, Y})->
 	[Y, X|S].
+
+%% @spec pushList(stack(), list(integer())) -> stack()
+%% @doc Push a list on the stack.
+-spec pushList(stack(), [integer(),...]) -> stack().
+pushList(Stack, []) ->
+	Stack;
+pushList(Stack, [H|T]) when is_integer(H) ->
+	pushList([H|Stack], T).
+
+%% @spec pushGnirtses(stack(), list(list(integer()))) -> stack()
+%% @doc Push a series of 0"gnirts"
+-spec pushGnirtses(stack(), [[integer(),...],...]) -> stack().
+pushGnirtses(Stack, []) ->
+	Stack;
+pushGnirtses(Stack, [H|T]) ->
+	pushGnirtses(pushList(Stack, [0|lists:reverse(H)]), T).
+
+
 
 %% @spec dup(stack()) -> stack()
 %% @doc Duplicate the top value on a stack.

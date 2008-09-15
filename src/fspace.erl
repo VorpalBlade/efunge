@@ -76,6 +76,7 @@ getBounds(#fspace{} = Fungespace) ->
 %% Private functions
 
 %% @doc Create a Funge Space.
+-spec create() -> fungespace_table().
 create() ->
 	Space = ets:new(fungespace, [set, private]),
 	ets:insert(Space, {minx, undefined}),

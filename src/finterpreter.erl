@@ -6,7 +6,7 @@
 -include("fspace.hrl").
 -include("funge_types.hrl").
 -import(fspace, [set/4, fetch/3]).
--import(fstackstack, [push/2, peek/1, pop/1, popVec/1, pushVec/2, dup/1, swap/1]).
+-import(fstackstack, [push/2, pop/1, popVec/1, dup/1, swap/1]).
 -import(finput, [readNextChar/1, readNextInteger/1]).
 -import(fip, [getNewPos/2, setDelta/3, setOffset/3, revDelta/1, turnDeltaLeft/1, turnDeltaRight/1]).
 
