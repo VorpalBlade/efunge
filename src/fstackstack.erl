@@ -72,6 +72,10 @@ new() ->
 -spec ssBegin(stackstack(), non_neg_integer()) -> stackstack().
 ssBegin(StackStack, 0) ->
 	[fstack:new()|StackStack];
+ssBegin([OldTOSS|Tail], N) when N < 0 ->
+	NewTOSS = fstack:new(),
+	OldTOSS1 = pushNZero(-N, OldTOSS),
+	[NewTOSS, OldTOSS1|Tail];
 ssBegin([OldTOSS|Tail], N) ->
 	NewTOSS = fstack:new(),
 	{OldTOSS1, NewTOSS1} = stackToStack(N, OldTOSS, NewTOSS),
@@ -82,6 +86,10 @@ ssBegin([OldTOSS|Tail], N) ->
 -spec ssEnd(stackstack(), non_neg_integer()) -> stackstack().
 ssEnd([_TOSS], _) ->
 	throw(oneStack);
+ssEnd([_TOSS,SOSS|Tail], N) when N < 0 ->
+	% Pop |N| items
+	NewSOSS = popAndDrop(-N, SOSS),
+	[NewSOSS|Tail];
 ssEnd([TOSS,SOSS|Tail], N) ->
 	TempStack = fstack:new(),
 	{_, TempStack1} = stackToStack(N, TOSS, TempStack),
@@ -94,14 +102,25 @@ ssEnd([TOSS,SOSS|Tail], N) ->
 ssUnder([_TOSS], _) ->
 	throw(oneStack);
 ssUnder([TOSS,SOSS|Tail], Count) when Count < 0 ->
-	{NewSOSS, NewTOSS} = stackToStack(-Count, SOSS, TOSS),
+	{NewTOSS, NewSOSS} = stackToStack(-Count, TOSS, SOSS),
 	[NewTOSS, NewSOSS|Tail];
 ssUnder([TOSS,SOSS|Tail], Count) ->
-	{NewTOSS, NewSOSS} = stackToStack(Count, TOSS, SOSS),
+	{NewSOSS, NewTOSS} = stackToStack(Count, SOSS, TOSS),
 	[NewTOSS, NewSOSS|Tail].
 
 
 %% Private functions
+pushNZero(0, Stack) ->
+	Stack;
+pushNZero(N, Stack) ->
+	NewStack = fstack:push(Stack, 0),
+	pushNZero(N-1, NewStack).
+
+popAndDrop(0, Stack) ->
+	Stack;
+popAndDrop(N, Stack) ->
+	{NewStack, _} = fstack:pop(Stack),
+	popAndDrop(N-1, NewStack).
 
 %% @doc This pops N elements from Stack1 to Stack2. Tail recursive.
 %% Note that order is reverse of original list.
