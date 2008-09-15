@@ -347,7 +347,8 @@ processInstruction(_Instr, #fip{} = IP, Stack, _Space) ->
 	{revDelta(IP), Stack}.
 
 
-%% @doc Iterate helper
+%% @spec iterate(Count, Instr, IP, Stack, Space) -> {ip(), stack()}
+%% @doc Iterate helper. Calls the relevant processInstruction Count times.
 -spec iterate(non_neg_integer(),integer(),ip(),stackstack(),fungespace()) -> {ip(),stack()}.
 iterate(0, _Instr, IP, Stack, _Space) ->
 	{IP, Stack};

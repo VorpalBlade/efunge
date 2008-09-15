@@ -8,6 +8,7 @@
 -define(MAX_FUNGE98, 20).
 
 
+%% @doc Return value for a specific y request.
 -spec pushRequest(1..20,ip(),stackstack(),fungespace(),stack()) -> stack().
 % 1 Flags
 pushRequest(1, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
@@ -15,9 +16,12 @@ pushRequest(1, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 % 2 Cell size
 pushRequest(2, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	push(PushStack, -1);
-% 3 Handprint - EFUN
+% 3 Handprint - EFUN (16#4546554E) (prime: EMUS 16#454D5553)
 pushRequest(3, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
-	push(PushStack, 16#4546554e);
+	push(PushStack, 16#4546554E);
+	% I would prefer this, but would be hard to match on in a non-BIGNUM Funge.
+	% "efunge - A BIGNUM Befunge-98 interpreter in Erlang"
+	%push(PushStack, 16#6566756E6765202D2041204249474E554D20426566756E67652D393820696E74657270726574657220696E2045726C616E67);
 % 4 Version
 pushRequest(4, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	push(PushStack, 1);
@@ -77,6 +81,9 @@ pushRequest(20, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	push(PushStack, 0),
 	fstack:pushGnirtses(PushStack, os:getenv()).
 
+
+%% @spec sysInfo(RequestID, IP, StackStack, FungeSpace) -> stackstack()
+%% @doc This implements y.
 -spec sysInfo(integer(),ip(),stackstack(), fungespace()) -> stackstack().
 
 sysInfo(RequestID, #fip{} = IP, [TOSS|T] = StackStack, FungeSpace) when RequestID =< 0 ->
@@ -108,6 +115,7 @@ sysInfo(RequestID, #fip{} = IP, [TOSS|_] = StackStack, FungeSpace) ->
 
 % Various helper functions
 
+%% @doc Push all requests.
 -spec pushAll(1..20,ip(),stackstack(),fungespace(),stack()) -> stack().
 pushAll(0, _, _, _, PushStack) ->
 	PushStack;
@@ -118,6 +126,7 @@ pushAll(RequestID, #fip{} = IP, StackStack, FungeSpace, PushStack) ->
 
 % Helper functions for use in pushRequest()
 
+%% @doc Push length of all the stacks to another stack.
 -spec pushStackLengths(stackstack(),stack()) -> stack().
 pushStackLengths([], PushStack) ->
 	PushStack;

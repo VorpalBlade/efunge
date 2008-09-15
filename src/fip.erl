@@ -9,7 +9,7 @@
 -include("fspace.hrl").
 -include("funge_types.hrl").
 
-%% @spec getNewPos(ip()) -> NewIP::ip()
+%% @spec getNewPos(ip(), fungespace()) -> NewIP::ip()
 %% @doc Move IP forward one step.
 -spec getNewPos(ip(), fungespace()) -> ip().
 getNewPos(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
@@ -26,6 +26,8 @@ getNewPos(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
 			end
 	end.
 
+% @doc Handles j correctly, it will temporarly change delta for the IP then
+% jump forward, and finally restore delta.
 -spec jump(ip(), fungespace(), integer()) -> ip().
 jump(#fip{dx=DX, dy=DY} = IP, FungeSpace, Distance) ->
 	IPNewDelta = IP#fip{ dx = DX * Distance, dy = DY * Distance},

@@ -38,9 +38,9 @@ pop([]) ->
 pop([H|T]) ->
 	{T, H}.
 
-%% @spec popVec(stack()) -> {stack(), {integer(), integer()}}
+%% @spec popVec(stack()) -> {stack(), coord()}
 %% @doc Pop a Funge vector from a stack.
--spec popVec(stack()) -> {stack(), {integer(), integer()}}.
+-spec popVec(stack()) -> {stack(), coord()}.
 popVec([]) ->
 	{[], {0, 0}};
 popVec([Y]) ->
@@ -48,9 +48,9 @@ popVec([Y]) ->
 popVec([Y,X|T])->
 	{T, {X, Y}}.
 
-%% @spec pushVec(stack(), {integer(), integer()}) -> stack()
+%% @spec pushVec(stack(), coord()) -> stack()
 %% @doc Pop a Funge vector from a stack.
--spec pushVec(stack(), {integer(), integer()}) -> stack().
+-spec pushVec(stack(), coord()) -> stack().
 pushVec([], {X, Y}) ->
 	[Y,X];
 pushVec(S, {X, Y})->

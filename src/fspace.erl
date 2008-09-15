@@ -62,7 +62,7 @@ load(Filename) ->
 delete(#fspace{} = Fungespace) ->
 	ets:delete(Fungespace#fspace.space).
 
-%% @spec getBounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}.
+%% @spec getBounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
 %% @doc Get Funge Space bounds.
 -spec getBounds(fungespace()) -> {coord(), coord()}.
 getBounds(#fspace{} = Fungespace) ->
