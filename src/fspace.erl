@@ -68,10 +68,9 @@ fetch(Fungespace, {_X,_Y} = Coord) ->
 %% @doc Create a Funge Space from a file.
 -spec load(string()) -> fungespace().
 load(Filename) ->
-	{ok, File} = file:open(Filename, [read]),
+	{ok, Binary} = file:read_file(Filename),
 	FungeSpace = create(),
-	load_lines(File, FungeSpace, 0),
-	file:close(File),
+	load_binary(Binary, FungeSpace, 0, 0, false),
 	FungeSpace.
 
 %% @spec delete(fungespace()) -> true
@@ -134,28 +133,20 @@ update_bounds(_V, Space, {X,Y}) ->
 	ets:insert(Space, {maxy, MaxY1}),
 	true.
 
-%% @spec load_chars(fungespace(), Y::integer(), X::integer(), string()) -> true
-%% @doc Load everything from one line.
-load_chars(_FungeSpace, _Y, _X, []) ->
-	true;
-load_chars(FungeSpace, Y, X, [H|T]) ->
-	if
-		(H =:= $\n) orelse (H =:= $\r) ->
-			%% May contain ending newlines...
-			true;
-		true ->
+%% @spec load_lines(Binary, fungespace(), X, Y, LastWasCR) -> true
+%% @doc Load a binary into Funge Space.
+-spec load_binary(binary(),fungespace(),non_neg_integer(),non_neg_integer(),bool()) -> true.
+load_binary(<<H,T/binary>>, FungeSpace, X, Y, LastWasCR) ->
+	case H of
+		$\n ->
+			case LastWasCR of
+				true -> load_binary(T, FungeSpace, 0, Y, false);
+				false -> load_binary(T, FungeSpace, 0, Y+1, false)
+			end;
+		$\r ->
+			load_binary(T, FungeSpace, 0, Y+1, true);
+		_ ->
 			set(FungeSpace, {X, Y}, H),
-			load_chars(FungeSpace, Y, X+1, T)
-	end.
-
-%% @spec load_lines(File, fungespace(), Y::integer()) -> true
-%% @doc Load a line at the the time, then tail recursive call to load the next one.
-load_lines(File, FungeSpace, Y) ->
-	Line = io:get_line(File, ''),
-	if
-		(Line =:= eof) ->
-			true;
-		true ->
-			load_chars(FungeSpace, Y, 0, Line),
-			load_lines(File, FungeSpace, Y+1)
-	end.
+			load_binary(T, FungeSpace, X+1, Y, true)
+	end;
+load_binary(<<>>, _FungeSpace, _X, _Y, _LastWasCR) -> true.
