@@ -6,7 +6,7 @@
 -include("funge_types.hrl").
 -import(fspace, [set/4, fetch/3]).
 -import(fstackstack, [push/2, pop/1, popVec/1, dup/1, swap/1]).
--import(finput, [readNextChar/1, readNextInteger/1]).
+-import(finput, [read_next_char/1, read_next_integer/1]).
 -import(fip, [getNewPos/2, setDelta/3, setOffset/3, revDelta/1, turnDeltaLeft/1, turnDeltaRight/1]).
 
 %% @type process_instr_ret() = {ip(),stack()} | {dead, integer()}.
@@ -192,14 +192,14 @@ process_instruction($., #fip{} = IP, Stack, _Space) ->
 
 %% ~ Get char
 process_instruction($~, #fip{} = IP, Stack, _Space) ->
-	{NewIP, Result} = readNextChar(IP),
+	{NewIP, Result} = read_next_char(IP),
 	if
 		Result =:= eof -> {revDelta(IP), Stack};
 		true           -> {NewIP, push(Stack, Result)}
 	end;
 %% & Get int
 process_instruction($&, #fip{} = IP, Stack, _Space) ->
-	{NewIP, Result} = readNextInteger(IP),
+	{NewIP, Result} = read_next_integer(IP),
 	if
 		Result =:= eof -> {revDelta(IP), Stack};
 		true           -> {NewIP, push(Stack, Result)}

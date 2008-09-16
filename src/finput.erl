@@ -1,6 +1,6 @@
 %% @doc Handles input buffer stuff.
 -module(finput).
--export([readNextChar/1, readNextInteger/1]).
+-export([read_next_char/1, read_next_integer/1]).
 -include("fip.hrl").
 -include("funge_types.hrl").
 
@@ -21,10 +21,10 @@ fill_buffer(#fip{} = State) ->
 			{ok, State}
 	end.
 
-%% @spec readNextChar(ip()) -> {NewState, Char}
+%% @spec read_next_char(ip()) -> {NewState, Char}
 %% @doc Get a letter from the string buffer.
--spec readNextChar(ip()) -> {ip(), char() | eof}.
-readNextChar(#fip{} = State) ->
+-spec read_next_char(ip()) -> {ip(), char() | eof}.
+read_next_char(#fip{} = State) ->
 	{Status, NewState} = fill_buffer(State),
 	case Status of
 		eof -> {State, eof};
@@ -54,10 +54,10 @@ parse_integer(String) ->
 	end.
 
 
-%% @spec readNextInteger(ip()) -> {NewState::ip(), eof | integer()}
+%% @spec read_next_integer(ip()) -> {NewState::ip(), eof | integer()}
 %% @doc Get an integer from the string buffer.
--spec readNextInteger(ip()) -> {ip(), eof | integer()}.
-readNextInteger(#fip{} = State) ->
+-spec read_next_integer(ip()) -> {ip(), eof | integer()}.
+read_next_integer(#fip{} = State) ->
 	{Status, NewState} = fill_buffer(State),
 	case Status of
 		eof -> {State, eof};
@@ -67,7 +67,7 @@ readNextInteger(#fip{} = State) ->
 			case Result of
 				%% Try again!
 				error ->
-					readNextInteger(NewState#fip{ stringBuffer=[] });
+					read_next_integer(NewState#fip{ stringBuffer=[] });
 				{Int, Rest} ->
 					{NewState#fip{ stringBuffer=Rest }, Int}
 			end
