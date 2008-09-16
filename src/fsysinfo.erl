@@ -3,7 +3,7 @@
 -export([sysInfo/4]).
 -include("fip.hrl").
 -include("funge_types.hrl").
--import(fstack, [push/2, pushVec/2]).
+-import(fstack, [push/2, push_vec/2]).
 -define(MAX_FUNGE98, 20).
 
 
@@ -41,21 +41,21 @@ push_request(9, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	push(PushStack, 0);
 % 10 IP pos
 push_request(10, #fip{ x = X, y = Y}, _StackStack, _FungeSpace, PushStack) ->
-	pushVec(PushStack, {X, Y});
+	push_vec(PushStack, {X, Y});
 % 11 IP delta
 push_request(11, #fip{ dx = DX, dy = DY}, _StackStack, _FungeSpace, PushStack) ->
-	pushVec(PushStack, {DX, DY});
+	push_vec(PushStack, {DX, DY});
 % 12 Storage offset
 push_request(12, #fip{ offX = OX, offY = OY}, _StackStack, _FungeSpace, PushStack) ->
-	pushVec(PushStack, {OX, OY});
+	push_vec(PushStack, {OX, OY});
 % 13 Least point
 push_request(13, #fip{} = _IP, _StackStack, FungeSpace, PushStack) ->
 	{Least, _} = fspace:get_bounds(FungeSpace),
-	pushVec(PushStack, Least);
+	push_vec(PushStack, Least);
 % 14 Greatest point
 push_request(14, #fip{} = _IP, _StackStack, FungeSpace, PushStack) ->
 	{{Lx, Ly}, {Mx, My}} = fspace:get_bounds(FungeSpace),
-	pushVec(PushStack, {Mx - Lx, My - Ly});
+	push_vec(PushStack, {Mx - Lx, My - Ly});
 % 15 Date
 push_request(15, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	{{Y, M, D}, _} = erlang:universaltime(),
@@ -74,11 +74,11 @@ push_request(18, #fip{} = _IP, StackStack, _FungeSpace, PushStack) ->
 push_request(19, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	Args = lists:reverse(get(efungeargs)),
 	PushStack2 = push(push(PushStack, 0), 0),
-	fstack:pushGnirtses(PushStack2, Args);
+	fstack:push_gnirtses(PushStack2, Args);
 % 20 Environment
 push_request(20, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	push(PushStack, 0),
-	fstack:pushGnirtses(PushStack, os:getenv()).
+	fstack:push_gnirtses(PushStack, os:getenv()).
 
 
 %% @spec sysInfo(RequestID, IP, StackStack, FungeSpace) -> stackstack()
@@ -107,7 +107,7 @@ sysInfo(RequestID, #fip{} = IP, [TOSS|_] = StackStack, FungeSpace) ->
 				error:function_clause -> fstackstack:push(StackStack, 0)
 			end;
 		true ->
-			Tmp3 = fstack:popAndDrop(RequestID-1, Tmp2),
+			Tmp3 = fstack:pop_drop(RequestID-1, Tmp2),
 			{_, V} = fstack:pop(Tmp3),
 			fstackstack:push(StackStack, V)
 	end.

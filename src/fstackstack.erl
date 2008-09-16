@@ -4,9 +4,9 @@
 -include("funge_types.hrl").
 -export([
          new/0, ssBegin/2, ssEnd/2, ssUnder/2,
-         push/2, peek/1, pop/1, popVec/1, pushVec/2, dup/1, swap/1,
+         push/2, peek/1, pop/1, pop_vec/1, push_vec/2, dup/1, swap/1,
          clear/1,
-         popVecSOSS/1, pushVecSOSS/2
+         pop_vecSOSS/1, push_vecSOSS/2
         ]).
 
 
@@ -35,16 +35,16 @@ pop([TOSS|T]) ->
 	{NewTOSS, V} = fstack:pop(TOSS),
 	{[NewTOSS|T], V}.
 %% @doc Pop a vector from TOSS.
-%% @see fstack:popVec/1
--spec popVec(stackstack()) -> {stackstack(),coord()}.
-popVec([TOSS|T]) ->
-	{NewTOSS, V} = fstack:popVec(TOSS),
+%% @see fstack:pop_vec/1
+-spec pop_vec(stackstack()) -> {stackstack(),coord()}.
+pop_vec([TOSS|T]) ->
+	{NewTOSS, V} = fstack:pop_vec(TOSS),
 	{[NewTOSS|T], V}.
 %% @doc Push a vector on TOSS.
-%% @see fstack:pushVec/2
--spec pushVec(stackstack(), coord()) -> stackstack().
-pushVec([TOSS|T], V) ->
-	NewTOSS = fstack:pushVec(TOSS, V),
+%% @see fstack:push_vec/2
+-spec push_vec(stackstack(), coord()) -> stackstack().
+push_vec([TOSS|T], V) ->
+	NewTOSS = fstack:push_vec(TOSS, V),
 	[NewTOSS|T].
 %% @doc Duplicate the top value on TOSS.
 %% @see fstack:dup/1
@@ -67,20 +67,20 @@ clear([_|T]) ->
 %% Functions working on SOSS
 
 %% @doc Pop a vector from SOSS. If no SOSS exists, throw 'oneStack'.
-%% @see fstack:popVec/1
--spec popVecSOSS(stackstack()) -> {stackstack(),coord()}.
-popVecSOSS([_]) ->
+%% @see fstack:pop_vec/1
+-spec pop_vecSOSS(stackstack()) -> {stackstack(),coord()}.
+pop_vecSOSS([_]) ->
 	throw(oneStack);
-popVecSOSS([TOSS,SOSS|T]) ->
-	{NewSOSS, V} = fstack:popVec(SOSS),
+pop_vecSOSS([TOSS,SOSS|T]) ->
+	{NewSOSS, V} = fstack:pop_vec(SOSS),
 	{[TOSS, NewSOSS|T], V}.
 %% @doc Push a vector on SOSS. If no SOSS exists, throw 'oneStack'.
-%% @see fstack:pushVec/2
--spec pushVecSOSS(stackstack(), coord()) -> stackstack().
-pushVecSOSS([_], _) ->
+%% @see fstack:push_vec/2
+-spec push_vecSOSS(stackstack(), coord()) -> stackstack().
+push_vecSOSS([_], _) ->
 	throw(oneStack);
-pushVecSOSS([TOSS,SOSS|T], V) ->
-	NewSOSS = fstack:pushVec(SOSS, V),
+push_vecSOSS([TOSS,SOSS|T], V) ->
+	NewSOSS = fstack:push_vec(SOSS, V),
 	[TOSS, NewSOSS|T].
 
 %% @spec new() -> stackstack()
@@ -109,7 +109,7 @@ ssEnd([_TOSS], _) ->
 	throw(oneStack);
 ssEnd([_TOSS,SOSS|Tail], N) when N < 0 ->
 	% Pop |N| items
-	NewSOSS = fstack:popAndDrop(-N, SOSS),
+	NewSOSS = fstack:pop_drop(-N, SOSS),
 	[NewSOSS|Tail];
 ssEnd([TOSS,SOSS|Tail], N) ->
 	TempStack = fstack:new(),

@@ -3,8 +3,8 @@
 -include("fip.hrl").
 -include("funge_types.hrl").
 -export([new/0, push/2, peek/1, pop/1, dup/1, swap/1,
-         popVec/1, pushVec/2,
-         pushList/2, pushGnirtses/2, popAndDrop/2, stack_to_stack/3]).
+         pop_vec/1, push_vec/2,
+         push_list/2, push_gnirtses/2, pop_drop/2, stack_to_stack/3]).
 
 
 %% @type stack() = [] | list(integer()).
@@ -58,48 +58,48 @@ swap([H1,H2|T]) ->
 swap([H]) ->
 	[0,H].
 
-%% @spec popVec(stack()) -> {stack(), coord()}
+%% @spec pop_vec(stack()) -> {stack(), coord()}
 %% @doc Pop a Funge vector from a stack.
--spec popVec(stack()) -> {stack(), coord()}.
-popVec([]) ->
+-spec pop_vec(stack()) -> {stack(), coord()}.
+pop_vec([]) ->
 	{[], {0, 0}};
-popVec([Y]) ->
+pop_vec([Y]) ->
 	{[], {0, Y}};
-popVec([Y,X|T])->
+pop_vec([Y,X|T])->
 	{T, {X, Y}}.
 
-%% @spec pushVec(stack(), coord()) -> stack()
+%% @spec push_vec(stack(), coord()) -> stack()
 %% @doc Pop a Funge vector from a stack.
--spec pushVec(stack(), coord()) -> stack().
-pushVec([], {X, Y}) ->
+-spec push_vec(stack(), coord()) -> stack().
+push_vec([], {X, Y}) ->
 	[Y,X];
-pushVec(S, {X, Y})->
+push_vec(S, {X, Y})->
 	[Y, X|S].
 
-%% @spec pushList(stack(), list(integer())) -> stack()
+%% @spec push_list(stack(), list(integer())) -> stack()
 %% @doc Push a list on the stack.
--spec pushList(stack(), [integer(),...]) -> stack().
-pushList(Stack, []) ->
+-spec push_list(stack(), [integer(),...]) -> stack().
+push_list(Stack, []) ->
 	Stack;
-pushList(Stack, [H|T]) when is_integer(H) ->
-	pushList([H|Stack], T).
+push_list(Stack, [H|T]) when is_integer(H) ->
+	push_list([H|Stack], T).
 
-%% @spec pushGnirtses(stack(), list(list(integer()))) -> stack()
+%% @spec push_gnirtses(stack(), list(list(integer()))) -> stack()
 %% @doc Push a series of 0"gnirts"
--spec pushGnirtses(stack(), [[integer(),...],...]) -> stack().
-pushGnirtses(Stack, []) ->
+-spec push_gnirtses(stack(), [[integer(),...],...]) -> stack().
+push_gnirtses(Stack, []) ->
 	Stack;
-pushGnirtses(Stack, [H|T]) ->
-	pushGnirtses(pushList(Stack, [0|lists:reverse(H)]), T).
+push_gnirtses(Stack, [H|T]) ->
+	push_gnirtses(push_list(Stack, [0|lists:reverse(H)]), T).
 
-%% @spec popAndDrop(integer(), stack()) -> stack()
+%% @spec pop_drop(integer(), stack()) -> stack()
 %% @doc Pop N items from a stack.
--spec popAndDrop(non_neg_integer(), stack()) -> stack().
-popAndDrop(0, Stack) ->
+-spec pop_drop(non_neg_integer(), stack()) -> stack().
+pop_drop(0, Stack) ->
 	Stack;
-popAndDrop(N, Stack) ->
+pop_drop(N, Stack) ->
 	{NewStack, _} = fstack:pop(Stack),
-	popAndDrop(N-1, NewStack).
+	pop_drop(N-1, NewStack).
 
 %% @spec stack_to_stack(integer(), stack(), stack()) -> {stack(), stack()}
 %% @doc This pops N elements from Stack1 and pushes them on Stack2.

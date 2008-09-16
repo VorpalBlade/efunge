@@ -5,7 +5,7 @@
 -include("fip.hrl").
 -include("funge_types.hrl").
 -import(fspace, [set/4, fetch/3]).
--import(fstackstack, [push/2, pop/1, popVec/1, dup/1, swap/1]).
+-import(fstackstack, [push/2, pop/1, pop_vec/1, dup/1, swap/1]).
 -import(finput, [read_next_char/1, read_next_integer/1]).
 -import(fip, [ip_forward/2, set_delta/3, set_offset/3, rev_delta/1, turn_delta_left/1, turn_delta_right/1]).
 
@@ -61,14 +61,14 @@ process_instruction($\s, #fip{} = IP, Stack, _Space) ->
 
 %% p Put
 process_instruction($p, #fip{} = IP, Stack, Space) ->
-	{S1, C} = popVec(Stack),
+	{S1, C} = pop_vec(Stack),
 	{S2, V} = pop(S1),
 	set(Space, IP, C, V),
 	{IP, S2};
 
 %% g Get
 process_instruction($g, #fip{} = IP, Stack, Space) ->
-	{S1, C} = popVec(Stack),
+	{S1, C} = pop_vec(Stack),
 	V = fetch(Space, IP, C),
 	{IP, push(S1, V)};
 
@@ -269,7 +269,7 @@ process_instruction($w, #fip{} = IP, Stack, _Space) ->
 
 %% x Absolute delta
 process_instruction($x, #fip{} = IP, Stack, _Space) ->
-	{S1, {X, Y}} = popVec(Stack),
+	{S1, {X, Y}} = pop_vec(Stack),
 	{set_delta(IP, X,  Y), S1};
 
 %% j Jump
@@ -289,7 +289,7 @@ process_instruction($z, #fip{} = IP, Stack, _Space) ->
 process_instruction(${, #fip{ x = X, y = Y, dx = DX, dy = DY, offX = OX, offY = OY} = IP, StackStack, _Space) ->
 	{S1, N} = pop(StackStack),
 	S2 = fstackstack:ssBegin(S1, N),
-	S3 = fstackstack:pushVecSOSS(S2, {OX, OY}),
+	S3 = fstackstack:push_vecSOSS(S2, {OX, OY}),
 	IP2 = set_offset(IP, X+DX, Y+DY),
 	{IP2, S3};
 
@@ -297,7 +297,7 @@ process_instruction(${, #fip{ x = X, y = Y, dx = DX, dy = DY, offX = OX, offY = 
 process_instruction($}, #fip{} = IP, StackStack, _Space) ->
 	{S1, N} = pop(StackStack),
 	try
-		{S2, {OX, OY}} = fstackstack:popVecSOSS(S1),
+		{S2, {OX, OY}} = fstackstack:pop_vecSOSS(S1),
 		S3 = fstackstack:ssEnd(S2, N),
 		IP2 = set_offset(IP, OX, OY),
 		{IP2, S3}
@@ -327,7 +327,7 @@ process_instruction($(, #fip{} = IP, StackStack, _Space) ->
 		N < 0 -> {rev_delta(IP), S1};
 		true ->
 			[TOSS|T] = S1,
-			TOSS2 = fstack:popAndDrop(N, TOSS),
+			TOSS2 = fstack:pop_drop(N, TOSS),
 			{rev_delta(IP), [TOSS2|T]}
 	end;
 %% ) Unload fingerprint
