@@ -147,6 +147,6 @@ load_binary(<<H,T/binary>>, FungeSpace, X, Y, LastWasCR) ->
 			load_binary(T, FungeSpace, 0, Y+1, true);
 		_ ->
 			set(FungeSpace, {X, Y}, H),
-			load_binary(T, FungeSpace, X+1, Y, true)
+			load_binary(T, FungeSpace, X+1, Y, false)
 	end;
 load_binary(<<>>, _FungeSpace, _X, _Y, _LastWasCR) -> true.

@@ -56,7 +56,7 @@ loop(#fip{} = IP, Stack, FungeSpace) ->
 handle_string_mode(Instr, #fip{ lastWasSpace = LastSpace } = IP, Stack) ->
 	if
 		%% This code is needed to handle SGML spaces.
-		Instr =:= $\s andalso not LastSpace ->
+		(Instr =:= $\s) and (not LastSpace) ->
 			{IP#fip{ lastWasSpace=true }, push(Stack, Instr)};
 		Instr =:= $\s ->
 			{IP, Stack};
@@ -361,10 +361,10 @@ process_instruction($q, _IP, Stack, _Space) ->
 %% Handle ranges and unimplemented.
 
 %% 0-9 Any number.
-process_instruction(Instr, #fip{} = IP, Stack, _Space) when (Instr >= $0) andalso (Instr =< $9) ->
+process_instruction(Instr, #fip{} = IP, Stack, _Space) when (Instr >= $0) and (Instr =< $9) ->
 	{IP, push(Stack, Instr - $0)};
 %% a-f Hexdecimal numbers.
-process_instruction(Instr, #fip{} = IP, Stack, _Space) when (Instr >= $a) andalso (Instr =< $f) ->
+process_instruction(Instr, #fip{} = IP, Stack, _Space) when (Instr >= $a) and (Instr =< $f) ->
 	{IP, push(Stack, Instr - $a + 10)};
 
 %% unimplemented
