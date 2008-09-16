@@ -21,18 +21,12 @@ loop(#fip{} = IP, Stack, FungeSpace) ->
 			{NewIP, NewStack} = handleStringMode(Instr, IP, Stack),
 			loop(getNewPos(NewIP, FungeSpace), NewStack, FungeSpace);
 		false ->
-			%% Handle @ specically since we need to end loop then.
-			if
-				Instr =:= $@ ->
-					fspace:delete(FungeSpace),
-					0;
-				Instr =:= $q ->
-					{_, Retval} = pop(Stack),
+			case processInstruction(Instr, IP, Stack, FungeSpace) of
+				% This is for @ and q.
+				{dead, Retval} ->
 					fspace:delete(FungeSpace),
 					Retval;
-				true ->
-					{NewIP, NewStack} =
-						processInstruction(Instr, IP, Stack, FungeSpace),
+				{NewIP, NewStack} ->
 					loop(getNewPos(NewIP, FungeSpace), NewStack, FungeSpace)
 			end
 	end.
@@ -54,9 +48,9 @@ handleStringMode(Instr, #fip{ lastWasSpace = LastSpace } = IP, Stack) ->
 
 %% Finally, process instruction:
 
-%% @spec processInstruction(integer(), ip(), stackstack(), Space) -> {ip(), stack()}
+%% @spec processInstruction(integer(), ip(), stackstack(), Space) -> {ip(), stack()} | {dead, integer()}
 %% @doc Process an instruction.
--spec processInstruction(integer(),ip(),stackstack(), fungespace()) -> {ip(),stack()}.
+-spec processInstruction(integer(),ip(),stackstack(), fungespace()) -> {ip(),stack()} | {dead, integer()}.
 
 %%   Space
 processInstruction($\s, #fip{} = IP, Stack, _Space) ->
@@ -208,6 +202,10 @@ processInstruction($&, #fip{} = IP, Stack, _Space) ->
 		true           -> {NewIP, push(Stack, Result)}
 	end;
 
+%% @ Quit
+processInstruction($@, #fip{} = IP, _Stack, _Space) ->
+	{dead, 0};
+
 
 %% Begin Funge-98 instructions.
 
@@ -329,6 +327,10 @@ processInstruction($(, #fip{} = IP, StackStack, _Space) ->
 processInstruction($), #fip{} = IP, StackStack, Space) ->
 	processInstruction($(, IP, StackStack, Space);
 
+%% @ Quit
+processInstruction($q, #fip{} = IP, Stack, _Space) ->
+	{_S2, Retval} = pop(Stack),
+	{dead, Retval};
 
 %% Handle ranges and unimplemented.
 
