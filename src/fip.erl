@@ -1,19 +1,19 @@
 %% @doc Handles manipulation functions for IP.
 -module(fip).
--export([getNewPos/2, jump/3,
-         set_delta/3, rev_delta/1, setOffset/3,
-         turnDeltaLeft/1, turnDeltaRight/1,
-         findNextMatch/3, findNextNonSpace/2
+-export([ip_forward/2, jump/3,
+         set_delta/3, rev_delta/1, set_offset/3,
+         turn_delta_left/1, turn_delta_right/1,
+         find_next_match/3, find_next_non_space/2
         ]).
 -include("fip.hrl").
 -include("funge_types.hrl").
 %% @type ip() = #fip{}.
 %%    The IP state. See fip.hrl.
 
-%% @spec getNewPos(ip(), fungespace()) -> NewIP::ip()
+%% @spec ip_forward(ip(), fungespace()) -> NewIP::ip()
 %% @doc Move IP forward one step.
--spec getNewPos(ip(), fungespace()) -> ip().
-getNewPos(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
+-spec ip_forward(ip(), fungespace()) -> ip().
+ip_forward(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
 	Bounds = fspace:get_bounds(FungeSpace),
 	NewX = X+DX,
 	NewY = Y+DY,
@@ -22,8 +22,8 @@ getNewPos(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
 		true -> NewIP;
 		false ->
 			case is_delta_cardinal(IP) of
-				true -> calc_new_pos_cardinal(NewIP, Bounds);
-				false -> calc_new_pos_flying(rev_delta(IP), Bounds)
+				true -> ip_forward_cardinal(NewIP, Bounds);
+				false -> ip_forward_flying(rev_delta(IP), Bounds)
 			end
 	end.
 
@@ -32,7 +32,7 @@ getNewPos(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
 -spec jump(ip(), fungespace(), integer()) -> ip().
 jump(#fip{dx=DX, dy=DY} = IP, FungeSpace, Distance) ->
 	IPNewDelta = IP#fip{ dx = DX * Distance, dy = DY * Distance},
-	IPNewPos = getNewPos(IPNewDelta, FungeSpace),
+	IPNewPos = ip_forward(IPNewDelta, FungeSpace),
 	IPNewPos#fip{ dx = DX, dy = DY }.
 
 %% @spec set_delta(ip(), integer(), integer()) -> NewState::ip()
@@ -48,41 +48,41 @@ rev_delta(#fip{dx=DX, dy=DY} = IP) ->
 	IP#fip{ dx = -DX, dy = -DY }.
 
 
-%% @spec setOffset(ip(), integer(), integer()) -> NewState::ip()
+%% @spec set_offset(ip(), integer(), integer()) -> NewState::ip()
 %% @doc Set delta in state.
--spec setOffset(ip(), integer(), integer()) -> ip().
-setOffset(#fip{} = IP, X, Y) ->
+-spec set_offset(ip(), integer(), integer()) -> ip().
+set_offset(#fip{} = IP, X, Y) ->
 	IP#fip{ offX = X, offY = Y }.
 
 %% @doc Turn IP left.
--spec turnDeltaLeft(ip()) -> ip().
-turnDeltaLeft(#fip{dx=DX, dy=DY} = IP) ->
+-spec turn_delta_left(ip()) -> ip().
+turn_delta_left(#fip{dx=DX, dy=DY} = IP) ->
 	IP#fip{ dx = DY, dy = -DX }.
 
 %% @doc Turn IP right.
--spec turnDeltaRight(ip()) -> ip().
-turnDeltaRight(#fip{dx=DX, dy=DY} = IP) ->
+-spec turn_delta_right(ip()) -> ip().
+turn_delta_right(#fip{dx=DX, dy=DY} = IP) ->
 	IP#fip{ dx = -DY, dy = DX }.
 
 %% @doc Search in IP's path for the next time value shows up.
--spec findNextMatch(ip(),integer(),fungespace()) -> ip().
-findNextMatch(#fip{x=X, y=Y} = IP, Match, FungeSpace) ->
+-spec find_next_match(ip(),integer(),fungespace()) -> ip().
+find_next_match(#fip{x=X, y=Y} = IP, Match, FungeSpace) ->
 	Value = fspace:fetch(FungeSpace, {X, Y}),
 	if
 		Value =:= Match -> IP#fip{x = X, y = Y};
-		true -> findNextMatch(getNewPos(IP, FungeSpace), Match, FungeSpace)
+		true -> find_next_match(ip_forward(IP, FungeSpace), Match, FungeSpace)
 	end.
 
 %% @doc Find next one that isn't a whitespace, and isn't in ;;.
--spec findNextNonSpace(ip(),fungespace()) -> {ip(), integer()}.
-findNextNonSpace(#fip{x=X, y=Y} = IP, FungeSpace) ->
+-spec find_next_non_space(ip(),fungespace()) -> {ip(), integer()}.
+find_next_non_space(#fip{x=X, y=Y} = IP, FungeSpace) ->
 	Value = fspace:fetch(FungeSpace, {X, Y}),
 	if
 		Value =:= $\s ->
-			findNextNonSpace(getNewPos(IP, FungeSpace), FungeSpace);
+			find_next_non_space(ip_forward(IP, FungeSpace), FungeSpace);
 		Value =:= $; ->
-			IP2 = findNextMatch(getNewPos(IP, FungeSpace), $;, FungeSpace),
-			findNextNonSpace(getNewPos(IP2, FungeSpace), FungeSpace);
+			IP2 = find_next_match(ip_forward(IP, FungeSpace), $;, FungeSpace),
+			find_next_non_space(ip_forward(IP2, FungeSpace), FungeSpace);
 		true ->
 			{IP#fip{x = X, y = Y}, Value}
 	end.
@@ -101,8 +101,8 @@ is_delta_cardinal(#fip{dx=DX, dy=DY}) ->
 	end.
 
 %% @doc Move forward for Cardinal IPs
--spec calc_new_pos_cardinal(ip(),{coord(),coord()}) -> ip().
-calc_new_pos_cardinal(#fip{x=X, y=Y} = IP, {{MinX, MinY}, {MaxX, MaxY}}) ->
+-spec ip_forward_cardinal(ip(),{coord(),coord()}) -> ip().
+ip_forward_cardinal(#fip{x=X, y=Y} = IP, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	if
 		X < MinX -> NewX = MaxX+1;
 		X > MaxX -> NewX = MinX-1;
@@ -130,9 +130,9 @@ is_in_range({X, Y}, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	end.
 
 %% @doc Move forward for flying IPs.
--spec calc_new_pos_flying(ip(),{coord(),coord()}) -> ip().
-calc_new_pos_flying(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, Bounds) ->
+-spec ip_forward_flying(ip(),{coord(),coord()}) -> ip().
+ip_forward_flying(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, Bounds) ->
 	case is_in_range({X, Y}, Bounds) of
 		false -> rev_delta(IP);
-		true -> calc_new_pos_flying(IP#fip{ x=X+DX, y=Y+DY }, Bounds)
+		true -> ip_forward_flying(IP#fip{ x=X+DX, y=Y+DY }, Bounds)
 	end.

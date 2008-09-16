@@ -7,7 +7,7 @@
 -import(fspace, [set/4, fetch/3]).
 -import(fstackstack, [push/2, pop/1, popVec/1, dup/1, swap/1]).
 -import(finput, [read_next_char/1, read_next_integer/1]).
--import(fip, [getNewPos/2, set_delta/3, setOffset/3, rev_delta/1, turnDeltaLeft/1, turnDeltaRight/1]).
+-import(fip, [ip_forward/2, set_delta/3, set_offset/3, rev_delta/1, turn_delta_left/1, turn_delta_right/1]).
 
 %% @type process_instr_ret() = {ip(),stack()} | {dead, integer()}.
 -type process_instr_ret() :: {ip(),stack()} | {dead, integer()}.
@@ -22,7 +22,7 @@ loop(#fip{} = IP, Stack, FungeSpace) ->
 	case IP#fip.isStringMode of
 		true ->
 			{NewIP, NewStack} = handle_string_mode(Instr, IP, Stack),
-			loop(getNewPos(NewIP, FungeSpace), NewStack, FungeSpace);
+			loop(ip_forward(NewIP, FungeSpace), NewStack, FungeSpace);
 		false ->
 			case process_instruction(Instr, IP, Stack, FungeSpace) of
 				% This is for @ and q.
@@ -30,7 +30,7 @@ loop(#fip{} = IP, Stack, FungeSpace) ->
 					fspace:delete(FungeSpace),
 					Retval;
 				{NewIP, NewStack} ->
-					loop(getNewPos(NewIP, FungeSpace), NewStack, FungeSpace)
+					loop(ip_forward(NewIP, FungeSpace), NewStack, FungeSpace)
 			end
 	end.
 
@@ -158,7 +158,7 @@ process_instruction($$, #fip{} = IP, Stack, _Space) ->
 
 %% # Jump
 process_instruction($#, #fip{} = IP, Stack, Space) ->
-	{getNewPos(IP, Space), Stack};
+	{ip_forward(IP, Space), Stack};
 
 %% _ Horisontal if
 process_instruction($_, #fip{} = IP, Stack, _Space) ->
@@ -214,14 +214,14 @@ process_instruction($@, _IP, _Stack, _Space) ->
 
 %% [ Turn Left
 process_instruction($[, #fip{} = IP, Stack, _Space) ->
-	{turnDeltaLeft(IP), Stack};
+	{turn_delta_left(IP), Stack};
 %% ] Turn Right
 process_instruction($], #fip{} = IP, Stack, _Space) ->
-	{turnDeltaRight(IP), Stack};
+	{turn_delta_right(IP), Stack};
 
 %% ;
 process_instruction($;, #fip{} = IP, Stack, Space) ->
-	{fip:findNextMatch(getNewPos(IP, Space), $;, Space), Stack};
+	{fip:find_next_match(ip_forward(IP, Space), $;, Space), Stack};
 
 %% k Iterate
 process_instruction($k, #fip{} = IP, Stack, Space) ->
@@ -230,22 +230,22 @@ process_instruction($k, #fip{} = IP, Stack, Space) ->
 		Count < 0 ->
 			{rev_delta(IP), S1};
 		Count =:= 0 ->
-			{IP2, _} = fip:findNextNonSpace(getNewPos(IP, Space), Space),
+			{IP2, _} = fip:find_next_non_space(ip_forward(IP, Space), Space),
 			{IP2, S1};
 		true ->
-			{_, Instr} = fip:findNextNonSpace(getNewPos(IP, Space), Space),
+			{_, Instr} = fip:find_next_non_space(ip_forward(IP, Space), Space),
 			iterate(Count, Instr, IP, S1, Space)
 	end;
 
 %% ' Fetch char
 process_instruction($', #fip{} = IP, Stack, Space) ->
-	#fip{ x = X, y = Y} = NewIP = getNewPos(IP, Space),
+	#fip{ x = X, y = Y} = NewIP = ip_forward(IP, Space),
 	Value = fspace:fetch(Space, {X, Y}),
 	{NewIP, push(Stack, Value)};
 
 %% s Set char
 process_instruction($s, #fip{} = IP, Stack, Space) ->
-	#fip{ x = X, y = Y} = NewIP = getNewPos(IP, Space),
+	#fip{ x = X, y = Y} = NewIP = ip_forward(IP, Space),
 	{S1, Value} = pop(Stack),
 	fspace:set(Space, {X, Y}, Value),
 	{NewIP, S1};
@@ -260,9 +260,9 @@ process_instruction($w, #fip{} = IP, Stack, _Space) ->
 	{S2, A} = pop(S1),
 	if
 		A < B ->
-			{turnDeltaLeft(IP), S2};
+			{turn_delta_left(IP), S2};
 		A > B ->
-			{turnDeltaRight(IP), S2};
+			{turn_delta_right(IP), S2};
 		true ->
 			{IP, S2}
 	end;
@@ -290,7 +290,7 @@ process_instruction(${, #fip{ x = X, y = Y, dx = DX, dy = DY, offX = OX, offY = 
 	{S1, N} = pop(StackStack),
 	S2 = fstackstack:ssBegin(S1, N),
 	S3 = fstackstack:pushVecSOSS(S2, {OX, OY}),
-	IP2 = setOffset(IP, X+DX, Y+DY),
+	IP2 = set_offset(IP, X+DX, Y+DY),
 	{IP2, S3};
 
 %% } End Stack
@@ -299,7 +299,7 @@ process_instruction($}, #fip{} = IP, StackStack, _Space) ->
 	try
 		{S2, {OX, OY}} = fstackstack:popVecSOSS(S1),
 		S3 = fstackstack:ssEnd(S2, N),
-		IP2 = setOffset(IP, OX, OY),
+		IP2 = set_offset(IP, OX, OY),
 		{IP2, S3}
 	catch
 		throw:oneStack -> {rev_delta(IP), S1}
