@@ -14,11 +14,11 @@
 %% @doc Move IP forward one step.
 -spec getNewPos(ip(), fungespace()) -> ip().
 getNewPos(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
-	Bounds = fspace:getBounds(FungeSpace),
+	Bounds = fspace:get_bounds(FungeSpace),
 	NewX = X+DX,
 	NewY = Y+DY,
 	NewIP = IP#fip{ x=NewX, y=NewY },
-	case isInRange({NewX, NewY}, Bounds) of
+	case is_in_range({NewX, NewY}, Bounds) of
 		true -> NewIP;
 		false ->
 			case isDeltaCardinal(IP) of
@@ -115,9 +115,9 @@ getNewPosCardinal(#fip{x=X, y=Y} = IP, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	end,
 	IP#fip{ x=NewX, y=NewY }.
 
-%% @doc Is X, Y in range?
--spec isInRange(coord(),{coord(),coord()}) -> bool().
-isInRange({X, Y}, {{MinX, MinY}, {MaxX, MaxY}}) ->
+%% @doc Is X, Y in range of the box created by the second parameter?
+-spec is_in_range(coord(),{coord(),coord()}) -> bool().
+is_in_range({X, Y}, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	if
 		X < MinX -> false;
 		X > MaxX -> false;
@@ -132,7 +132,7 @@ isInRange({X, Y}, {{MinX, MinY}, {MaxX, MaxY}}) ->
 %% @doc Move forward for flying IPs.
 -spec getNewPosFlying(ip(),{coord(),coord()}) -> ip().
 getNewPosFlying(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, Bounds) ->
-	case isInRange({X, Y}, Bounds) of
+	case is_in_range({X, Y}, Bounds) of
 		false -> revDelta(IP);
 		true -> getNewPosFlying(IP#fip{ x=X+DX, y=Y+DY }, Bounds)
 	end.

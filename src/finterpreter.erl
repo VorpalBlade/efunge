@@ -322,7 +322,7 @@ processInstruction($(, #fip{} = IP, StackStack, _Space) ->
 		N < 0 -> {revDelta(IP), S1};
 		true ->
 			[TOSS|T] = S1,
-			TOSS2 = fstackstack:popAndDrop(N, TOSS),
+			TOSS2 = fstack:popAndDrop(N, TOSS),
 			{revDelta(IP), [TOSS2|T]}
 	end;
 %% ) Unload fingerprint

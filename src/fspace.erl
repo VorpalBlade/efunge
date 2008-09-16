@@ -8,7 +8,7 @@
 -module(fspace).
 -include("fip.hrl").
 -include("funge_types.hrl").
--export([load/1, set/3, set/4, fetch/2, fetch/3, delete/1, getBounds/1]).
+-export([load/1, set/3, set/4, fetch/2, fetch/3, delete/1, get_bounds/1]).
 
 %% Public functions
 
@@ -28,7 +28,7 @@ set(Fungespace, #fip{offX = OffX, offY = OffY}, {X,Y}, V) ->
 -spec set(fungespace(), coord(), integer()) -> true.
 set(Fungespace, {_X,_Y} = Coord, V) ->
 	ets:insert(Fungespace, {Coord, V}),
-	updateBounds(Fungespace, Coord).
+	update_bounds(Fungespace, Coord).
 
 %% @spec fetch(fungespace(), ip(), coord()) -> integer()
 %% @doc Get a cell from a specific Funge Space.
@@ -53,7 +53,7 @@ fetch(Fungespace, {_X,_Y} = Coord) ->
 load(Filename) ->
 	{ok, File} = file:open(Filename, [read]),
 	FungeSpace = create(),
-	loadLines(File, FungeSpace, 0),
+	load_lines(File, FungeSpace, 0),
 	file:close(File),
 	FungeSpace.
 
@@ -63,10 +63,10 @@ load(Filename) ->
 delete(Fungespace) ->
 	ets:delete(Fungespace).
 
-%% @spec getBounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
+%% @spec get_bounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
 %% @doc Get Funge Space bounds.
--spec getBounds(fungespace()) -> {coord(), coord()}.
-getBounds(Fungespace) ->
+-spec get_bounds(fungespace()) -> {coord(), coord()}.
+get_bounds(Fungespace) ->
 	[{_,MinX}] = ets:lookup(Fungespace, minx),
 	[{_,MinY}] = ets:lookup(Fungespace, miny),
 	[{_,MaxX}] = ets:lookup(Fungespace, maxx),
@@ -87,56 +87,56 @@ create() ->
 
 
 %% @doc Finds minimum.
--spec boundsMin(undefined | integer(), integer()) -> integer().
-boundsMin(undefined, Y)    -> Y;
-boundsMin(X, Y) when X < Y -> X;
-boundsMin(_X, Y) -> Y.
+-spec find_bounds_min(undefined | integer(), integer()) -> integer().
+find_bounds_min(undefined, Y)    -> Y;
+find_bounds_min(X, Y) when X < Y -> X;
+find_bounds_min(_X, Y) -> Y.
 
 %% @doc Finds maximum.
--spec boundsMax(undefined | integer(), integer()) -> integer().
-boundsMax(undefined, Y)    -> Y;
-boundsMax(X, Y) when X > Y -> X;
-boundsMax(_X, Y) -> Y.
+-spec find_bounds_max(undefined | integer(), integer()) -> integer().
+find_bounds_max(undefined, Y)    -> Y;
+find_bounds_max(X, Y) when X > Y -> X;
+find_bounds_max(_X, Y) -> Y.
 
 %% @doc Update bounds values in tables.
--spec updateBounds(fungespace(), coord()) -> 'true'.
-updateBounds(Space, {X,Y}) ->
+-spec update_bounds(fungespace(), coord()) -> 'true'.
+update_bounds(Space, {X,Y}) ->
 	[{_,MinX}] = ets:lookup(Space, minx),
 	[{_,MinY}] = ets:lookup(Space, miny),
 	[{_,MaxX}] = ets:lookup(Space, maxx),
 	[{_,MaxY}] = ets:lookup(Space, maxy),
-	MinX1 = boundsMin(MinX, X),
-	MinY1 = boundsMin(MinY, Y),
-	MaxX1 = boundsMax(MaxX, X),
-	MaxY1 = boundsMax(MaxY, Y),
+	MinX1 = find_bounds_min(MinX, X),
+	MinY1 = find_bounds_min(MinY, Y),
+	MaxX1 = find_bounds_max(MaxX, X),
+	MaxY1 = find_bounds_max(MaxY, Y),
 	ets:insert(Space, {minx, MinX1}),
 	ets:insert(Space, {miny, MinY1}),
 	ets:insert(Space, {maxx, MaxX1}),
 	ets:insert(Space, {maxy, MaxY1}),
 	true.
 
-%% @spec loadChars(fungespace(), Y::integer(), X::integer(), string()) -> true
+%% @spec load_chars(fungespace(), Y::integer(), X::integer(), string()) -> true
 %% @doc Load everything from one line.
-loadChars(_, _, _, []) ->
+load_chars(_FungeSpace, _Y, _X, []) ->
 	true;
-loadChars(FungeSpace, Y, X, [H|T]) ->
+load_chars(FungeSpace, Y, X, [H|T]) ->
 	if
 		(H =:= $\n) orelse (H =:= $\r) ->
 			%% May contain ending newlines...
 			true;
 		true ->
 			set(FungeSpace, {X, Y}, H),
-			loadChars(FungeSpace, Y, X+1, T)
+			load_chars(FungeSpace, Y, X+1, T)
 	end.
 
-%% @spec loadLines(File, fungespace(), Y::integer()) -> true
+%% @spec load_lines(File, fungespace(), Y::integer()) -> true
 %% @doc Load a line at the the time, then tail recursive call to load the next one.
-loadLines(File, FungeSpace, Y) ->
+load_lines(File, FungeSpace, Y) ->
 	Line = io:get_line(File, ''),
 	if
 		(Line =:= eof) ->
 			true;
 		true ->
-			loadChars(FungeSpace, Y, 0, Line),
-			loadLines(File, FungeSpace, Y+1)
+			load_chars(FungeSpace, Y, 0, Line),
+			load_lines(File, FungeSpace, Y+1)
 	end.

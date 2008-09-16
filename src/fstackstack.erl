@@ -6,8 +6,7 @@
          new/0, ssBegin/2, ssEnd/2, ssUnder/2,
          push/2, peek/1, pop/1, popVec/1, pushVec/2, dup/1, swap/1,
          clear/1,
-         popVecSOSS/1, pushVecSOSS/2,
-         popAndDrop/2, stackToStack/3
+         popVecSOSS/1, pushVecSOSS/2
         ]).
 
 
@@ -100,7 +99,7 @@ ssBegin([OldTOSS|Tail], N) when N < 0 ->
 	[NewTOSS, OldTOSS1|Tail];
 ssBegin([OldTOSS|Tail], N) ->
 	NewTOSS = fstack:new(),
-	{OldTOSS1, NewTOSS1} = stackToStack(N, OldTOSS, NewTOSS),
+	{OldTOSS1, NewTOSS1} = fstack:stack_to_stack(N, OldTOSS, NewTOSS),
 	NewTOSS2 = lists:reverse(NewTOSS1),
 	[NewTOSS2, OldTOSS1|Tail].
 
@@ -110,11 +109,11 @@ ssEnd([_TOSS], _) ->
 	throw(oneStack);
 ssEnd([_TOSS,SOSS|Tail], N) when N < 0 ->
 	% Pop |N| items
-	NewSOSS = popAndDrop(-N, SOSS),
+	NewSOSS = fstack:popAndDrop(-N, SOSS),
 	[NewSOSS|Tail];
 ssEnd([TOSS,SOSS|Tail], N) ->
 	TempStack = fstack:new(),
-	{_, TempStack1} = stackToStack(N, TOSS, TempStack),
+	{_, TempStack1} = fstack:stack_to_stack(N, TOSS, TempStack),
 	% Reverse the popped list and append the SOSS at the end.
 	NewSOSS = lists:reverse(TempStack1, SOSS),
 	[NewSOSS|Tail].
@@ -124,31 +123,11 @@ ssEnd([TOSS,SOSS|Tail], N) ->
 ssUnder([_TOSS], _) ->
 	throw(oneStack);
 ssUnder([TOSS,SOSS|Tail], Count) when Count < 0 ->
-	{NewTOSS, NewSOSS} = stackToStack(-Count, TOSS, SOSS),
+	{NewTOSS, NewSOSS} = fstack:stack_to_stack(-Count, TOSS, SOSS),
 	[NewTOSS, NewSOSS|Tail];
 ssUnder([TOSS,SOSS|Tail], Count) ->
-	{NewSOSS, NewTOSS} = stackToStack(Count, SOSS, TOSS),
+	{NewSOSS, NewTOSS} = fstack:stack_to_stack(Count, SOSS, TOSS),
 	[NewTOSS, NewSOSS|Tail].
-
-
-%% @doc Pop N items from a stack.
--spec popAndDrop(non_neg_integer(), stack()) -> stack().
-popAndDrop(0, Stack) ->
-	Stack;
-popAndDrop(N, Stack) ->
-	{NewStack, _} = fstack:pop(Stack),
-	popAndDrop(N-1, NewStack).
-
-%% @doc This pops N elements from Stack1 to Stack2. Tail recursive.
-%% Note that order is reverse of original list.
--spec stackToStack(non_neg_integer(),stack(),stack()) -> {stack(),stack()}.
-stackToStack(0, Stack1, Stack2) ->
-	{Stack1, Stack2};
-stackToStack(Count, Stack1, Stack2) ->
-	{NewStack1, Item} = fstack:pop(Stack1),
-	NewStack2 = fstack:push(Stack2, Item),
-	stackToStack(Count-1, NewStack1, NewStack2).
-
 
 %% Private functions
 
