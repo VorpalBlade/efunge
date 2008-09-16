@@ -1,7 +1,7 @@
 %% @doc Handles manipulation functions for IP.
 -module(fip).
 -export([getNewPos/2, jump/3,
-         setDelta/3, revDelta/1, setOffset/3,
+         set_delta/3, rev_delta/1, setOffset/3,
          turnDeltaLeft/1, turnDeltaRight/1,
          findNextMatch/3, findNextNonSpace/2
         ]).
@@ -23,7 +23,7 @@ getNewPos(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
 		false ->
 			case is_delta_cardinal(IP) of
 				true -> calc_new_pos_cardinal(NewIP, Bounds);
-				false -> calc_new_pos_flying(revDelta(IP), Bounds)
+				false -> calc_new_pos_flying(rev_delta(IP), Bounds)
 			end
 	end.
 
@@ -35,16 +35,16 @@ jump(#fip{dx=DX, dy=DY} = IP, FungeSpace, Distance) ->
 	IPNewPos = getNewPos(IPNewDelta, FungeSpace),
 	IPNewPos#fip{ dx = DX, dy = DY }.
 
-%% @spec setDelta(ip(), integer(), integer()) -> NewState::ip()
+%% @spec set_delta(ip(), integer(), integer()) -> NewState::ip()
 %% @doc Set delta in state.
--spec setDelta(ip(), integer(), integer()) -> ip().
-setDelta(#fip{} = IP, X, Y) ->
+-spec set_delta(ip(), integer(), integer()) -> ip().
+set_delta(#fip{} = IP, X, Y) ->
 	IP#fip{ dx = X, dy = Y }.
 
-%% @spec revDelta(ip()) -> NewState::ip()
+%% @spec rev_delta(ip()) -> NewState::ip()
 %% @doc Reverse IP.
--spec revDelta(ip()) -> ip().
-revDelta(#fip{dx=DX, dy=DY} = IP) ->
+-spec rev_delta(ip()) -> ip().
+rev_delta(#fip{dx=DX, dy=DY} = IP) ->
 	IP#fip{ dx = -DX, dy = -DY }.
 
 
@@ -133,6 +133,6 @@ is_in_range({X, Y}, {{MinX, MinY}, {MaxX, MaxY}}) ->
 -spec calc_new_pos_flying(ip(),{coord(),coord()}) -> ip().
 calc_new_pos_flying(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, Bounds) ->
 	case is_in_range({X, Y}, Bounds) of
-		false -> revDelta(IP);
+		false -> rev_delta(IP);
 		true -> calc_new_pos_flying(IP#fip{ x=X+DX, y=Y+DY }, Bounds)
 	end.

@@ -7,7 +7,7 @@
 -import(fspace, [set/4, fetch/3]).
 -import(fstackstack, [push/2, pop/1, popVec/1, dup/1, swap/1]).
 -import(finput, [read_next_char/1, read_next_integer/1]).
--import(fip, [getNewPos/2, setDelta/3, setOffset/3, revDelta/1, turnDeltaLeft/1, turnDeltaRight/1]).
+-import(fip, [getNewPos/2, set_delta/3, setOffset/3, rev_delta/1, turnDeltaLeft/1, turnDeltaRight/1]).
 
 %% @type process_instr_ret() = {ip(),stack()} | {dead, integer()}.
 -type process_instr_ret() :: {ip(),stack()} | {dead, integer()}.
@@ -106,24 +106,24 @@ process_instruction($", #fip{} = IP, Stack, _Space) ->
 
 %% > East
 process_instruction($>, #fip{} = IP, Stack, _Space) ->
-	{setDelta(IP, 1, 0), Stack};
+	{set_delta(IP, 1, 0), Stack};
 %% < West
 process_instruction($<, #fip{} = IP, Stack, _Space) ->
-	{setDelta(IP, -1, 0), Stack};
+	{set_delta(IP, -1, 0), Stack};
 %% ^ North
 process_instruction($^, #fip{} = IP, Stack, _Space) ->
-	{setDelta(IP, 0, -1), Stack};
+	{set_delta(IP, 0, -1), Stack};
 %% v South
 process_instruction($v, #fip{} = IP, Stack, _Space) ->
-	{setDelta(IP, 0, 1), Stack};
+	{set_delta(IP, 0, 1), Stack};
 %% ? Random direction
 process_instruction($?, #fip{} = IP, Stack, _Space) ->
 	R = random:uniform(4),
 	case R of
-		1 -> {setDelta(IP, -1,  0), Stack};
-		2 -> {setDelta(IP,  1,  0), Stack};
-		3 -> {setDelta(IP,  0, -1), Stack};
-		4 -> {setDelta(IP,  0,  1), Stack}
+		1 -> {set_delta(IP, -1,  0), Stack};
+		2 -> {set_delta(IP,  1,  0), Stack};
+		3 -> {set_delta(IP,  0, -1), Stack};
+		4 -> {set_delta(IP,  0,  1), Stack}
 	end;
 
 %% ! Not
@@ -165,18 +165,18 @@ process_instruction($_, #fip{} = IP, Stack, _Space) ->
 	{NewStack, Val} = pop(Stack),
 	if
 		Val =:= 0 ->
-			{setDelta(IP, 1, 0), NewStack};
+			{set_delta(IP, 1, 0), NewStack};
 		true ->
-			{setDelta(IP, -1, 0), NewStack}
+			{set_delta(IP, -1, 0), NewStack}
 	end;
 %% | Vertical if
 process_instruction($|, #fip{} = IP, Stack, _Space) ->
 	{NewStack, Val} = pop(Stack),
 	if
 		Val =:= 0 ->
-			{setDelta(IP, 0, 1), NewStack};
+			{set_delta(IP, 0, 1), NewStack};
 		true ->
-			{setDelta(IP, 0, -1), NewStack}
+			{set_delta(IP, 0, -1), NewStack}
 	end;
 
 %% , Put char
@@ -194,14 +194,14 @@ process_instruction($., #fip{} = IP, Stack, _Space) ->
 process_instruction($~, #fip{} = IP, Stack, _Space) ->
 	{NewIP, Result} = read_next_char(IP),
 	if
-		Result =:= eof -> {revDelta(IP), Stack};
+		Result =:= eof -> {rev_delta(IP), Stack};
 		true           -> {NewIP, push(Stack, Result)}
 	end;
 %% & Get int
 process_instruction($&, #fip{} = IP, Stack, _Space) ->
 	{NewIP, Result} = read_next_integer(IP),
 	if
-		Result =:= eof -> {revDelta(IP), Stack};
+		Result =:= eof -> {rev_delta(IP), Stack};
 		true           -> {NewIP, push(Stack, Result)}
 	end;
 
@@ -228,7 +228,7 @@ process_instruction($k, #fip{} = IP, Stack, Space) ->
 	{S1, Count} = pop(Stack),
 	if
 		Count < 0 ->
-			{revDelta(IP), S1};
+			{rev_delta(IP), S1};
 		Count =:= 0 ->
 			{IP2, _} = fip:findNextNonSpace(getNewPos(IP, Space), Space),
 			{IP2, S1};
@@ -270,7 +270,7 @@ process_instruction($w, #fip{} = IP, Stack, _Space) ->
 %% x Absolute delta
 process_instruction($x, #fip{} = IP, Stack, _Space) ->
 	{S1, {X, Y}} = popVec(Stack),
-	{setDelta(IP, X,  Y), S1};
+	{set_delta(IP, X,  Y), S1};
 
 %% j Jump
 process_instruction($j, #fip{} = IP, Stack, Space) ->
@@ -280,7 +280,7 @@ process_instruction($j, #fip{} = IP, Stack, Space) ->
 
 %% r Reflect
 process_instruction($r, #fip{} = IP, Stack, _Space) ->
-	{revDelta(IP), Stack};
+	{rev_delta(IP), Stack};
 %% z NOP
 process_instruction($z, #fip{} = IP, Stack, _Space) ->
 	{IP, Stack};
@@ -302,7 +302,7 @@ process_instruction($}, #fip{} = IP, StackStack, _Space) ->
 		IP2 = setOffset(IP, OX, OY),
 		{IP2, S3}
 	catch
-		throw:oneStack -> {revDelta(IP), S1}
+		throw:oneStack -> {rev_delta(IP), S1}
 	end;
 
 %% u Stack under Stack
@@ -312,7 +312,7 @@ process_instruction($u, #fip{} = IP, StackStack, _Space) ->
 		S2 = fstackstack:ssUnder(S1, Count),
 		{IP, S2}
 	catch
-		throw:oneStack -> {revDelta(IP), S1}
+		throw:oneStack -> {rev_delta(IP), S1}
 	end;
 
 %% y System Info
@@ -324,11 +324,11 @@ process_instruction($y, #fip{} = IP, Stack, Space) ->
 process_instruction($(, #fip{} = IP, StackStack, _Space) ->
 	{S1, N} = pop(StackStack),
 	if
-		N < 0 -> {revDelta(IP), S1};
+		N < 0 -> {rev_delta(IP), S1};
 		true ->
 			[TOSS|T] = S1,
 			TOSS2 = fstack:popAndDrop(N, TOSS),
-			{revDelta(IP), [TOSS2|T]}
+			{rev_delta(IP), [TOSS2|T]}
 	end;
 %% ) Unload fingerprint
 process_instruction($), #fip{} = IP, StackStack, Space) ->
@@ -354,7 +354,7 @@ process_instruction(Instr, #fip{} = IP, Stack, _Space) when (Instr >= $a) andals
 process_instruction(_Instr, #fip{} = IP, Stack, _Space) ->
 	%io:format("Instruction ~c is not implemented (at x=~w y=~w).~n",
 	%          [_Instr, IP#fip.x, IP#fip.y]),
-	{revDelta(IP), Stack}.
+	{rev_delta(IP), Stack}.
 
 
 %% @spec iterate(Count, Instr, IP, Stack, Space) -> process_instr_ret()
