@@ -288,8 +288,8 @@ process_instruction($z, #fip{} = IP, Stack, _Space) ->
 %% { Begin Stack
 process_instruction(${, #fip{ x = X, y = Y, dx = DX, dy = DY, offX = OX, offY = OY} = IP, StackStack, _Space) ->
 	{S1, N} = pop(StackStack),
-	S2 = fstackstack:ssBegin(S1, N),
-	S3 = fstackstack:push_vecSOSS(S2, {OX, OY}),
+	S2 = fstackstack:ss_begin(S1, N),
+	S3 = fstackstack:push_vec_SOSS(S2, {OX, OY}),
 	IP2 = set_offset(IP, X+DX, Y+DY),
 	{IP2, S3};
 
@@ -297,8 +297,8 @@ process_instruction(${, #fip{ x = X, y = Y, dx = DX, dy = DY, offX = OX, offY = 
 process_instruction($}, #fip{} = IP, StackStack, _Space) ->
 	{S1, N} = pop(StackStack),
 	try
-		{S2, {OX, OY}} = fstackstack:pop_vecSOSS(S1),
-		S3 = fstackstack:ssEnd(S2, N),
+		{S2, {OX, OY}} = fstackstack:pop_vec_SOSS(S1),
+		S3 = fstackstack:ss_end(S2, N),
 		IP2 = set_offset(IP, OX, OY),
 		{IP2, S3}
 	catch
@@ -309,7 +309,7 @@ process_instruction($}, #fip{} = IP, StackStack, _Space) ->
 process_instruction($u, #fip{} = IP, StackStack, _Space) ->
 	{S1, Count} = pop(StackStack),
 	try
-		S2 = fstackstack:ssUnder(S1, Count),
+		S2 = fstackstack:ss_under(S1, Count),
 		{IP, S2}
 	catch
 		throw:oneStack -> {rev_delta(IP), S1}

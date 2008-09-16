@@ -3,10 +3,10 @@
 -include("fip.hrl").
 -include("funge_types.hrl").
 -export([
-         new/0, ssBegin/2, ssEnd/2, ssUnder/2,
+         new/0, ss_begin/2, ss_end/2, ss_under/2,
          push/2, peek/1, pop/1, pop_vec/1, push_vec/2, dup/1, swap/1,
          clear/1,
-         pop_vecSOSS/1, push_vecSOSS/2
+         pop_vec_SOSS/1, push_vec_SOSS/2
         ]).
 
 
@@ -68,18 +68,18 @@ clear([_|T]) ->
 
 %% @doc Pop a vector from SOSS. If no SOSS exists, throw 'oneStack'.
 %% @see fstack:pop_vec/1
--spec pop_vecSOSS(stackstack()) -> {stackstack(),coord()}.
-pop_vecSOSS([_]) ->
+-spec pop_vec_SOSS(stackstack()) -> {stackstack(),coord()}.
+pop_vec_SOSS([_]) ->
 	throw(oneStack);
-pop_vecSOSS([TOSS,SOSS|T]) ->
+pop_vec_SOSS([TOSS,SOSS|T]) ->
 	{NewSOSS, V} = fstack:pop_vec(SOSS),
 	{[TOSS, NewSOSS|T], V}.
 %% @doc Push a vector on SOSS. If no SOSS exists, throw 'oneStack'.
 %% @see fstack:push_vec/2
--spec push_vecSOSS(stackstack(), coord()) -> stackstack().
-push_vecSOSS([_], _) ->
+-spec push_vec_SOSS(stackstack(), coord()) -> stackstack().
+push_vec_SOSS([_], _) ->
 	throw(oneStack);
-push_vecSOSS([TOSS,SOSS|T], V) ->
+push_vec_SOSS([TOSS,SOSS|T], V) ->
 	NewSOSS = fstack:push_vec(SOSS, V),
 	[TOSS, NewSOSS|T].
 
@@ -90,28 +90,28 @@ new() ->
 	[[]].
 
 %% @doc Stack-Stack Begin
--spec ssBegin(stackstack(), non_neg_integer()) -> stackstack().
-ssBegin(StackStack, 0) ->
+-spec ss_begin(stackstack(), non_neg_integer()) -> stackstack().
+ss_begin(StackStack, 0) ->
 	[fstack:new()|StackStack];
-ssBegin([OldTOSS|Tail], N) when N < 0 ->
+ss_begin([OldTOSS|Tail], N) when N < 0 ->
 	NewTOSS = fstack:new(),
-	OldTOSS1 = pushNZero(-N, OldTOSS),
+	OldTOSS1 = push_zeros(-N, OldTOSS),
 	[NewTOSS, OldTOSS1|Tail];
-ssBegin([OldTOSS|Tail], N) ->
+ss_begin([OldTOSS|Tail], N) ->
 	NewTOSS = fstack:new(),
 	{OldTOSS1, NewTOSS1} = fstack:stack_to_stack(N, OldTOSS, NewTOSS),
 	NewTOSS2 = lists:reverse(NewTOSS1),
 	[NewTOSS2, OldTOSS1|Tail].
 
 %% @doc Stack-Stack End
--spec ssEnd(stackstack(), non_neg_integer()) -> stackstack().
-ssEnd([_TOSS], _) ->
+-spec ss_end(stackstack(), non_neg_integer()) -> stackstack().
+ss_end([_TOSS], _) ->
 	throw(oneStack);
-ssEnd([_TOSS,SOSS|Tail], N) when N < 0 ->
+ss_end([_TOSS,SOSS|Tail], N) when N < 0 ->
 	% Pop |N| items
 	NewSOSS = fstack:pop_drop(-N, SOSS),
 	[NewSOSS|Tail];
-ssEnd([TOSS,SOSS|Tail], N) ->
+ss_end([TOSS,SOSS|Tail], N) ->
 	TempStack = fstack:new(),
 	{_, TempStack1} = fstack:stack_to_stack(N, TOSS, TempStack),
 	% Reverse the popped list and append the SOSS at the end.
@@ -119,22 +119,22 @@ ssEnd([TOSS,SOSS|Tail], N) ->
 	[NewSOSS|Tail].
 
 %% @doc Stack under Stack
--spec ssUnder(stackstack(), integer()) -> stackstack().
-ssUnder([_TOSS], _) ->
+-spec ss_under(stackstack(), integer()) -> stackstack().
+ss_under([_TOSS], _) ->
 	throw(oneStack);
-ssUnder([TOSS,SOSS|Tail], Count) when Count < 0 ->
+ss_under([TOSS,SOSS|Tail], Count) when Count < 0 ->
 	{NewTOSS, NewSOSS} = fstack:stack_to_stack(-Count, TOSS, SOSS),
 	[NewTOSS, NewSOSS|Tail];
-ssUnder([TOSS,SOSS|Tail], Count) ->
+ss_under([TOSS,SOSS|Tail], Count) ->
 	{NewSOSS, NewTOSS} = fstack:stack_to_stack(Count, SOSS, TOSS),
 	[NewTOSS, NewSOSS|Tail].
 
 %% Private functions
 
 %% @doc Push N zeros on a stack.
--spec pushNZero(non_neg_integer(),stack()) -> stack().
-pushNZero(0, Stack) ->
+-spec push_zeros(non_neg_integer(),stack()) -> stack().
+push_zeros(0, Stack) ->
 	Stack;
-pushNZero(N, Stack) ->
+push_zeros(N, Stack) ->
 	NewStack = fstack:push(Stack, 0),
-	pushNZero(N-1, NewStack).
+	push_zeros(N-1, NewStack).
