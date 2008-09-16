@@ -318,7 +318,7 @@ process_instruction($u, #fip{} = IP, StackStack, _Space) ->
 %% y System Info
 process_instruction($y, #fip{} = IP, Stack, Space) ->
 	{S1, N} = pop(Stack),
-	{IP, fsysinfo:sysInfo(N, IP, S1, Space)};
+	{IP, fsysinfo:system_info(N, IP, S1, Space)};
 
 %% ( Load fingerprint
 process_instruction($(, #fip{} = IP, StackStack, _Space) ->

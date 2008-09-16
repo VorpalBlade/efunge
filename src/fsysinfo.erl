@@ -1,6 +1,6 @@
 %% @doc Handles y instruction.
 -module(fsysinfo).
--export([sysInfo/4]).
+-export([system_info/4]).
 -include("fip.hrl").
 -include("funge_types.hrl").
 -import(fstack, [push/2, push_vec/2]).
@@ -81,18 +81,18 @@ push_request(20, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	fstack:push_gnirtses(PushStack, os:getenv()).
 
 
-%% @spec sysInfo(RequestID, IP, StackStack, FungeSpace) -> stackstack()
+%% @spec system_info(RequestID, IP, StackStack, FungeSpace) -> stackstack()
 %% @doc This implements y.
--spec sysInfo(integer(),ip(),stackstack(), fungespace()) -> stackstack().
+-spec system_info(integer(),ip(),stackstack(), fungespace()) -> stackstack().
 
-sysInfo(RequestID, #fip{} = IP, [TOSS|T] = StackStack, FungeSpace) when RequestID =< 0 ->
+system_info(RequestID, #fip{} = IP, [TOSS|T] = StackStack, FungeSpace) when RequestID =< 0 ->
 	NewTOSS = push_all(?MAX_FUNGE98, IP, StackStack, FungeSpace, TOSS),
 	[NewTOSS|T];
-sysInfo(RequestID, #fip{} = IP, [TOSS|T] = StackStack, FungeSpace) when RequestID < 10 ->
+system_info(RequestID, #fip{} = IP, [TOSS|T] = StackStack, FungeSpace) when RequestID < 10 ->
 	NewTOSS = push_request(RequestID, IP, StackStack, FungeSpace, TOSS),
 	[NewTOSS|T];
 % Now we need to create a temp stack..
-sysInfo(RequestID, #fip{} = IP, [TOSS|_] = StackStack, FungeSpace) ->
+system_info(RequestID, #fip{} = IP, [TOSS|_] = StackStack, FungeSpace) ->
 	Tmp1 = fstack:new(),
 	Tmp2 = push_all(?MAX_FUNGE98, IP, StackStack, FungeSpace, Tmp1),
 	Len = erlang:length(Tmp2),
