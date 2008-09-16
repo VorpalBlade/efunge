@@ -28,7 +28,7 @@ set(Fungespace, #fip{offX = OffX, offY = OffY}, {X,Y}, V) ->
 -spec set(fungespace(), coord(), integer()) -> true.
 set(Fungespace, {_X,_Y} = Coord, V) ->
 	ets:insert(Fungespace, {Coord, V}),
-	update_bounds(Fungespace, Coord).
+	update_bounds(V, Fungespace, Coord).
 
 %% @spec fetch(fungespace(), ip(), coord()) -> integer()
 %% @doc Get a cell from a specific Funge Space.
@@ -99,8 +99,10 @@ find_bounds_max(X, Y) when X > Y -> X;
 find_bounds_max(_X, Y) -> Y.
 
 %% @doc Update bounds values in tables.
--spec update_bounds(fungespace(), coord()) -> 'true'.
-update_bounds(Space, {X,Y}) ->
+-spec update_bounds(integer(), fungespace(), coord()) -> 'true'.
+update_bounds($\s, _Space, _Coord) ->
+	true;
+update_bounds(_V, Space, {X,Y}) ->
 	[{_,MinX}] = ets:lookup(Space, minx),
 	[{_,MinY}] = ets:lookup(Space, miny),
 	[{_,MaxX}] = ets:lookup(Space, maxx),
