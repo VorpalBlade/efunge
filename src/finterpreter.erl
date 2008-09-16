@@ -9,6 +9,9 @@
 -import(finput, [readNextChar/1, readNextInteger/1]).
 -import(fip, [getNewPos/2, setDelta/3, setOffset/3, revDelta/1, turnDeltaLeft/1, turnDeltaRight/1]).
 
+%% @type process_instr_ret() = {ip(),stack()} | {dead, integer()}.
+-type process_instr_ret() :: {ip(),stack()} | {dead, integer()}.
+
 %% @spec loop(ip(), stackstack(), tid()) -> integer()
 %% @doc Main loop
 -spec loop(ip(), stackstack(), fungespace()) -> integer().
@@ -48,9 +51,9 @@ handleStringMode(Instr, #fip{ lastWasSpace = LastSpace } = IP, Stack) ->
 
 %% Finally, process instruction:
 
-%% @spec processInstruction(integer(), ip(), stackstack(), Space) -> {ip(), stack()} | {dead, integer()}
+%% @spec processInstruction(integer(), ip(), stackstack(), Space) -> process_instr_ret()
 %% @doc Process an instruction.
--spec processInstruction(integer(),ip(),stackstack(), fungespace()) -> {ip(),stack()} | {dead, integer()}.
+-spec processInstruction(integer(),ip(),stackstack(), fungespace()) -> process_instr_ret().
 
 %%   Space
 processInstruction($\s, #fip{} = IP, Stack, _Space) ->
@@ -202,8 +205,8 @@ processInstruction($&, #fip{} = IP, Stack, _Space) ->
 		true           -> {NewIP, push(Stack, Result)}
 	end;
 
-%% @ Quit
-processInstruction($@, #fip{} = IP, _Stack, _Space) ->
+%% @ Exit
+processInstruction($@, _IP, _Stack, _Space) ->
 	{dead, 0};
 
 
@@ -227,7 +230,8 @@ processInstruction($k, #fip{} = IP, Stack, Space) ->
 		Count < 0 ->
 			{revDelta(IP), S1};
 		Count =:= 0 ->
-			{getNewPos(IP, Space), S1};
+			{IP2, _} = fip:findNextNonSpace(getNewPos(IP, Space), Space),
+			{IP2, S1};
 		true ->
 			{_, Instr} = fip:findNextNonSpace(getNewPos(IP, Space), Space),
 			iterate(Count, Instr, IP, S1, Space)
@@ -288,6 +292,7 @@ processInstruction(${, #fip{ x = X, y = Y, dx = DX, dy = DY, offX = OX, offY = O
 	S3 = fstackstack:pushVecSOSS(S2, {OX, OY}),
 	IP2 = setOffset(IP, X+DX, Y+DY),
 	{IP2, S3};
+
 %% } End Stack
 processInstruction($}, #fip{} = IP, StackStack, _Space) ->
 	{S1, N} = pop(StackStack),
@@ -299,6 +304,7 @@ processInstruction($}, #fip{} = IP, StackStack, _Space) ->
 	catch
 		throw:oneStack -> {revDelta(IP), S1}
 	end;
+
 %% u Stack under Stack
 processInstruction($u, #fip{} = IP, StackStack, _Space) ->
 	{S1, Count} = pop(StackStack),
@@ -308,6 +314,7 @@ processInstruction($u, #fip{} = IP, StackStack, _Space) ->
 	catch
 		throw:oneStack -> {revDelta(IP), S1}
 	end;
+
 %% y System Info
 processInstruction($y, #fip{} = IP, Stack, Space) ->
 	{S1, N} = pop(Stack),
@@ -327,10 +334,12 @@ processInstruction($(, #fip{} = IP, StackStack, _Space) ->
 processInstruction($), #fip{} = IP, StackStack, Space) ->
 	processInstruction($(, IP, StackStack, Space);
 
-%% @ Quit
-processInstruction($q, #fip{} = IP, Stack, _Space) ->
+%% q Quit
+processInstruction($q, _IP, Stack, _Space) ->
 	{_S2, Retval} = pop(Stack),
 	{dead, Retval};
+
+
 
 %% Handle ranges and unimplemented.
 
@@ -348,11 +357,14 @@ processInstruction(_Instr, #fip{} = IP, Stack, _Space) ->
 	{revDelta(IP), Stack}.
 
 
-%% @spec iterate(Count, Instr, IP, Stack, Space) -> {ip(), stack()}
+%% @spec iterate(Count, Instr, IP, Stack, Space) -> process_instr_ret()
 %% @doc Iterate helper. Calls the relevant processInstruction Count times.
--spec iterate(non_neg_integer(),integer(),ip(),stackstack(),fungespace()) -> {ip(),stack()}.
+-spec iterate(non_neg_integer(),integer(),ip()|dead,stackstack()|integer(),fungespace()) -> process_instr_ret().
 iterate(0, _Instr, IP, Stack, _Space) ->
 	{IP, Stack};
+% For @ and q.
+iterate(_Count, _Instr, dead, Retval, _Space) ->
+	{dead, Retval};
 iterate(Count, Instr, IP, Stack, Space) ->
 	{IP2, Stack2} = processInstruction(Instr, IP, Stack, Space),
 	iterate(Count-1, Instr, IP2, Stack2, Space).
