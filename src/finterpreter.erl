@@ -379,7 +379,7 @@ process_instruction(_Instr, #fip{} = IP, Stack, _Space) ->
 -spec iterate(non_neg_integer(),integer(),ip()|dead,stackstack()|integer(),fungespace()) -> process_instr_ret().
 iterate(0, _Instr, IP, Stack, _Space) ->
 	{IP, Stack};
-% For @ and q.
+%% For @ and q.
 iterate(_Count, _Instr, dead, Retval, _Space) ->
 	{dead, Retval};
 iterate(Count, Instr, IP, Stack, Space) ->
