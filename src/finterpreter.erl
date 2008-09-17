@@ -90,16 +90,16 @@ process_instruction($g, #fip{} = IP, Stack, Space) ->
 	{IP, push(S1, V)};
 
 
-%% + Plus
+%% + Add
 process_instruction($+, #fip{} = IP, Stack, _Space) ->
 	{S1,B} = pop(Stack), {S2,A} = pop(S1), {IP, push(S2, A + B)};
-%% - Minus
+%% - Subtract
 process_instruction($-, #fip{} = IP, Stack, _Space) ->
 	{S1,B} = pop(Stack), {S2,A} = pop(S1), {IP, push(S2, A - B)};
-%% * Multiplication
+%% * Multiply
 process_instruction($*, #fip{} = IP, Stack, _Space) ->
 	{S1,B} = pop(Stack), {S2,A} = pop(S1), {IP, push(S2, A * B)};
-%% / Integer division
+%% / Divide
 process_instruction($/, #fip{} = IP, Stack, _Space) ->
 	{S1,B} = pop(Stack),
 	{S2,A} = pop(S1),
@@ -108,7 +108,7 @@ process_instruction($/, #fip{} = IP, Stack, _Space) ->
 		true    -> {IP, push(S2, A div B)}
 	end;
 
-%% % Reminder
+%% % Remainder
 process_instruction($%, #fip{} = IP, Stack, _Space) ->
 	{S1,B} = pop(Stack),
 	{S2,A} = pop(S1),
@@ -133,17 +133,16 @@ process_instruction($^, #fip{} = IP, Stack, _Space) ->
 %% v South
 process_instruction($v, #fip{} = IP, Stack, _Space) ->
 	{set_delta(IP, 0, 1), Stack};
-%% ? Random direction
+%% ? Go Away (Random direction)
 process_instruction($?, #fip{} = IP, Stack, _Space) ->
-	R = random:uniform(4),
-	case R of
+	case random:uniform(4) of
 		1 -> {set_delta(IP, -1,  0), Stack};
 		2 -> {set_delta(IP,  1,  0), Stack};
 		3 -> {set_delta(IP,  0, -1), Stack};
 		4 -> {set_delta(IP,  0,  1), Stack}
 	end;
 
-%% ! Not
+%% ! Logical Not
 process_instruction($!, #fip{} = IP, Stack, _Space) ->
 	{S1, V} = pop(Stack),
 	if
@@ -162,7 +161,7 @@ process_instruction($`, #fip{} = IP, Stack, _Space) ->
 	end,
 	{IP, push(S2, R)};
 
-%% : Dup
+%% : Duplicate
 process_instruction($:, #fip{} = IP, Stack, _Space) ->
 	{IP, dup(Stack)};
 %% \ Swap
@@ -173,11 +172,11 @@ process_instruction($$, #fip{} = IP, Stack, _Space) ->
 	{S1, _} = pop(Stack),
 	{IP, S1};
 
-%% # Jump
+%% # Trampoline
 process_instruction($#, #fip{} = IP, Stack, Space) ->
 	{ip_forward(IP, Space), Stack};
 
-%% _ Horisontal if
+%% _ North-South If
 process_instruction($_, #fip{} = IP, Stack, _Space) ->
 	{NewStack, Val} = pop(Stack),
 	if
@@ -196,25 +195,25 @@ process_instruction($|, #fip{} = IP, Stack, _Space) ->
 			{set_delta(IP, 0, -1), NewStack}
 	end;
 
-%% , Put char
+%% , Output Character
 process_instruction($, , #fip{} = IP, Stack, _Space) ->
 	{NewStack, Val} = pop(Stack),
 	io:format("~c", [Val]),
 	{IP, NewStack};
-%% . Put number
+%% . Output Integer
 process_instruction($., #fip{} = IP, Stack, _Space) ->
 	{NewStack, Val} = pop(Stack),
 	io:format("~w ", [Val]),
 	{IP, NewStack};
 
-%% ~ Get char
+%% ~ Input Character
 process_instruction($~, #fip{} = IP, Stack, _Space) ->
 	{NewIP, Result} = finput:read_next_char(IP),
 	if
 		Result =:= eof -> {rev_delta(IP), Stack};
 		true           -> {NewIP, push(Stack, Result)}
 	end;
-%% & Get int
+%% & Input Integer
 process_instruction($&, #fip{} = IP, Stack, _Space) ->
 	{NewIP, Result} = finput:read_next_integer(IP),
 	if
@@ -222,7 +221,7 @@ process_instruction($&, #fip{} = IP, Stack, _Space) ->
 		true           -> {NewIP, push(Stack, Result)}
 	end;
 
-%% @ Exit
+%% @ Stop
 process_instruction($@, _IP, _Stack, _Space) ->
 	{dead, 0};
 
@@ -236,7 +235,7 @@ process_instruction($[, #fip{} = IP, Stack, _Space) ->
 process_instruction($], #fip{} = IP, Stack, _Space) ->
 	{turn_delta_right(IP), Stack};
 
-%% ;
+%% ; Jump Over
 process_instruction($;, #fip{} = IP, Stack, Space) ->
 	{fip:find_next_match(ip_forward(IP, Space), $;, Space), Stack};
 
@@ -254,13 +253,13 @@ process_instruction($k, #fip{} = IP, Stack, Space) ->
 			iterate(Count, Instr, IP, S1, Space)
 	end;
 
-%% ' Fetch char
+%% ' Fetch Character
 process_instruction($', #fip{} = IP, Stack, Space) ->
 	#fip{ x = X, y = Y} = NewIP = ip_forward(IP, Space),
 	Value = fspace:fetch(Space, {X, Y}),
 	{NewIP, push(Stack, Value)};
 
-%% s Set char
+%% s Store Character
 process_instruction($s, #fip{} = IP, Stack, Space) ->
 	#fip{ x = X, y = Y} = NewIP = ip_forward(IP, Space),
 	{S1, Value} = pop(Stack),
@@ -284,12 +283,12 @@ process_instruction($w, #fip{} = IP, Stack, _Space) ->
 			{IP, S2}
 	end;
 
-%% x Absolute delta
+%% x Absolute Delta
 process_instruction($x, #fip{} = IP, Stack, _Space) ->
 	{S1, {X, Y}} = pop_vec(Stack),
 	{set_delta(IP, X,  Y), S1};
 
-%% j Jump
+%% j Jump Forward
 process_instruction($j, #fip{} = IP, Stack, Space) ->
 	{S1, Dist} = pop(Stack),
 	{fip:jump(IP, Space, Dist), S1};
@@ -298,11 +297,11 @@ process_instruction($j, #fip{} = IP, Stack, Space) ->
 %% r Reflect
 process_instruction($r, #fip{} = IP, Stack, _Space) ->
 	{rev_delta(IP), Stack};
-%% z NOP
+%% z No Operation
 process_instruction($z, #fip{} = IP, Stack, _Space) ->
 	{IP, Stack};
 
-%% { Begin Stack
+%% { Begin Block
 process_instruction(${, #fip{ x = X, y = Y, dx = DX, dy = DY, offX = OX, offY = OY} = IP, StackStack, _Space) ->
 	{S1, N} = pop(StackStack),
 	S2 = fstackstack:ss_begin(S1, N),
@@ -310,7 +309,7 @@ process_instruction(${, #fip{ x = X, y = Y, dx = DX, dy = DY, offX = OX, offY = 
 	IP2 = set_offset(IP, X+DX, Y+DY),
 	{IP2, S3};
 
-%% } End Stack
+%% } End Block
 process_instruction($}, #fip{} = IP, StackStack, _Space) ->
 	{S1, N} = pop(StackStack),
 	try
@@ -322,7 +321,7 @@ process_instruction($}, #fip{} = IP, StackStack, _Space) ->
 		throw:oneStack -> {rev_delta(IP), S1}
 	end;
 
-%% u Stack under Stack
+%% u Stack Under Stack
 process_instruction($u, #fip{} = IP, StackStack, _Space) ->
 	{S1, Count} = pop(StackStack),
 	try
@@ -332,12 +331,12 @@ process_instruction($u, #fip{} = IP, StackStack, _Space) ->
 		throw:oneStack -> {rev_delta(IP), S1}
 	end;
 
-%% y System Info
+%% y Get SysInfo
 process_instruction($y, #fip{} = IP, Stack, Space) ->
 	{S1, N} = pop(Stack),
 	{IP, fsysinfo:system_info(N, IP, S1, Space)};
 
-%% ( Load fingerprint
+%% ( Load Semantics
 process_instruction($(, #fip{} = IP, StackStack, _Space) ->
 	{S1, N} = pop(StackStack),
 	if
@@ -347,7 +346,7 @@ process_instruction($(, #fip{} = IP, StackStack, _Space) ->
 			TOSS2 = fstack:pop_drop(N, TOSS),
 			{rev_delta(IP), [TOSS2|T]}
 	end;
-%% ) Unload fingerprint
+%% ) Unload Semantics
 process_instruction($), #fip{} = IP, StackStack, Space) ->
 	process_instruction($(, IP, StackStack, Space);
 

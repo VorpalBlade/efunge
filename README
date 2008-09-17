@@ -45,5 +45,6 @@ Known bugs and limitations
 * It is slow, but that will not be fixed, if you want a fast Befunge interpreter
   try cfunge (http://rage.kuonet.org/~anmaster/cfunge/) that is coded in C.
   cfunge also handles Funge-108. However, cfunge only works on POSIX platforms.
+* k on " is broken.
 * The code is rather unreadable in many places, a clean up would be a good idea.
 * Better code documentation would be useful.
