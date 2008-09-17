@@ -57,8 +57,7 @@ fetch(Fungespace, #fip{offX = OffX, offY = OffY}, {X,Y}) ->
 %% @doc Get a cell from a specific Funge Space.
 -spec fetch(fungespace(), coord()) -> integer().
 fetch(Fungespace, {_X,_Y} = Coord) ->
-	Result = ets:lookup(Fungespace, Coord),
-	case Result of
+	case ets:lookup(Fungespace, Coord) of
 		[] -> $\s;
 		[{{_,_},Value}] -> Value
 	end.

@@ -16,11 +16,11 @@
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
 -module(efunge).
--export([start/2, start/1, run/1]).
+-export([run/1, start/1, start/2]).
 -include("fip.hrl").
 -include("funge_types.hrl").
 
-%% @spec run([Filename::string()]) -> none()
+%% @spec run(list(string())) -> none()
 %% @doc Handler for -run
 -spec run([string(),...]) -> ok.
 run([Filename|Parameters]) when is_list(Filename) ->

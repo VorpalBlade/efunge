@@ -132,7 +132,7 @@ system_info(RequestID, #fip{} = IP, [TOSS|_] = StackStack, FungeSpace) ->
 %% Various helper functions
 
 %% @doc Push all requests.
--spec push_all(1..20,ip(),stackstack(),fungespace(),stack()) -> stack().
+-spec push_all(0..20,ip(),stackstack(),fungespace(),stack()) -> stack().
 push_all(0, _, _, _, PushStack) ->
 	PushStack;
 push_all(RequestID, #fip{} = IP, StackStack, FungeSpace, PushStack) ->

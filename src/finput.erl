@@ -25,9 +25,8 @@
 %% @doc Fill up the input line buffer if needed.
 -spec fill_buffer(ip()) -> {ok, ip()} | {eof, ip()}.
 fill_buffer(#fip{} = State) ->
-	StringBuf = State#fip.stringBuffer,
 	if
-		StringBuf =:= [] ->
+		State#fip.stringBuffer =:= [] ->
 			String = io:get_line(''),
 			if
 				String =:= eof -> {eof, State};
@@ -42,10 +41,9 @@ fill_buffer(#fip{} = State) ->
 %% @doc Get a letter from the string buffer.
 -spec read_next_char(ip()) -> {ip(), char() | eof}.
 read_next_char(#fip{} = State) ->
-	{Status, NewState} = fill_buffer(State),
-	case Status of
-		eof -> {State, eof};
-		ok ->
+	case fill_buffer(State) of
+		{eof, _} -> {State, eof};
+		{ok, NewState} ->
 			StringBuf = NewState#fip.stringBuffer,
 			[H|T] = StringBuf,
 			{NewState#fip{ stringBuffer=T }, H}
@@ -75,13 +73,10 @@ parse_integer(String) ->
 %% @doc Get an integer from the string buffer.
 -spec read_next_integer(ip()) -> {ip(), eof | integer()}.
 read_next_integer(#fip{} = State) ->
-	{Status, NewState} = fill_buffer(State),
-	case Status of
-		eof -> {State, eof};
-		ok ->
-			StringBuf = NewState#fip.stringBuffer,
-			Result = parse_integer(StringBuf),
-			case Result of
+	case fill_buffer(State) of
+		{eof, _} -> {State, eof};
+		{ok, NewState} ->
+			case parse_integer(NewState#fip.stringBuffer) of
 				%% Try again!
 				error ->
 					read_next_integer(NewState#fip{ stringBuffer=[] });
