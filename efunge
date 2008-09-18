@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #----------------------------------------------------------------------
 # Path of efunge, set to where you install the compiled beam files.
-EFUNGE_ROOT=.
+EFUNGE_ROOT=./ebin
 # Filename of efunge to check for
 EFUNGENAME=efunge.beam
 
