@@ -19,20 +19,25 @@ Building instructions
 * Run "make" (without the quotes) in your shell while you are in the efunge
   directory.
 * To build a high performance build use:
-   ERL_COMPILER_OPTIONS='[inline,native,{hipe,[o3]}]' make
-  Note that your erlang needs HIPE support for this, and debugging is near
+     ERL_COMPILER_OPTIONS='[inline,native,{hipe,[o3]}]' make
+  Note that your Erlang needs HIPE support for this, and debugging is near
   impossible in such a build.
 
 Running instructions
 --------------------
 You can run efunge in two ways:
 * Using the wrapper script efunge, by default it will only work when run inside
-  build directory. Change $EFUNGE_ROOT at the top to an absolute path if you
-  want to run it elsewhere.
-* Using 'efunge:start("path/to/befunge/program.bf").' (without the single
-  quotes) inside the Erlang shell. Note that the dot after the statement is
-  important, do not try to use a semi-colon or such, just use a dot.
-  Use 'q().' (wihtout the single quotes) to exit the Erlang shell.
+  build directory. Change $EFUNGE_ROOT at the top to an absolute path to the
+  ebin directory if you want to run it elsewhere.
+* Start an Erlang shell in the build directory using:
+     erl -pa ./ebin
+  Then run:
+     efunge:start("path/to/befunge/program.bf").
+  or
+     efunge:start("path/to/befunge/program.bf", ["parameters", "to", "the program"]).
+  inside the Erlang shell to run efunge. Note that the dot after the statement
+  is important, do not try to use a semi-colon or such, just use a dot.
+  Use "q()." (without the quotes) to exit the Erlang shell.
 
 If you want to report a bug with a backtrace, compile with:
    ERL_COMPILER_OPTIONS='[debug_info]' make clean all
@@ -42,6 +47,8 @@ detailed.
 
 Known bugs and limitations
 --------------------------
+* When running inside the shell, non-printable characters will be escaped. This
+  is an Erlang "feature", if it is a problem just run it freestanding.
 * It is slow, but that will not be fixed, if you want a fast Befunge interpreter
   try cfunge (http://rage.kuonet.org/~anmaster/cfunge/) that is coded in C.
   cfunge also handles Funge-108. However, cfunge only works on POSIX platforms.
