@@ -144,6 +144,9 @@ load_binary(<<H,T/binary>>, FungeSpace, X, Y, LastWasCR) ->
 			end;
 		$\r ->
 			load_binary(T, FungeSpace, 0, Y+1, true);
+		%% Spaces shouldn't replace.
+		$\s ->
+			load_binary(T, FungeSpace, X+1, Y, false);
 		_ ->
 			set(FungeSpace, {X, Y}, H),
 			load_binary(T, FungeSpace, X+1, Y, false)
