@@ -198,7 +198,7 @@ process_instruction($|, #fip{} = IP, Stack, _Space) ->
 %% , Output Character
 process_instruction($, , #fip{} = IP, Stack, _Space) ->
 	{NewStack, Val} = pop(Stack),
-	io:format("~c", [Val]),
+	io:put_chars([Val]),
 	{IP, NewStack};
 %% . Output Integer
 process_instruction($., #fip{} = IP, Stack, _Space) ->
@@ -249,8 +249,15 @@ process_instruction($k, #fip{} = IP, Stack, Space) ->
 			{IP2, _} = fip:find_next_non_space(ip_forward(IP, Space), Space),
 			{IP2, S1};
 		true ->
-			{_, Instr} = fip:find_next_non_space(ip_forward(IP, Space), Space),
-			iterate(Count, Instr, IP, S1, Space)
+			{InstrPos, Instr} = fip:find_next_non_space(ip_forward(IP, Space), Space),
+			if
+				%% This is actually buggy, we somehow need to keep track of
+				%% position here and check after each iteration.
+				Instr =:= $k ->
+					iterate(Count, Instr, InstrPos, S1, Space);
+				true ->
+					iterate(Count, Instr, IP, S1, Space)
+			end
 	end;
 
 %% ' Fetch Character

@@ -8,7 +8,7 @@ Modules:
 * finput         - STDIO in the Funge way. Can be used from fingerprints too.
 * fip            - IP functions, like reverse, also things like getting and
                    setting fingerprint specific data. IP specific state.
-* finterpreter   - Handle core instructions, loop over ips. Also global shared
+* finterpreter   - Handle core instructions, loops over IP. Also global shared
                    state.
 * fsysinfo       - Implements y.
 * ffingermanager - Handle the details of finding fingerprints, opcode stacks.
