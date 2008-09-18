@@ -16,8 +16,10 @@
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
 -type stack_items() :: integer() | {float, float()}.
--type stack() :: [] | [stack_items()].
--type stackstack() :: [] | [stack()].
+-type stack() :: [] | list(stack_items()).
+-type stackstack() :: [] | list(stack()).
 -type coord() :: {integer(), integer()}.
 -type ip() :: #fip{}.
 -type fungespace() :: integer().
+-type fingerfun() :: fun((ip(), stackstack(), fungespace()) -> {ip(), stackstack()}).
+-type fingerstack() :: [] | list(fingerfun()).

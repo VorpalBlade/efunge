@@ -132,7 +132,7 @@ update_bounds(_V, Space, {X,Y}) ->
 	ets:insert(Space, {maxy, MaxY1}),
 	true.
 
-%% @spec load_lines(Binary, fungespace(), X, Y, LastWasCR) -> true
+%% @spec load_binary(Binary, fungespace(), X, Y, LastWasCR) -> true
 %% @doc Load a binary into Funge Space.
 -spec load_binary(binary(),fungespace(),non_neg_integer(),non_neg_integer(),bool()) -> true.
 load_binary(<<H,T/binary>>, FungeSpace, X, Y, LastWasCR) ->
