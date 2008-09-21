@@ -253,7 +253,7 @@ cat > "fing${FPRINT}.erl" << EOF
 EOF
 
 addtoerl "%% @doc ${FPRINT} fingerprint."
-addtoerl "-module(fingMODU)."
+addtoerl "-module(fing${FPRINT})."
 
 cat >> "fing${FPRINT}.erl" << EOF
 -include("../fip.hrl").
