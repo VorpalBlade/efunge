@@ -14,6 +14,7 @@ You will also need make to build the project (or you could use c() in erl).
 efunge has been tested on Erlang/OTP R12B-4. It may or may not work on other
 versions.
 
+
 Building instructions
 ---------------------
 * Run "make" (without the quotes) in your shell while you are in the efunge
@@ -22,6 +23,7 @@ Building instructions
      ERL_COMPILER_OPTIONS='[inline,native,{hipe,[o3]}]' make
   Note that your Erlang needs HIPE support for this, and debugging is near
   impossible in such a build.
+
 
 Running instructions
 --------------------
@@ -45,13 +47,22 @@ Then run the resulting program from *inside* erl as shown in example two. The
 backtrace produced when running the interpreter freestanding is much less
 detailed.
 
+
 Known bugs and limitations
 --------------------------
-* When running inside the shell, non-printable characters will be escaped. This
-  is an Erlang "feature", if it is a problem just run it freestanding.
-* It is slow, but that will not be fixed, if you want a fast Befunge interpreter
-  try cfunge (http://rage.kuonet.org/~anmaster/cfunge/) that is coded in C.
-  cfunge also handles Funge-108. However, cfunge only works on POSIX platforms.
-* k on " is broken.
-* The code is rather unreadable in many places, a clean up would be a good idea.
-* Better code documentation would be useful.
+Limitations or bugs caused by Erlang:
+ * When running inside the shell, non-printable characters will be escaped. This
+   is an Erlang "feature", if it is a problem just run it freestanding.
+ * Erlang adds some environment variables by itself, and also modifies $PATH. It
+   is not possible to fix or work around this.
+Both of these issues can be resolved by defining Erlang itself to be the OS.
+
+ * It is slow, but that will not be fixed, if you want a faster Befunge interpreter
+   try cfunge (http://rage.kuonet.org/~anmaster/cfunge/) that is coded in C.
+   cfunge also handles Funge-108. However, cfunge only works on POSIX platforms.
+
+Real bugs or issues:
+ * k on k is broken.
+ * k on " may be broken.
+ * The code is rather unreadable in many places, a clean up would be a good idea.
+ * Better code documentation would be useful.

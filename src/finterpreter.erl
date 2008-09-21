@@ -118,8 +118,8 @@ process_instruction($%, #fip{} = IP, Stack, _Space) ->
 	end;
 
 %% " String mode
-process_instruction($", #fip{} = IP, Stack, _Space) ->
-	{IP#fip{ isStringMode=true }, Stack};
+process_instruction($", #fip{ isStringMode = StrMode } = IP, Stack, _Space) ->
+	{IP#fip{ isStringMode=not StrMode }, Stack};
 
 %% > East
 process_instruction($>, #fip{} = IP, Stack, _Space) ->
@@ -404,7 +404,7 @@ iterate(0, _Instr, IP, Stack, _Space) ->
 %% For @ and q.
 iterate(_Count, _Instr, dead, Retval, _Space) ->
 	{dead, Retval};
-%% Should insert cases for " and k here.
+%% Should insert cases for k here.
 iterate(Count, Instr, IP, Stack, Space) ->
 	{IP2, Stack2} = process_instruction(Instr, IP, Stack, Space),
 	iterate(Count-1, Instr, IP2, Stack2, Space).
