@@ -31,6 +31,8 @@
 %% @doc Look up loader function and implemented instrs for a fingerprint.
 %% If fingerprint isn't implemented the atom notfound will be returned.
 -spec lookup(integer()) -> {string(), fingerloadingfun()} | notfound.
+%% CPLI - Complex Integer extension
+lookup(16#43504c49)  -> { "ADMOSV", fun fingCPLI:load/1 };
 %% MODU - Modulo Arithmetic
 lookup(16#4d4f4455)  -> { "MRU", fun fingMODU:load/1 };
 %% NULL - Null
