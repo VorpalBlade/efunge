@@ -22,7 +22,7 @@
 %% These are called from core.
 -export([init/1, load/2, unload/2, execute/4]).
 %% These are called from fingerprint loading functions.
--export([push_fun/3]).
+-export([push_fun/3, push_funs/2]).
 
 %% @type fingerfun() = function((ip(), stackstack(), fungespace()) -> {ip(), stackstack()}).
 %%   A fingerprint function
@@ -74,6 +74,13 @@ push_fun(Instr, #fip{ fingerOpStacks = Array } = IP, Fun) when (Instr >= $A) and
 	Array2 = array:set(Idx, S2, Array),
 	IP#fip{ fingerOpStacks = Array2 }.
 
+%% @doc Push a list of fingerprint ops on the IP stack.
+-spec push_funs(ip(),[{pos_integer(), fingerfun()}]) -> ip().
+push_funs(IP, []) ->
+	IP;
+push_funs(IP, [{Instr,Fun}|T]) ->
+	IP2 = push_fun(Instr, IP, Fun),
+	push_funs(IP2, T).
 
 
 %% Private functions

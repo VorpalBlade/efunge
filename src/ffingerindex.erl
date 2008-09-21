@@ -28,9 +28,7 @@
 
 %% @doc Look up loader function and implemented instrs.
 -spec lookup(integer()) -> {string(), fingerloadingfun()} | notfound.
-lookup(16#4e554c4c) ->
-	{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ", fun fingNULL:load/1 };
-lookup(16#524f4d41) ->
-	{ "CDILMVX", fun fingROMA:load/1 };
-lookup(_Fingerprint) ->
-	notfound.
+lookup(16#4d4f4455)  -> { "MRU",                        fun fingMODU:load/1 };
+lookup(16#4e554c4c)  -> { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", fun fingNULL:load/1 };
+lookup(16#524f4d41)  -> { "CDILMVX",                    fun fingROMA:load/1 };
+lookup(_Fingerprint) -> notfound.

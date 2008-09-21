@@ -198,7 +198,7 @@ process_instruction($|, #fip{} = IP, Stack, _Space) ->
 %% , Output Character
 process_instruction($, , #fip{} = IP, Stack, _Space) ->
 	{NewStack, Val} = pop(Stack),
-	io:put_chars([Val]),
+	io:put_chars([abs(Val)]),
 	{IP, NewStack};
 %% . Output Integer
 process_instruction($., #fip{} = IP, Stack, _Space) ->

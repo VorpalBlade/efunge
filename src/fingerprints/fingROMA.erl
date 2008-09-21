@@ -15,7 +15,7 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
-%% @doc NULL fingerprint.
+%% @doc ROMA fingerprint.
 -module(fingROMA).
 -include("../fip.hrl").
 -include("../funge_types.hrl").
