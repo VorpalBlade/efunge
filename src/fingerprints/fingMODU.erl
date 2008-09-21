@@ -25,7 +25,7 @@
 
 -import(fstackstack, [push/2, pop/1]).
 
-
+-spec modu_signed(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 modu_signed(IP, Stack, _Space) ->
 	{S2, Y} = pop(Stack),
 	{S3, X} = pop(S2),
@@ -34,6 +34,7 @@ modu_signed(IP, Stack, _Space) ->
 		true    -> {IP, push(S3, X - floordiv(X, Y) * Y)}
 	end.
 
+-spec modu_c99(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 modu_c99(IP, Stack, _Space) ->
 	{S2, Y} = pop(Stack),
 	{S3, X} = pop(S2),
@@ -44,6 +45,7 @@ modu_c99(IP, Stack, _Space) ->
 		true    -> {IP, push(S3, X rem Y)}
 	end.
 
+-spec modu_unsigned(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 modu_unsigned(IP, Stack, _Space) ->
 	{S2, Y} = pop(Stack),
 	{S3, X} = pop(S2),
@@ -62,7 +64,7 @@ load(IP) ->
 	{ok, IP2}.
 
 %% Private funtions
-
+-spec floordiv(integer(),integer()) -> integer().
 floordiv(X, Y) ->
 	R = X div Y,
 	if
