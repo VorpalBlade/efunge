@@ -30,32 +30,27 @@ modu_signed(IP, Stack, _Space) ->
 	{S2, Y} = pop(Stack),
 	{S3, X} = pop(S2),
 	if
-		Y =:= 0 -> {IP, push(S2, 0)};
-		true    -> {IP, push(S2, X - floordiv(X, Y) * Y)}
+		Y =:= 0 -> {IP, push(S3, 0)};
+		true    -> {IP, push(S3, X - floordiv(X, Y) * Y)}
 	end.
 
 modu_c99(IP, Stack, _Space) ->
 	{S2, Y} = pop(Stack),
 	{S3, X} = pop(S2),
 	if
-		Y =:= 0 -> {IP, push(S2, 0)};
+		Y =:= 0 -> {IP, push(S3, 0)};
 		%% Note: I don't know if this is well defined in Erlang. If not please
 		%% contact me.
-		true    -> {IP, push(S2, X rem Y)}
+		true    -> {IP, push(S3, X rem Y)}
 	end.
 
 modu_unsigned(IP, Stack, _Space) ->
 	{S2, Y} = pop(Stack),
 	{S3, X} = pop(S2),
 	if
-		Y =:= 0 -> {IP, push(S2, 0)};
-		true    -> {IP, push(S2, abs(X rem Y))}
+		Y =:= 0 -> {IP, push(S3, 0)};
+		true    -> {IP, push(S3, abs(X rem Y))}
 	end.
-
-
-% M	signedResult	Signed result
-% R	remainder	C style reminder
-% U	unsignedResult	Unsigned result
 
 %% @doc Load the MODU fingerprint.
 -spec load(ip()) -> {ok, ip()}.
