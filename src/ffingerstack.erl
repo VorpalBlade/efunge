@@ -20,7 +20,7 @@
 -include("fip.hrl").
 -include("funge_types.hrl").
 -export([new/0, push/2, peek/1, pop/1]).
-%% For special use:
+%% For special use (and from NULL
 -export([reflect/3]).
 
 %% @type fingerfun() = function((ip(), stackstack(), fungespace()) -> {ip(), stackstack()}).

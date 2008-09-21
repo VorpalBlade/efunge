@@ -15,20 +15,27 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
-%% @doc Fingerprint lookup.
--module(ffingerindex).
--include("fip.hrl").
--include("funge_types.hrl").
--export([lookup/1]).
+%% @doc NULL fingerprint.
+-module(fingNULL).
+-include("../fip.hrl").
+-include("../funge_types.hrl").
+-export([load/1]).
 
-%% @type fingerloadingfun() = function((ip()) -> {ok, ip()} | {error, ip()}).
-%%   A fingerprint loader function.
-%% @type fingerstack() = [] | list(fingerfun()).
-%%   Stack is a list, access at list head.
+%% @doc Load NULL fingerprint.
+-spec load(ip()) -> {ok, ip()}.
+load(IP) ->
+	L = lists:seq($A, $Z),
+	IP2 = load_ops(IP, L),
+	{ok, IP2}.
 
-%% @doc Look up loader function and implemented instrs.
--spec lookup(integer()) -> {string(), fingerloadingfun()} | notfound.
-lookup(16#4e554c4c) ->
-	{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ", fun fingNULL:load/1 };
-lookup(_Fingerprint) ->
-	notfound.
+%% Private funtions
+
+%% Tail recursive load.
+
+%% @doc Load NULL.
+-spec load_ops(ip(),string()) -> ip().
+load_ops(IP, []) ->
+	IP;
+load_ops(IP, [H|T]) ->
+	IP2 = ffingermanager:push_fun(H, IP, fun ffingerstack:reflect/3),
+	load_ops(IP2, T).

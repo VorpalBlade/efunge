@@ -25,6 +25,8 @@
 -import(fstackstack, [push/2, pop/1, pop_vec/1, dup/1, swap/1]).
 -import(fip, [ip_forward/2, set_delta/3, set_offset/3, rev_delta/1, turn_delta_left/1, turn_delta_right/1]).
 
+-define(TRACE(X), io:format("TRACE ~p:~p ~p~n" ,[?MODULE, ?LINE, X])).
+
 %% @type process_instr_ret() = {ip(),stack()} | {dead, integer()}.
 -type process_instr_ret() :: {ip(),stack()} | {dead, integer()}.
 
@@ -350,8 +352,14 @@ process_instruction($(, #fip{} = IP, StackStack, _Space) ->
 		N < 0 -> {rev_delta(IP), S1};
 		true ->
 			{S2, Fingerprint} = build_fingerprint(N, S1, 0),
-			IP2 = ffingermanager:load(IP, Fingerprint),
-			{IP2, S2}
+			case ffingermanager:load(IP, Fingerprint) of
+				{error, _} ->
+					{fip:rev_delta(IP), S2};
+				{ok, IP2} ->
+					S3 = push(S2, Fingerprint),
+					S4 = push(S3, 1),
+					{IP2, S4}
+			end
 	end;
 %% ) Unload Semantics
 process_instruction($), #fip{} = IP, StackStack, _Space) ->
@@ -360,7 +368,7 @@ process_instruction($), #fip{} = IP, StackStack, _Space) ->
 		N < 0 -> {rev_delta(IP), S1};
 		true ->
 			{S2, Fingerprint} = build_fingerprint(N, S1, 0),
-			IP2 = ffingermanager:unload(IP, Fingerprint),
+			#fip{} = IP2 = ffingermanager:unload(IP, Fingerprint),
 			{IP2, S2}
 	end;
 

@@ -36,11 +36,17 @@ init(#fip{} = IP) ->
 	IP#fip{ fingerOpStacks = OpArray }.
 
 %% @doc Load a fingerprint.
--spec load(ip(), integer()) -> ip().
+-spec load(ip(), integer()) -> {ok | error, ip()}.
 load(#fip{} = IP, Fingerprint) ->
 	case ffingerindex:lookup(Fingerprint) of
-		notfound -> fip:rev_delta(IP);
-		{_, Loader} -> Loader(IP)
+		notfound ->
+			{error, IP};
+		{_Instrs, Loader} ->
+			LoaderRet = Loader(IP),
+			case LoaderRet of
+				{error, _} -> {error, IP};
+				{ok, #fip{} = IP2} -> {ok, IP2}
+			end
 	end.
 
 %% @doc Unload a fingerprint.
@@ -48,7 +54,7 @@ load(#fip{} = IP, Fingerprint) ->
 unload(#fip{} = IP, Fingerprint) ->
 	case ffingerindex:lookup(Fingerprint) of
 		notfound -> fip:rev_delta(IP);
-		{Instrs, _} -> unload_ops(IP, Instrs)
+		{Instrs, _Loader} -> unload_ops(IP, Instrs)
 	end.
 
 %% @doc Execute a fingerprint op
