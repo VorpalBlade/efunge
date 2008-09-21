@@ -15,7 +15,7 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
-%% @doc Handles manipulation functions for IP.
+%% @doc This module implements manipulation functions for the IP.
 -module(fip).
 -export([ip_forward/2, jump/3,
          set_delta/3, rev_delta/1, set_offset/3,

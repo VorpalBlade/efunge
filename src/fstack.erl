@@ -15,7 +15,7 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
-%% @doc Funge stack in Erlang
+%% @doc An implementation of a Funge style stack.
 -module(fstack).
 -include("fip.hrl").
 -include("funge_types.hrl").

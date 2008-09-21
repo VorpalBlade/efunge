@@ -15,7 +15,8 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
-%% @doc Handles input buffer stuff.
+%% @doc This module handles input buffer and extracting values from said
+%% buffers.
 -module(finput).
 -export([read_next_char/1, read_next_integer/1]).
 -include("fip.hrl").

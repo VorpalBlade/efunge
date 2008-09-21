@@ -15,6 +15,7 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
+%% @doc Main entry point for efunge. Used to start efunge.
 -module(efunge).
 -export([run/1, start/1, start/2]).
 -include("fip.hrl").

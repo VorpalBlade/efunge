@@ -15,7 +15,7 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
-%% @doc Handle Funge Space.
+%% @doc This module handles the Funge Space.
 %%
 %% Format of tuples in table is {{X,Y},Value}. The current implementation use
 %% ETS tables, but that may change without prior notice.

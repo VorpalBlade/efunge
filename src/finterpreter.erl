@@ -15,8 +15,7 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
-%% @doc Handles main loop, and will handle exeuting an instruction from
-%% elsewhere.
+%% @doc This module implements the main loop.
 -module(finterpreter).
 -export([loop/3]).
 -include("fip.hrl").

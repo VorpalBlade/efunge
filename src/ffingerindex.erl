@@ -15,7 +15,7 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
-%% @doc Fingerprint lookup.
+%% @doc This module implements a lookup "table" for fingerprints.
 -module(ffingerindex).
 -include("fip.hrl").
 -include("funge_types.hrl").
@@ -26,7 +26,9 @@
 %% @type fingerstack() = [] | list(fingerfun()).
 %%   Stack is a list, access at list head.
 
-%% @doc Look up loader function and implemented instrs.
+%% @spec lookup(integer()) -> {string(), fingerloadingfun()} | notfound
+%% @doc Look up loader function and implemented instrs for a fingerprint.
+%% If fingerprint isn't implemented the atom notfound will be returned.
 -spec lookup(integer()) -> {string(), fingerloadingfun()} | notfound.
 lookup(16#4d4f4455)  -> { "MRU",                        fun fingMODU:load/1 };
 lookup(16#4e554c4c)  -> { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", fun fingNULL:load/1 };

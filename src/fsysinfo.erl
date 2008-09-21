@@ -15,7 +15,7 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
-%% @doc Handles y instruction.
+%% @doc This module handles y instruction.
 -module(fsysinfo).
 -export([system_info/4]).
 -include("fip.hrl").
