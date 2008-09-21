@@ -22,7 +22,7 @@
 %% These are called from core.
 -export([init/1, load/2, unload/2, execute/4]).
 %% These are called from fingerprint loading functions.
--export([push_fun/2]).
+-export([push_fun/3]).
 
 %% @type fingerfun() = function((ip(), stackstack(), fungespace()) -> {ip(), stackstack()}).
 %%   A fingerprint function
@@ -50,12 +50,20 @@ unload(#fip{} = IP, Fingerprint) ->
 	end.
 
 -spec execute(integer(), ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
-execute(Instr, #fip{} = IP, StackStack, FungeSpace) ->
-	throw(fingerprint_execte_todo).
+execute(Instr, #fip{ fingerOpStacks = Array } = IP, StackStack, FungeSpace) ->
+	Idx = Instr - $A,
+	OpStack = array:get(Idx, Array),
+	Fun = ffingerstack:peek(OpStack),
+	Fun(IP, StackStack, FungeSpace).
 
--spec push_fun(integer(), ip()) -> ip().
-push_fun(Instr, #fip{} = IP) ->
-	throw(fingerprint_push_fun_todo).
+-spec push_fun(pos_integer(), ip(), fingerfun()) -> ip().
+push_fun(Instr, #fip{ fingerOpStacks = Array } = IP, Fun) when (Instr >= $A) and (Instr =< $Z) ->
+	Idx = Instr - $A,
+	OpStack = array:get(Idx, Array),
+	S2 = ffingerstack:push(OpStack, Fun),
+	Array2 = array:set(Idx, S2, Array),
+	IP#fip{ fingerOpStacks = Array2 }.
+
 
 
 %% Private functions
