@@ -281,20 +281,6 @@ cat >> "fing${FPRINT}.erl" << EOF
 
 EOF
 
-
-for (( i = 0; i < ${#OPCODES}; i++ )); do
-	ord number "${OPCODES:$i:1}"
-	funname="${FPRINTLOW}_${OPCODE_NAMES[$number]}"
-
-	addtoerl "%% @spec ${funname}(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}"
-	addtoerl "%% @doc ${OPCODES:$i:1} - ${OPCODE_DESC[$number]}"
-	addtoerl "-spec ${funname}(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}."
-	addtoerl "${funname}(IP, Stack, Space) ->"
-	addtoerl "	{fip:rev_delta(IP), Stack}."
-	addtoerl ''
-done
-
-
 addtoerl "%% @doc Load the $FPRINT fingerprint."
 addtoerl "-spec load(ip()) -> {ok, ip()}."
 addtoerl "load(IP) ->"
@@ -309,9 +295,25 @@ done
 addtoerl "]),"
 addtoerl '	{ok, IP2}.'
 addtoerl ''
+addtoerl ''
+addtoerl '%% The fingerprint functions'
+addtoerl ''
+
+for (( i = 0; i < ${#OPCODES}; i++ )); do
+	ord number "${OPCODES:$i:1}"
+	funname="${FPRINTLOW}_${OPCODE_NAMES[$number]}"
+
+	addtoerl "%% @spec ${funname}(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}"
+	addtoerl "%% @doc ${OPCODES:$i:1} - ${OPCODE_DESC[$number]}"
+	addtoerl "-spec ${funname}(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}."
+	addtoerl "${funname}(IP, Stack, Space) ->"
+	addtoerl "	{fip:rev_delta(IP), Stack}."
+	addtoerl ''
+done
 
 
 cat >> "fing${FPRINT}.erl" << EOF
+
 %% Private funtions
 EOF
 

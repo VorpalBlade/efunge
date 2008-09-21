@@ -21,6 +21,7 @@
 -include("../funge_types.hrl").
 -export([load/1]).
 
+
 %% @doc Load the ROMA fingerprint.
 -spec load(ip()) -> {ok, ip()}.
 load(IP) ->
@@ -33,6 +34,7 @@ load(IP) ->
 		 {$V, 5},
 		 {$X, 10}]),
 	{ok, IP2}.
+
 
 %% Private funtions
 
