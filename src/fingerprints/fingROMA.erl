@@ -15,22 +15,38 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
-%% @doc Fingerprint lookup.
--module(ffingerindex).
--include("fip.hrl").
--include("funge_types.hrl").
--export([lookup/1]).
+%% @doc NULL fingerprint.
+-module(fingROMA).
+-include("../fip.hrl").
+-include("../funge_types.hrl").
+-export([load/1]).
 
-%% @type fingerloadingfun() = function((ip()) -> {ok, ip()} | {error, ip()}).
-%%   A fingerprint loader function.
-%% @type fingerstack() = [] | list(fingerfun()).
-%%   Stack is a list, access at list head.
 
-%% @doc Look up loader function and implemented instrs.
--spec lookup(integer()) -> {string(), fingerloadingfun()} | notfound.
-lookup(16#4e554c4c) ->
-	{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ", fun fingNULL:load/1 };
-lookup(16#524f4d41) ->
-	{ "CDILMVX", fun fingROMA:load/1 };
-lookup(_Fingerprint) ->
-	notfound.
+
+%% @doc Load the ROMA fingerprint.
+-spec load(ip()) -> {ok, ip()}.
+load(IP) ->
+	IP2 = load_ops(IP,
+		[{$C, 100},
+		 {$D, 500},
+		 {$I, 1},
+		 {$L, 50},
+		 {$M, 1000},
+		 {$V, 5},
+		 {$X, 10}]),
+	{ok, IP2}.
+
+%% Private funtions
+
+%% @doc Return a fingerprint fun that push Amount.
+make_pusher(Amount) ->
+	fun(IP, Stack, _Space) ->
+		{IP, fstackstack:push(Stack, Amount)}
+	end.
+
+%% @doc Load functions, constructed using make_pusher/1
+load_ops(IP, []) ->
+	IP;
+load_ops(IP, [{Instr,Amount}|T]) ->
+	IP2 = ffingermanager:push_fun(Instr, IP, make_pusher(Amount)),
+	load_ops(IP2, T).

@@ -21,7 +21,7 @@
 -include("../funge_types.hrl").
 -export([load/1]).
 
-%% @doc Load NULL fingerprint.
+%% @doc Load the NULL fingerprint.
 -spec load(ip()) -> {ok, ip()}.
 load(IP) ->
 	IP2 = load_ops(IP, lists:seq($A, $Z)),
