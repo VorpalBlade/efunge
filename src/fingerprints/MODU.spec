@@ -5,7 +5,7 @@
 %safe:true
 %begin-instrs
 #I	name	desc
-M	modu_signed	Signed result
-R	modu_c99	C style reminder.
-U	modu_unsigned	Unsigned result
+M	signed	Signed result
+R	c99	C style reminder.
+U	unsigned	Unsigned result
 %end
