@@ -379,6 +379,9 @@ process_instruction(Instr, #fip{} = IP, Stack, _Space) when (Instr >= $0) and (I
 %% a-f Hexdecimal numbers.
 process_instruction(Instr, #fip{} = IP, Stack, _Space) when (Instr >= $a) and (Instr =< $f) ->
 	{IP, push(Stack, Instr - $a + 10)};
+%% A-Z Fingerprints.
+process_instruction(Instr, #fip{} = IP, Stack, Space) when (Instr >= $A) and (Instr =< $Z) ->
+	ffingermanager:execute(Instr, IP, Stack, Space);
 
 %% unimplemented
 process_instruction(_Instr, #fip{} = IP, Stack, _Space) ->
