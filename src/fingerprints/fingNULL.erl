@@ -24,8 +24,7 @@
 %% @doc Load NULL fingerprint.
 -spec load(ip()) -> {ok, ip()}.
 load(IP) ->
-	L = lists:seq($A, $Z),
-	IP2 = load_ops(IP, L),
+	IP2 = load_ops(IP, lists:seq($A, $Z)),
 	{ok, IP2}.
 
 %% Private funtions
