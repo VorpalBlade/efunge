@@ -11,6 +11,7 @@ Modules:
 * finterpreter   - Handle core instructions, loops over IP. Also global shared
                    state.
 * fsysinfo       - Implements y.
+* ffingerstack   - Implements fingerprint instruction stacks.
 * ffingermanager - Handle the details of finding fingerprints, opcode stacks.
 * fingerprints/  - Fingerprints should be in a subdirectory. One per file.
 

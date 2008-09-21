@@ -388,6 +388,7 @@ iterate(0, _Instr, IP, Stack, _Space) ->
 %% For @ and q.
 iterate(_Count, _Instr, dead, Retval, _Space) ->
 	{dead, Retval};
+%% Should insert cases for " and k here.
 iterate(Count, Instr, IP, Stack, Space) ->
 	{IP2, Stack2} = process_instruction(Instr, IP, Stack, Space),
 	iterate(Count-1, Instr, IP2, Stack2, Space).
