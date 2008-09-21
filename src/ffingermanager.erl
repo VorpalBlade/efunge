@@ -29,12 +29,13 @@
 %% @type fingerstack() = [] | list(fingerfun()).
 %%   Stack is a list, access at list head.
 
-%% Set up array of fingerprint stacks.
+%% @doc Set up array of fingerprint stacks.
 -spec init(ip()) -> ip().
 init(#fip{} = IP) ->
 	OpArray = array:new(26, [{fixed, true}, {default, []}]),
 	IP#fip{ fingerOpStacks = OpArray }.
 
+%% @doc Load a fingerprint.
 -spec load(ip(), integer()) -> ip().
 load(#fip{} = IP, Fingerprint) ->
 	case ffingerindex:lookup(Fingerprint) of
@@ -42,6 +43,7 @@ load(#fip{} = IP, Fingerprint) ->
 		{_, Loader} -> Loader(IP)
 	end.
 
+%% @doc Unload a fingerprint.
 -spec unload(ip(), integer()) -> ip().
 unload(#fip{} = IP, Fingerprint) ->
 	case ffingerindex:lookup(Fingerprint) of
@@ -49,6 +51,7 @@ unload(#fip{} = IP, Fingerprint) ->
 		{Instrs, _} -> unload_ops(IP, Instrs)
 	end.
 
+%% @doc Execute a fingerprint op
 -spec execute(integer(), ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 execute(Instr, #fip{ fingerOpStacks = Array } = IP, StackStack, FungeSpace) ->
 	Idx = Instr - $A,
@@ -56,6 +59,7 @@ execute(Instr, #fip{ fingerOpStacks = Array } = IP, StackStack, FungeSpace) ->
 	Fun = ffingerstack:peek(OpStack),
 	Fun(IP, StackStack, FungeSpace).
 
+%% @doc Push a fingerprint op on the IP stack.
 -spec push_fun(pos_integer(), ip(), fingerfun()) -> ip().
 push_fun(Instr, #fip{ fingerOpStacks = Array } = IP, Fun) when (Instr >= $A) and (Instr =< $Z) ->
 	Idx = Instr - $A,
