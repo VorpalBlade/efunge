@@ -5,7 +5,7 @@
 %safe:true
 %begin-instrs
 #I	name	desc
-M	signed	Signed result
+M	signed	Signed result.
 R	c99	C style reminder.
-U	unsigned	Unsigned result
+U	unsigned	Unsigned result.
 %end

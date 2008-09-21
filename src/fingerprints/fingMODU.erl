@@ -23,6 +23,7 @@
 %% The implemented functions
 -export([modu_signed/3, modu_c99/3, modu_unsigned/3]).
 
+%% Import common functions:
 -import(fstackstack, [push/2, pop/1]).
 
 -spec modu_signed(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.

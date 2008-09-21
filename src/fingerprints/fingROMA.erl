@@ -21,8 +21,6 @@
 -include("../funge_types.hrl").
 -export([load/1]).
 
-
-
 %% @doc Load the ROMA fingerprint.
 -spec load(ip()) -> {ok, ip()}.
 load(IP) ->
