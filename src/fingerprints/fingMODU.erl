@@ -26,6 +26,18 @@
 %% Import common functions:
 -import(fstackstack, [push/2, pop/1]).
 
+
+%% @doc Load the MODU fingerprint.
+-spec load(ip()) -> {ok, ip()}.
+load(IP) ->
+	IP2 = ffingermanager:push_funs(IP,
+		[{$M, fun ?MODULE:modu_signed/3},
+		 {$R, fun ?MODULE:modu_c99/3},
+		 {$U, fun ?MODULE:modu_unsigned/3}]),
+	{ok, IP2}.
+
+
+%% The fingerprint functions:
 -spec modu_signed(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 modu_signed(IP, Stack, _Space) ->
 	{S2, Y} = pop(Stack),
@@ -55,14 +67,6 @@ modu_unsigned(IP, Stack, _Space) ->
 		true    -> {IP, push(S3, abs(X rem Y))}
 	end.
 
-%% @doc Load the MODU fingerprint.
--spec load(ip()) -> {ok, ip()}.
-load(IP) ->
-	IP2 = ffingermanager:push_funs(IP,
-		[{$M, fun ?MODULE:modu_signed/3},
-		 {$R, fun ?MODULE:modu_c99/3},
-		 {$U, fun ?MODULE:modu_unsigned/3}]),
-	{ok, IP2}.
 
 %% Private funtions
 -spec floordiv(integer(),integer()) -> integer().
