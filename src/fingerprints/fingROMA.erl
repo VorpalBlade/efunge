@@ -39,12 +39,14 @@ load(IP) ->
 %% Private funtions
 
 %% @doc Return a fingerprint fun that push Amount.
+-spec make_pusher(integer()) -> fun((ip(),stackstack(),fungespace()) -> {ip(),stackstack()}).
 make_pusher(Amount) ->
 	fun(IP, Stack, _Space) ->
 		{IP, fstackstack:push(Stack, Amount)}
 	end.
 
 %% @doc Load functions, constructed using make_pusher/1
+-spec load_ops(ip(),[{char(), integer()}]) -> ip().
 load_ops(IP, []) ->
 	IP;
 load_ops(IP, [{Instr,Amount}|T]) ->
