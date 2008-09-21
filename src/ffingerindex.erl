@@ -15,12 +15,18 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
--type stack_items() :: integer() | {float, float()}.
--type stack() :: [] | list(stack_items()).
--type stackstack() :: [] | list(stack()).
--type coord() :: {integer(), integer()}.
--type ip() :: #fip{}.
--type fungespace() :: integer().
--type fingerfun() :: fun((ip(), stackstack(), fungespace()) -> {ip(), stackstack()}).
--type fingerloadingfun() :: fun((ip()) -> {ok, ip()} | {error, ip()}).
--type fingerstack() :: [] | list(fingerfun()).
+%% @doc Fingerprint lookup.
+-module(ffingerindex).
+-include("fip.hrl").
+-include("funge_types.hrl").
+-export([lookup/1]).
+
+%% @type fingerloadingfun() = function((ip()) -> {ok, ip()} | {error, ip()}).
+%%   A fingerprint loader function.
+%% @type fingerstack() = [] | list(fingerfun()).
+%%   Stack is a list, access at list head.
+
+%% Set up array of fingerprint stacks.
+-spec lookup(integer()) -> fingerloadingfun() | notfound.
+lookup(_Fingerprint) ->
+	notfound.

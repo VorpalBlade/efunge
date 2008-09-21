@@ -15,6 +15,8 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
+-type array() :: any().
+
 -record(fip,
 	{
 		x = 0 :: integer(),
@@ -25,6 +27,7 @@
 		offY = 0 :: integer(),
 		isStringMode = false :: bool(),
 		lastWasSpace = false :: bool(),
-		stringBuffer = [] :: list()
+		stringBuffer = [] :: list(),
+		fingerOpStacks  :: array()
 	}
 ).

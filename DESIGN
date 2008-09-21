@@ -12,6 +12,7 @@ Modules:
                    state.
 * fsysinfo       - Implements y.
 * ffingerstack   - Implements fingerprint instruction stacks.
+* ffingerindex   - Looks up loading fun for a fingerprint. Used from manager.
 * ffingermanager - Handle the details of finding fingerprints, opcode stacks.
 * fingerprints/  - Fingerprints should be in a subdirectory. One per file.
 

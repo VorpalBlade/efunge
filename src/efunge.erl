@@ -41,4 +41,6 @@ start(Filename, Parameters) when is_list(Filename) and is_list(Parameters) ->
 	put(efungeargs, [Filename|Parameters]),
 	random:seed(R1, R2, R3),
 	Space = fspace:load(Filename),
-	finterpreter:loop(#fip{}, fstackstack:new(), Space).
+	IP = #fip{},
+	IP2 = ffingermanager:init(IP),
+	finterpreter:loop(IP2, fstackstack:new(), Space).
