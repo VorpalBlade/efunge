@@ -349,13 +349,20 @@ process_instruction($(, #fip{} = IP, StackStack, _Space) ->
 	if
 		N < 0 -> {rev_delta(IP), S1};
 		true ->
-			[TOSS|T] = S1,
-			TOSS2 = fstack:pop_drop(N, TOSS),
-			{rev_delta(IP), [TOSS2|T]}
+			{S2, Fingerprint} = build_fingerprint(N, S1, 0),
+			IP2 = ffingermanager:load(IP, Fingerprint),
+			{IP2, S2}
 	end;
 %% ) Unload Semantics
-process_instruction($), #fip{} = IP, StackStack, Space) ->
-	process_instruction($(, IP, StackStack, Space);
+process_instruction($), #fip{} = IP, StackStack, _Space) ->
+	{S1, N} = pop(StackStack),
+	if
+		N < 0 -> {rev_delta(IP), S1};
+		true ->
+			{S2, Fingerprint} = build_fingerprint(N, S1, 0),
+			IP2 = ffingermanager:unload(IP, Fingerprint),
+			{IP2, S2}
+	end;
 
 %% q Quit
 process_instruction($q, _IP, Stack, _Space) ->
@@ -392,3 +399,13 @@ iterate(_Count, _Instr, dead, Retval, _Space) ->
 iterate(Count, Instr, IP, Stack, Space) ->
 	{IP2, Stack2} = process_instruction(Instr, IP, Stack, Space),
 	iterate(Count-1, Instr, IP2, Stack2, Space).
+
+
+%% @doc Build a fingerprint.
+-spec build_fingerprint(non_neg_integer(),stackstack(), integer()) -> {stackstack(), integer()}.
+build_fingerprint(0, Stack, Result) ->
+	{Stack, Result};
+build_fingerprint(Count, Stack, Result) ->
+	{S2, Val} = pop(Stack),
+	R2 = Result bsl 8,
+	build_fingerprint(Count-1, S2, R2 + Val).

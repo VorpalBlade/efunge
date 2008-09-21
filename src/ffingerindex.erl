@@ -26,7 +26,7 @@
 %% @type fingerstack() = [] | list(fingerfun()).
 %%   Stack is a list, access at list head.
 
-%% Set up array of fingerprint stacks.
--spec lookup(integer()) -> fingerloadingfun() | notfound.
+%% @doc Look up loader function and implemented instrs.
+-spec lookup(integer()) -> {string(), fingerloadingfun()} | notfound.
 lookup(_Fingerprint) ->
 	notfound.

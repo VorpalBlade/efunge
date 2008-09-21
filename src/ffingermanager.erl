@@ -39,12 +39,15 @@ init(#fip{} = IP) ->
 load(#fip{} = IP, Fingerprint) ->
 	case ffingerindex:lookup(Fingerprint) of
 		notfound -> fip:rev_delta(IP);
-		Loader -> Loader(IP)
+		{_, Loader} -> Loader(IP)
 	end.
 
 -spec unload(ip(), integer()) -> ip().
 unload(#fip{} = IP, Fingerprint) ->
-	throw(fingerprint_unload_todo).
+	case ffingerindex:lookup(Fingerprint) of
+		notfound -> fip:rev_delta(IP);
+		{Instrs, _} -> unload_ops(IP, Instrs)
+	end.
 
 -spec execute(integer(), ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 execute(Instr, #fip{} = IP, StackStack, FungeSpace) ->
@@ -53,3 +56,23 @@ execute(Instr, #fip{} = IP, StackStack, FungeSpace) ->
 -spec push_fun(integer(), ip()) -> ip().
 push_fun(Instr, #fip{} = IP) ->
 	throw(fingerprint_push_fun_todo).
+
+
+%% Private functions
+
+%% @doc Unload an op.
+-spec unload_op(ip(),pos_integer()) -> ip().
+unload_op(#fip{ fingerOpStacks = Array } = IP, Instr) ->
+	Idx = Instr - $A,
+	OpStack = array:get(Idx, Array),
+	{S2, _} = ffingerstack:pop(OpStack),
+	Array2 = array:set(Idx, S2, Array),
+	IP#fip{ fingerOpStacks = Array2 }.
+
+%% @doc Given a string, will unload those ops.
+-spec unload_ops(ip(),string()) -> ip().
+unload_ops(IP, []) ->
+	IP;
+unload_ops(IP, [H|T]) ->
+	IP2 = unload_op(IP, H),
+	unload_ops(IP2, T).
