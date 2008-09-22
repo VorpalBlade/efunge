@@ -33,6 +33,8 @@
 -spec lookup(integer()) -> {string(), fingerloadingfun()} | notfound.
 %% CPLI - Complex Integer extension
 lookup(16#43504c49)  -> { "ADMOSV", fun fingCPLI:load/1 };
+%% FIXP - Some useful math functions
+lookup(16#46495850)  -> { "ABCDIJNOPQRSTUVX", fun fingFIXP:load/1 };
 %% MODU - Modulo Arithmetic
 lookup(16#4d4f4455)  -> { "MRU", fun fingMODU:load/1 };
 %% NULL - Null
