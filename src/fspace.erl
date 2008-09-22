@@ -80,7 +80,7 @@ fetch_int(Fungespace, {_X,_Y} = Coord) ->
 		[{{_,_},Value}] ->
 			if
 				is_integer(Value) -> Value;
-				true -> 0
+				true -> $f
 			end
 	end.
 

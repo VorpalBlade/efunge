@@ -22,7 +22,7 @@
 -export([
          new/0, ss_begin/2, ss_end/2, ss_under/2,
          push/2, peek/1, peek_int/1, pop/1, pop_int/1, pop_vec/1, push_vec/2,
-         dup/1, swap/1,
+         dup/1, swap/1, pop_gnirts/1,
          clear/1,
          pop_vec_SOSS/1, push_vec_SOSS/2
         ]).
@@ -87,6 +87,14 @@ dup([TOSS|T]) ->
 swap([TOSS|T]) ->
 	NewTOSS = fstack:swap(TOSS),
 	[NewTOSS|T].
+%% @doc Pop a 0"gnirts" from TOSS.
+%% @see fstack:pop_gnirts/1
+-spec pop_gnirts(stackstack()) -> {stackstack(), list(integer())}.
+pop_gnirts([TOSS|T]) ->
+	{NewTOSS, V} = fstack:pop_gnirts(TOSS),
+	{[NewTOSS|T], V}.
+
+
 %% @doc Clear TOSS.
 -spec clear(stackstack()) -> stackstack().
 clear([_|T]) ->

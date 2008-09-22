@@ -21,8 +21,8 @@
 -include("funge_types.hrl").
 -export([new/0, push/2, peek/1, peek_int/1, pop/1, pop_int/1, dup/1, swap/1,
          pop_vec/1, push_vec/2,
-         push_list/2, push_gnirtses/2, pop_drop/2, stack_to_stack/3]).
--define(INTDUMMY, 0).
+         push_list/2, pop_gnirts/1, push_gnirtses/2, pop_drop/2, stack_to_stack/3]).
+-define(INTDUMMY, $f).
 
 %% @type stack_item() = integer().
 %%   A item on the stack.
@@ -126,8 +126,27 @@ push_vec(S, {X, Y})->
 -spec push_list(stack(), [integer(),...]) -> stack().
 push_list(Stack, []) ->
 	Stack;
-push_list(Stack, [H|T]) when is_integer(H) ->
+push_list(Stack, [H|T]) ->
 	push_list([H|Stack], T).
+
+
+%% @spec pop_gnirts(stack()) -> {stack(), list(integer())}
+%% @doc Pop a 0gnirts.
+-spec pop_gnirts(stack()) -> {stack(), list(integer())}.
+pop_gnirts(Stack) ->
+	pop_gnirts(Stack, []).
+
+%% @spec pop_gnirts(stack(), list(integer())) -> {stack(), list(integer())}
+%% @doc Pop a 0gnirts.
+-spec pop_gnirts(stack(), list()) -> {stack(), list(integer())}.
+pop_gnirts([], Acc) ->
+	{[], lists:reverse(Acc)};
+pop_gnirts([0|T], Acc) ->
+	{T, lists:reverse(Acc)};
+pop_gnirts([H|T] = _Stack, Acc) when is_integer(H) ->
+	pop_gnirts(T, [H|Acc]);
+pop_gnirts([_H|T] = _Stack, Acc) ->
+	pop_gnirts(T, [?INTDUMMY|Acc]).
 
 %% @spec push_gnirtses(stack(), list(list(integer()))) -> stack()
 %% @doc Push a list of strings as a series of 0"gnirts"
