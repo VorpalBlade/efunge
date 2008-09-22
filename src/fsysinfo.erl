@@ -123,6 +123,7 @@ system_info(RequestID, #fip{} = IP, [TOSS|_] = StackStack, FungeSpace) ->
 			catch
 				error:function_clause -> fstackstack:push(StackStack, 0)
 			end;
+		%% Normal, get it from the temp stack.
 		true ->
 			Tmp3 = fstack:pop_drop(RequestID-1, Tmp2),
 			{_, V} = fstack:pop(Tmp3),

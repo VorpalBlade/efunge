@@ -24,7 +24,7 @@
 -export([modu_signed/3, modu_c99/3, modu_unsigned/3]).
 
 %% Import common functions:
--import(fstackstack, [push/2, pop/1]).
+-import(fstackstack, [push/2, pop_int/1]).
 
 
 %% @doc Load the MODU fingerprint.
@@ -41,8 +41,8 @@ load(IP) ->
 
 -spec modu_signed(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 modu_signed(IP, Stack, _Space) ->
-	{S2, Y} = pop(Stack),
-	{S3, X} = pop(S2),
+	{S2, Y} = pop_int(Stack),
+	{S3, X} = pop_int(S2),
 	if
 		Y =:= 0 -> {IP, push(S3, 0)};
 		true    -> {IP, push(S3, X - floordiv(X, Y) * Y)}
@@ -50,8 +50,8 @@ modu_signed(IP, Stack, _Space) ->
 
 -spec modu_c99(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 modu_c99(IP, Stack, _Space) ->
-	{S2, Y} = pop(Stack),
-	{S3, X} = pop(S2),
+	{S2, Y} = pop_int(Stack),
+	{S3, X} = pop_int(S2),
 	if
 		Y =:= 0 -> {IP, push(S3, 0)};
 		%% FIXME: Note: I don't know if this is well defined in Erlang.
@@ -60,8 +60,8 @@ modu_c99(IP, Stack, _Space) ->
 
 -spec modu_unsigned(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 modu_unsigned(IP, Stack, _Space) ->
-	{S2, Y} = pop(Stack),
-	{S3, X} = pop(S2),
+	{S2, Y} = pop_int(Stack),
+	{S3, X} = pop_int(S2),
 	if
 		Y =:= 0 -> {IP, push(S3, 0)};
 		true    -> {IP, push(S3, abs(X rem Y))}

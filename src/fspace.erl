@@ -25,7 +25,9 @@
 -module(fspace).
 -include("fip.hrl").
 -include("funge_types.hrl").
--export([load/1, set/3, set/4, fetch/2, fetch/3, delete/1, get_bounds/1]).
+-export([load/1, set/3, set/4,
+         fetch/2, fetch/3, fetch_int/2, fetch_int/3,
+         delete/1, get_bounds/1]).
 
 %% Public functions
 
@@ -48,19 +50,40 @@ set(Fungespace, {_X,_Y} = Coord, V) ->
 	update_bounds(V, Fungespace, Coord).
 
 %% @spec fetch(fungespace(), ip(), coord()) -> integer()
-%% @doc Get a cell from a specific Funge Space.
--spec fetch(fungespace(), ip(), coord()) -> integer().
+%% @doc Get a cell from a specific Funge Space. Will use storage offset of IP.
+-spec fetch(fungespace(), ip(), coord()) -> stack_item().
 fetch(Fungespace, #fip{offX = OffX, offY = OffY}, {X,Y}) ->
 	fetch(Fungespace, {X+OffX, Y+OffY}).
 
 %% @spec fetch(fungespace(), coord()) -> integer()
 %% @doc Get a cell from a specific Funge Space.
--spec fetch(fungespace(), coord()) -> integer().
+-spec fetch(fungespace(), coord()) -> stack_item().
 fetch(Fungespace, {_X,_Y} = Coord) ->
 	case ets:lookup(Fungespace, Coord) of
 		[] -> $\s;
 		[{{_,_},Value}] -> Value
 	end.
+
+%% @spec fetch_int(fungespace(), ip(), coord()) -> integer()
+%% @doc Get a cell from a specific Funge Space. Will use storage offset of IP.
+%% Type-tagged tuples are replaced with a dummy value.
+-spec fetch_int(fungespace(), ip(), coord()) -> integer().
+fetch_int(Fungespace, #fip{offX = OffX, offY = OffY}, {X,Y}) ->
+	fetch_int(Fungespace, {X+OffX, Y+OffY}).
+
+%% @spec fetch_int(fungespace(), coord()) -> integer()
+%% @doc Get a cell from a specific Funge Space.
+-spec fetch_int(fungespace(), coord()) -> stack_item().
+fetch_int(Fungespace, {_X,_Y} = Coord) ->
+	case ets:lookup(Fungespace, Coord) of
+		[] -> $\s;
+		[{{_,_},Value}] ->
+			if
+				is_integer(Value) -> Value;
+				true -> 0
+			end
+	end.
+
 
 
 %% @spec load(Filename::string()) -> fungespace()

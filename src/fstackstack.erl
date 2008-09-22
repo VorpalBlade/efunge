@@ -21,7 +21,8 @@
 -include("funge_types.hrl").
 -export([
          new/0, ss_begin/2, ss_end/2, ss_under/2,
-         push/2, peek/1, pop/1, pop_vec/1, push_vec/2, dup/1, swap/1,
+         push/2, peek/1, peek_int/1, pop/1, pop_int/1, pop_vec/1, push_vec/2,
+         dup/1, swap/1,
          clear/1,
          pop_vec_SOSS/1, push_vec_SOSS/2
         ]).
@@ -36,20 +37,31 @@
 
 %% @doc Push to TOSS.
 %% @see fstack:push/2
--spec push(stackstack(),integer()) -> stackstack().
+-spec push(stackstack(),stack_item()) -> stackstack().
 push([TOSS|T], V) ->
 	NewTOSS = fstack:push(TOSS, V),
 	[NewTOSS|T].
 %% @doc Peek on TOSS.
 %% @see fstack:peek/1
--spec peek(stackstack()) -> integer().
+-spec peek(stackstack()) -> stack_item().
 peek([TOSS|_]) ->
 	fstack:peek(TOSS).
+%% @doc Peek integer on TOSS.
+%% @see fstack:peek_int/1
+-spec peek_int(stackstack()) -> integer().
+peek_int([TOSS|_]) ->
+	fstack:peek_int(TOSS).
 %% @doc Pop from TOSS.
 %% @see fstack:pop/1
--spec pop(stackstack()) -> {stackstack(),integer()}.
+-spec pop(stackstack()) -> {stackstack(),stack_item()}.
 pop([TOSS|T]) ->
 	{NewTOSS, V} = fstack:pop(TOSS),
+	{[NewTOSS|T], V}.
+%% @doc Pop integer from TOSS.
+%% @see fstack:pop_int/1
+-spec pop_int(stackstack()) -> {stackstack(),integer()}.
+pop_int([TOSS|T]) ->
+	{NewTOSS, V} = fstack:pop_int(TOSS),
 	{[NewTOSS|T], V}.
 %% @doc Pop a vector from TOSS.
 %% @see fstack:pop_vec/1

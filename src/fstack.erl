@@ -19,9 +19,10 @@
 -module(fstack).
 -include("fip.hrl").
 -include("funge_types.hrl").
--export([new/0, push/2, peek/1, pop/1, dup/1, swap/1,
+-export([new/0, push/2, peek/1, peek_int/1, pop/1, pop_int/1, dup/1, swap/1,
          pop_vec/1, push_vec/2,
          push_list/2, push_gnirtses/2, pop_drop/2, stack_to_stack/3]).
+-define(INTDUMMY, 0).
 
 %% @type stack_item() = integer().
 %%   A item on the stack.
@@ -50,6 +51,16 @@ peek([]) ->
 peek([H|_]) ->
 	H.
 
+%% @spec peek(stack()) -> stack_item()
+%% @doc Get the top value of a stack.
+-spec peek_int(stack()) -> stack_item().
+peek_int([]) ->
+	0;
+peek_int([H|_]) when is_integer(H) ->
+	H;
+peek_int([_H|_]) ->
+	?INTDUMMY.
+
 %% @spec pop(stack()) -> {NewStack::stack(), Value::stack_item()}
 %% @doc Pop a value from a stack.
 -spec pop(stack()) -> {stack(), stack_item()}.
@@ -57,6 +68,17 @@ pop([]) ->
 	{[], 0};
 pop([H|T]) ->
 	{T, H}.
+
+%% @spec pop(stack()) -> {NewStack::stack(), Value::stack_item()}
+%% @doc Pop a value from a stack, if it is a type tagged tuple, it will be
+%% replaced with some undefined integer.
+-spec pop_int(stack()) -> {stack(), integer()}.
+pop_int([]) ->
+	{[], 0};
+pop_int([H|T]) when is_integer(H) ->
+	{T, H};
+pop_int([_H|T]) ->
+	{T, ?INTDUMMY}.
 
 %% @spec dup(stack()) -> stack()
 %% @doc Duplicate the top value on a stack.
@@ -77,14 +99,19 @@ swap([H]) ->
 	[0,H].
 
 %% @spec pop_vec(stack()) -> {stack(), coord()}
-%% @doc Pop a Funge vector from a stack.
+%% @doc Pop a Funge vector from a stack. Type tagged tuples will be replaced.
 -spec pop_vec(stack()) -> {stack(), coord()}.
 pop_vec([]) ->
 	{[], {0, 0}};
-pop_vec([Y]) ->
+pop_vec([Y]) when is_integer(Y) ->
 	{[], {0, Y}};
-pop_vec([Y,X|T])->
-	{T, {X, Y}}.
+pop_vec([Y,X|T]) when is_integer(X) and is_integer(Y) ->
+	{T, {X, Y}};
+%% Handle non-integer cases
+pop_vec([_Y]) ->
+	{[], {0, ?INTDUMMY}};
+pop_vec([_Y,_X|T]) ->
+	{T, {?INTDUMMY, ?INTDUMMY}}.
 
 %% @spec push_vec(stack(), coord()) -> stack()
 %% @doc Pop a Funge vector from a stack.
@@ -103,7 +130,7 @@ push_list(Stack, [H|T]) when is_integer(H) ->
 	push_list([H|Stack], T).
 
 %% @spec push_gnirtses(stack(), list(list(integer()))) -> stack()
-%% @doc Push a series of 0"gnirts"
+%% @doc Push a list of strings as a series of 0"gnirts"
 -spec push_gnirtses(stack(), [[integer(),...],...]) -> stack().
 push_gnirtses(Stack, []) ->
 	Stack;
