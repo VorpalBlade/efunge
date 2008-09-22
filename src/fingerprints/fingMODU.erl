@@ -54,8 +54,7 @@ modu_c99(IP, Stack, _Space) ->
 	{S3, X} = pop(S2),
 	if
 		Y =:= 0 -> {IP, push(S3, 0)};
-		%% Note: I don't know if this is well defined in Erlang. If not please
-		%% contact me.
+		%% FIXME: Note: I don't know if this is well defined in Erlang.
 		true    -> {IP, push(S3, X rem Y)}
 	end.
 

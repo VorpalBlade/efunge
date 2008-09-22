@@ -15,8 +15,8 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
--type stack_items() :: integer() | {float, float()}.
--type stack() :: [] | list(stack_items()).
+-type stack_item() :: integer() | {float, float()}.
+-type stack() :: [] | list(stack_item()).
 -type stackstack() :: [] | list(stack()).
 -type coord() :: {integer(), integer()}.
 -type ip() :: #fip{}.

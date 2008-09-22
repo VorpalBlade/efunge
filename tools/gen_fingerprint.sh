@@ -276,7 +276,7 @@ addtoerl "])."
 cat >> "fing${FPRINT}.erl" << EOF
 
 %% Import common functions:
--import(fstackstack, [push/2, pop/1, peek/1]).
+-import(fstackstack, [push/2, pop/1]).
 
 
 EOF

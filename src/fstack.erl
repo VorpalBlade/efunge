@@ -23,8 +23,9 @@
          pop_vec/1, push_vec/2,
          push_list/2, push_gnirtses/2, pop_drop/2, stack_to_stack/3]).
 
-
-%% @type stack() = [] | list(integer()).
+%% @type stack_item() = integer().
+%%   A item on the stack.
+%% @type stack() = [] | list(stack_item()).
 %%   Stack is a list, access at list head.
 
 %% @spec new() -> stack()
@@ -33,25 +34,25 @@
 new() ->
 	[].
 
-%% @spec push(stack(), integer()) -> stack()
+%% @spec push(stack(), stack_item()) -> stack()
 %% @doc Push a value on a stack.
--spec push(stack(), integer()) -> stack().
+-spec push(stack(), stack_item()) -> stack().
 push([], V) ->
 	[V];
 push(L, V) ->
 	[V|L].
 
-%% @spec peek(stack()) -> integer()
+%% @spec peek(stack()) -> stack_item()
 %% @doc Get the top value of a stack.
--spec peek(stack()) -> integer().
+-spec peek(stack()) -> stack_item().
 peek([]) ->
 	0;
 peek([H|_]) ->
 	H.
 
-%% @spec pop(stack()) -> {NewStack::stack(), Value::integer()}
+%% @spec pop(stack()) -> {NewStack::stack(), Value::stack_item()}
 %% @doc Pop a value from a stack.
--spec pop(stack()) -> {stack(), integer()}.
+-spec pop(stack()) -> {stack(), stack_item()}.
 pop([]) ->
 	{[], 0};
 pop([H|T]) ->

@@ -113,11 +113,14 @@ cpli_abs(IP, Stack, _Space) ->
 
 
 %% Private funtions
+
+-spec pop_complex(stackstack()) -> {stackstack(),integer(),integer()}.
 pop_complex(Stack) ->
 	{S2, I} = pop(Stack),
 	{S3, R} = pop(S2),
 	{S3, R, I}.
 
+-spec push_complex(stackstack(),integer(),integer()) -> stackstack().
 push_complex(Stack, R, I) ->
 	S2 = push(Stack, R),
 	push(S2, I).
