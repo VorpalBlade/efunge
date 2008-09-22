@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###########################################################################
 #                                                                         #
-#  cfunge - a conformant Befunge93/98/08 interpreter in C                 #
+#  efunge - a Befunge-98 interpreter in Erlang.                           #
 #  Copyright (C) 2008  Arvid Norlander                                    #
 #                                                                         #
 #  This program is free software: you can redistribute it and/or modify   #
@@ -319,7 +319,6 @@ EOF
 
 status "File creation done"
 echo
-echo "To make cfunge aware of the new fingerprint run tools/gen_fprint_list.sh"
-echo "You may need to run cmake or similar to make the build system aware as well."
+echo "To make efunge aware of the new fingerprint run tools/gen_fprint_list.sh"
 echo
 echo "All done! However make sure the copyright in the files is correct. Oh, and another thing: implement the fingerprint :)"

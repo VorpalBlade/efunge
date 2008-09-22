@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###########################################################################
 #                                                                         #
-#  cfunge - a conformant Befunge93/98/08 interpreter in C                 #
+#  efunge - a Befunge-98 interpreter in Erlang.                           #
 #  Copyright (C) 2008  Arvid Norlander                                    #
 #                                                                         #
 #  This program is free software: you can redistribute it and/or modify   #
