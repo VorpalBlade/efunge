@@ -19,14 +19,11 @@
 -module(fstackstack).
 -include("fip.hrl").
 -include("funge_types.hrl").
--export([
-         new/0, ss_begin/2, ss_end/2, ss_under/2,
-         push/2, peek/1, peek_int/1, pop/1, pop_int/1, pop_vec/1, push_vec/2,
-         dup/1, swap/1, pop_gnirts/1,
-         clear/1,
-         pop_vec_SOSS/1, push_vec_SOSS/2
-        ]).
-
+-export([new/0, ss_begin/2, ss_end/2, ss_under/2]).
+-export([clear/1, pop_vec_SOSS/1, push_vec_SOSS/2]).
+%% Wrappers for working on TOSS. Calls functions from the fstack module:
+-export([push/2, peek/1, peek_int/1, pop/1, pop_int/1, pop_vec/1, push_vec/2]).
+-export([dup/1, swap/1, pop_gnirts/1]).
 
 %% @type stack() = [] | list(integer()).
 %%   Stack is a list, access at list head.
