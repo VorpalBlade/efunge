@@ -15,9 +15,8 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
--type fpdp_double() :: float() | nan | pinf | ninf | dummy.
--type stack_item() :: integer() | {double, fpdp_double()}.
--type stack() :: [] | list(stack_item()).
+-type cell() :: integer().
+-type stack() :: [] | list(cell()).
 -type stackstack() :: [] | list(stack()).
 -type coord() :: {integer(), integer()}.
 -type ip() :: #fip{}.

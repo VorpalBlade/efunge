@@ -256,8 +256,6 @@ addtoerl "%% @doc ${FPRINT} fingerprint."
 addtoerl "-module(fing${FPRINT})."
 
 cat >> "fing${FPRINT}.erl" << EOF
--include("../fip.hrl").
--include("../funge_types.hrl").
 -export([load/1]).
 %% The implemented functions
 -export([
@@ -275,8 +273,11 @@ addtoerl "])."
 
 cat >> "fing${FPRINT}.erl" << EOF
 
+-include("../fip.hrl").
+-include("../funge_types.hrl").
+
 %% Import common functions:
--import(fstackstack, [push/2, pop/1, pop_int/1]).
+-import(fstackstack, [push/2, pop/1]).
 
 
 EOF

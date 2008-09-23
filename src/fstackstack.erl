@@ -34,13 +34,13 @@
 
 %% @doc Push to TOSS.
 %% @see fstack:push/2
--spec push(stackstack(),stack_item()) -> stackstack().
+-spec push(stackstack(),cell()) -> stackstack().
 push([TOSS|T], V) ->
 	NewTOSS = fstack:push(TOSS, V),
 	[NewTOSS|T].
 %% @doc Peek on TOSS.
 %% @see fstack:peek/1
--spec peek(stackstack()) -> stack_item().
+-spec peek(stackstack()) -> cell().
 peek([TOSS|_]) ->
 	fstack:peek(TOSS).
 %% @doc Peek integer on TOSS.
@@ -50,7 +50,7 @@ peek_int([TOSS|_]) ->
 	fstack:peek_int(TOSS).
 %% @doc Pop from TOSS.
 %% @see fstack:pop/1
--spec pop(stackstack()) -> {stackstack(),stack_item()}.
+-spec pop(stackstack()) -> {stackstack(),cell()}.
 pop([TOSS|T]) ->
 	{NewTOSS, V} = fstack:pop(TOSS),
 	{[NewTOSS|T], V}.
@@ -124,7 +124,7 @@ new() ->
 	[[]].
 
 %% @doc Stack-Stack Begin
--spec ss_begin(stackstack(), non_neg_integer()) -> stackstack().
+-spec ss_begin(stackstack(), integer()) -> stackstack().
 ss_begin(StackStack, 0) ->
 	[fstack:new()|StackStack];
 ss_begin([OldTOSS|Tail], N) when N < 0 ->
@@ -138,7 +138,7 @@ ss_begin([OldTOSS|Tail], N) ->
 	[NewTOSS2, OldTOSS1|Tail].
 
 %% @doc Stack-Stack End
--spec ss_end(stackstack(), non_neg_integer()) -> stackstack().
+-spec ss_end(stackstack(), integer()) -> stackstack().
 ss_end([_TOSS], _) ->
 	throw(oneStack);
 ss_end([_TOSS,SOSS|Tail], N) when N < 0 ->

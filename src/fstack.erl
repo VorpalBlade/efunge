@@ -20,16 +20,15 @@
 -include("fip.hrl").
 -include("funge_types.hrl").
 -export([new/0]).
--export([push/2, peek/1, peek_int/1, pop/1, pop_int/1]).
+-export([push/2, peek/1, pop/1]).
 -export([dup/1, swap/1]).
 -export([pop_vec/1, push_vec/2]).
 -export([push_list/2, pop_gnirts/1, push_gnirtses/2]).
 -export([pop_drop/2, stack_to_stack/3]).
--define(INTDUMMY, $f).
 
-%% @type stack_item() = integer().
+%% @type cell() = integer().
 %%   A item on the stack.
-%% @type stack() = [] | list(stack_item()).
+%% @type stack() = [] | list(cell()).
 %%   Stack is a list, access at list head.
 
 %% @spec new() -> stack()
@@ -38,50 +37,29 @@
 new() ->
 	[].
 
-%% @spec push(stack(), stack_item()) -> stack()
+%% @spec push(stack(), cell()) -> stack()
 %% @doc Push a value on a stack.
--spec push(stack(), stack_item()) -> stack().
+-spec push(stack(), cell()) -> stack().
 push([], V) ->
 	[V];
 push(L, V) ->
 	[V|L].
 
-%% @spec peek(stack()) -> stack_item()
+%% @spec peek(stack()) -> cell()
 %% @doc Get the top value of a stack.
--spec peek(stack()) -> stack_item().
+-spec peek(stack()) -> cell().
 peek([]) ->
 	0;
 peek([H|_]) ->
 	H.
 
-%% @spec peek_int(stack()) -> stack_item()
-%% @doc Get the top value of a stack.
--spec peek_int(stack()) -> stack_item().
-peek_int([]) ->
-	0;
-peek_int([H|_]) when is_integer(H) ->
-	H;
-peek_int([_H|_]) ->
-	?INTDUMMY.
-
-%% @spec pop(stack()) -> {NewStack::stack(), Value::stack_item()}
+%% @spec pop(stack()) -> {NewStack::stack(), Value::cell()}
 %% @doc Pop a value from a stack.
--spec pop(stack()) -> {stack(), stack_item()}.
+-spec pop(stack()) -> {stack(), cell()}.
 pop([]) ->
 	{[], 0};
 pop([H|T]) ->
 	{T, H}.
-
-%% @spec pop_int(stack()) -> {NewStack::stack(), Value::stack_item()}
-%% @doc Pop a value from a stack, if it is a type tagged tuple, it will be
-%% replaced with some undefined integer.
--spec pop_int(stack()) -> {stack(), integer()}.
-pop_int([]) ->
-	{[], 0};
-pop_int([H|T]) when is_integer(H) ->
-	{T, H};
-pop_int([_H|T]) ->
-	{T, ?INTDUMMY}.
 
 %% @spec dup(stack()) -> stack()
 %% @doc Duplicate the top value on a stack.
@@ -106,15 +84,10 @@ swap([H]) ->
 -spec pop_vec(stack()) -> {stack(), coord()}.
 pop_vec([]) ->
 	{[], {0, 0}};
-pop_vec([Y]) when is_integer(Y) ->
+pop_vec([Y]) ->
 	{[], {0, Y}};
-pop_vec([Y,X|T]) when is_integer(X) and is_integer(Y) ->
-	{T, {X, Y}};
-%% Handle non-integer cases
-pop_vec([_Y]) ->
-	{[], {0, ?INTDUMMY}};
-pop_vec([_Y,_X|T]) ->
-	{T, {?INTDUMMY, ?INTDUMMY}}.
+pop_vec([Y,X|T]) ->
+	{T, {X, Y}}.
 
 %% @spec push_vec(stack(), coord()) -> stack()
 %% @doc Pop a Funge vector from a stack.
@@ -146,10 +119,8 @@ pop_gnirts([], Acc) ->
 	{[], lists:reverse(Acc)};
 pop_gnirts([0|T], Acc) ->
 	{T, lists:reverse(Acc)};
-pop_gnirts([H|T] = _Stack, Acc) when is_integer(H) ->
-	pop_gnirts(T, [H|Acc]);
-pop_gnirts([_H|T] = _Stack, Acc) ->
-	pop_gnirts(T, [?INTDUMMY|Acc]).
+pop_gnirts([H|T] = _Stack, Acc) ->
+	pop_gnirts(T, [H|Acc]).
 
 %% @spec push_gnirtses(stack(), list(list(integer()))) -> stack()
 %% @doc Push a list of strings as a series of 0"gnirts"

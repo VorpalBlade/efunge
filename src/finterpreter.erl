@@ -19,7 +19,7 @@
 -module(finterpreter).
 -export([loop/3]).
 -import(fspace, [set/4, fetch/3]).
--import(fstackstack, [push/2, pop/1, pop_int/1, pop_vec/1, dup/1, swap/1]).
+-import(fstackstack, [push/2, pop/1, pop_vec/1, dup/1, swap/1]).
 -import(fip, [ip_forward/2, set_delta/3, set_offset/3, rev_delta/1, turn_delta_left/1, turn_delta_right/1]).
 
 -include("fip.hrl").
@@ -93,17 +93,17 @@ process_instruction($g, #fip{} = IP, Stack, Space) ->
 
 %% + Add
 process_instruction($+, #fip{} = IP, Stack, _Space) ->
-	{S1,B} = pop_int(Stack), {S2,A} = pop_int(S1), {IP, push(S2, A + B)};
+	{S1,B} = pop(Stack), {S2,A} = pop(S1), {IP, push(S2, A + B)};
 %% - Subtract
 process_instruction($-, #fip{} = IP, Stack, _Space) ->
-	{S1,B} = pop_int(Stack), {S2,A} = pop_int(S1), {IP, push(S2, A - B)};
+	{S1,B} = pop(Stack), {S2,A} = pop(S1), {IP, push(S2, A - B)};
 %% * Multiply
 process_instruction($*, #fip{} = IP, Stack, _Space) ->
-	{S1,B} = pop_int(Stack), {S2,A} = pop_int(S1), {IP, push(S2, A * B)};
+	{S1,B} = pop(Stack), {S2,A} = pop(S1), {IP, push(S2, A * B)};
 %% / Divide
 process_instruction($/, #fip{} = IP, Stack, _Space) ->
-	{S1,B} = pop_int(Stack),
-	{S2,A} = pop_int(S1),
+	{S1,B} = pop(Stack),
+	{S2,A} = pop(S1),
 	if
 		B =:= 0 -> {IP, push(S2, 0)};
 		true    -> {IP, push(S2, A div B)}
@@ -111,8 +111,8 @@ process_instruction($/, #fip{} = IP, Stack, _Space) ->
 
 %% % Remainder
 process_instruction($%, #fip{} = IP, Stack, _Space) ->
-	{S1,B} = pop_int(Stack),
-	{S2,A} = pop_int(S1),
+	{S1,B} = pop(Stack),
+	{S2,A} = pop(S1),
 	if
 		B =:= 0 -> {IP, push(S2, 0)};
 		true    -> {IP, push(S2, A rem B)}
@@ -145,7 +145,7 @@ process_instruction($?, #fip{} = IP, Stack, _Space) ->
 
 %% ! Logical Not
 process_instruction($!, #fip{} = IP, Stack, _Space) ->
-	{S1, V} = pop_int(Stack),
+	{S1, V} = pop(Stack),
 	if
 		V =:= 0 -> R = 1;
 		true    -> R = 0
@@ -154,8 +154,8 @@ process_instruction($!, #fip{} = IP, Stack, _Space) ->
 
 %% ` Greater than
 process_instruction($`, #fip{} = IP, Stack, _Space) ->
-	{S1,B} = pop_int(Stack),
-	{S2,A} = pop_int(S1),
+	{S1,B} = pop(Stack),
+	{S2,A} = pop(S1),
 	if
 		A > B -> R = 1;
 		true  -> R = 0
@@ -179,7 +179,7 @@ process_instruction($#, #fip{} = IP, Stack, Space) ->
 
 %% _ North-South If
 process_instruction($_, #fip{} = IP, Stack, _Space) ->
-	{NewStack, Val} = pop_int(Stack),
+	{NewStack, Val} = pop(Stack),
 	if
 		Val =:= 0 ->
 			{set_delta(IP, 1, 0), NewStack};
@@ -188,7 +188,7 @@ process_instruction($_, #fip{} = IP, Stack, _Space) ->
 	end;
 %% | Vertical if
 process_instruction($|, #fip{} = IP, Stack, _Space) ->
-	{NewStack, Val} = pop_int(Stack),
+	{NewStack, Val} = pop(Stack),
 	if
 		Val =:= 0 ->
 			{set_delta(IP, 0, 1), NewStack};
@@ -198,12 +198,12 @@ process_instruction($|, #fip{} = IP, Stack, _Space) ->
 
 %% , Output Character
 process_instruction($, , #fip{} = IP, Stack, _Space) ->
-	{NewStack, Val} = pop_int(Stack),
+	{NewStack, Val} = pop(Stack),
 	io:put_chars([abs(Val)]),
 	{IP, NewStack};
 %% . Output Integer
 process_instruction($., #fip{} = IP, Stack, _Space) ->
-	{NewStack, Val} = pop_int(Stack),
+	{NewStack, Val} = pop(Stack),
 	io:format("~w ", [Val]),
 	{IP, NewStack};
 
@@ -242,7 +242,7 @@ process_instruction($;, #fip{} = IP, Stack, Space) ->
 
 %% k Iterate
 process_instruction($k, #fip{} = IP, Stack, Space) ->
-	{S1, Count} = pop_int(Stack),
+	{S1, Count} = pop(Stack),
 	if
 		Count < 0 ->
 			{rev_delta(IP), S1};
@@ -280,8 +280,8 @@ process_instruction($n, #fip{} = IP, Stack, _Space) ->
 
 %% w Compare
 process_instruction($w, #fip{} = IP, Stack, _Space) ->
-	{S1, B} = pop_int(Stack),
-	{S2, A} = pop_int(S1),
+	{S1, B} = pop(Stack),
+	{S2, A} = pop(S1),
 	if
 		A < B ->
 			{turn_delta_left(IP), S2};
@@ -298,7 +298,7 @@ process_instruction($x, #fip{} = IP, Stack, _Space) ->
 
 %% j Jump Forward
 process_instruction($j, #fip{} = IP, Stack, Space) ->
-	{S1, Dist} = pop_int(Stack),
+	{S1, Dist} = pop(Stack),
 	{fip:jump(IP, Space, Dist), S1};
 
 
@@ -311,7 +311,7 @@ process_instruction($z, #fip{} = IP, Stack, _Space) ->
 
 %% { Begin Block
 process_instruction(${, #fip{ x = X, y = Y, dx = DX, dy = DY, offX = OX, offY = OY} = IP, StackStack, _Space) ->
-	{S1, N} = pop_int(StackStack),
+	{S1, N} = pop(StackStack),
 	S2 = fstackstack:ss_begin(S1, N),
 	S3 = fstackstack:push_vec_SOSS(S2, {OX, OY}),
 	IP2 = set_offset(IP, X+DX, Y+DY),
@@ -319,7 +319,7 @@ process_instruction(${, #fip{ x = X, y = Y, dx = DX, dy = DY, offX = OX, offY = 
 
 %% } End Block
 process_instruction($}, #fip{} = IP, StackStack, _Space) ->
-	{S1, N} = pop_int(StackStack),
+	{S1, N} = pop(StackStack),
 	try
 		{S2, {OX, OY}} = fstackstack:pop_vec_SOSS(S1),
 		S3 = fstackstack:ss_end(S2, N),
@@ -331,7 +331,7 @@ process_instruction($}, #fip{} = IP, StackStack, _Space) ->
 
 %% u Stack Under Stack
 process_instruction($u, #fip{} = IP, StackStack, _Space) ->
-	{S1, Count} = pop_int(StackStack),
+	{S1, Count} = pop(StackStack),
 	try
 		S2 = fstackstack:ss_under(S1, Count),
 		{IP, S2}
@@ -341,12 +341,12 @@ process_instruction($u, #fip{} = IP, StackStack, _Space) ->
 
 %% y Get SysInfo
 process_instruction($y, #fip{} = IP, Stack, Space) ->
-	{S1, N} = pop_int(Stack),
+	{S1, N} = pop(Stack),
 	{IP, fsysinfo:system_info(N, IP, S1, Space)};
 
 %% ( Load Semantics
 process_instruction($(, #fip{} = IP, StackStack, _Space) ->
-	{S1, N} = pop_int(StackStack),
+	{S1, N} = pop(StackStack),
 	if
 		N < 0 -> {rev_delta(IP), S1};
 		true ->
@@ -362,7 +362,7 @@ process_instruction($(, #fip{} = IP, StackStack, _Space) ->
 	end;
 %% ) Unload Semantics
 process_instruction($), #fip{} = IP, StackStack, _Space) ->
-	{S1, N} = pop_int(StackStack),
+	{S1, N} = pop(StackStack),
 	if
 		N < 0 -> {rev_delta(IP), S1};
 		true ->
@@ -373,7 +373,7 @@ process_instruction($), #fip{} = IP, StackStack, _Space) ->
 
 %% q Quit
 process_instruction($q, _IP, Stack, _Space) ->
-	{_S2, Retval} = pop_int(Stack),
+	{_S2, Retval} = pop(Stack),
 	{dead, Retval};
 
 
@@ -416,6 +416,6 @@ iterate(Count, Instr, IP, Stack, Space) ->
 build_fingerprint(0, Stack, Result) ->
 	{Stack, Result};
 build_fingerprint(Count, Stack, Result) ->
-	{S2, Val} = pop_int(Stack),
+	{S2, Val} = pop(Stack),
 	R2 = Result bsl 8,
 	build_fingerprint(Count-1, S2, R2 + Val).

@@ -21,8 +21,7 @@
 -include("../funge_types.hrl").
 -export([load/1]).
 %% The implemented functions
--export([
-         fixp_and/3,
+-export([fixp_and/3,
          fixp_acos/3,
          fixp_cos/3,
          fixp_rand/3,
@@ -40,7 +39,7 @@
          fixp_xor/3]).
 
 %% Import common functions:
--import(fstackstack, [push/2, pop_int/1]).
+-import(fstackstack, [push/2, pop/1]).
 
 -define(PI, 3.14159265358979323846).
 -define(F_PI_DIV_180, (?PI / 180)).
@@ -75,15 +74,15 @@ load(IP) ->
 %% @doc A - bitwise and
 -spec fixp_and(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_and(IP, Stack, _Space) ->
-	{S1, B} = pop_int(Stack),
-	{S2, A} = pop_int(S1),
+	{S1, B} = pop(Stack),
+	{S2, A} = pop(S1),
 	{IP, push(S2, A band B)}.
 
 %% @spec fixp_acos(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
 %% @doc B - arccos
 -spec fixp_acos(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_acos(IP, Stack, _Space) ->
-	{S1, N} = pop_int(Stack),
+	{S1, N} = pop(Stack),
 	try
 		R = 10000 * math:acos(N / 10000) * ?F_180_DIV_PI,
 		{IP, push(S1, round(R))}
@@ -96,7 +95,7 @@ fixp_acos(IP, Stack, _Space) ->
 %% @doc C - cos
 -spec fixp_cos(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_cos(IP, Stack, _Space) ->
-	{S1, N} = pop_int(Stack),
+	{S1, N} = pop(Stack),
 	R = 10000 * math:cos((N / 10000) * ?F_PI_DIV_180),
 	{IP, push(S1, round(R))}.
 
@@ -104,7 +103,7 @@ fixp_cos(IP, Stack, _Space) ->
 %% @doc D - random number
 -spec fixp_rand(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_rand(IP, Stack, _Space) ->
-	{S1, N} = pop_int(Stack),
+	{S1, N} = pop(Stack),
 	if
 		N =< 0 -> {fip:rev_delta(IP), S1};
 		true   -> {IP, push(S1, random:uniform(N))}
@@ -114,7 +113,7 @@ fixp_rand(IP, Stack, _Space) ->
 %% @doc I - sin
 -spec fixp_sin(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_sin(IP, Stack, _Space) ->
-	{S1, N} = pop_int(Stack),
+	{S1, N} = pop(Stack),
 	R = 10000 * math:sin((N / 10000) * ?F_PI_DIV_180),
 	{IP, push(S1, round(R))}.
 
@@ -122,7 +121,7 @@ fixp_sin(IP, Stack, _Space) ->
 %% @doc J - arcsin
 -spec fixp_asin(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_asin(IP, Stack, _Space) ->
-	{S1, N} = pop_int(Stack),
+	{S1, N} = pop(Stack),
 	try
 		R = 10000 * math:asin(N / 10000) * ?F_180_DIV_PI,
 		{IP, push(S1, round(R))}
@@ -135,29 +134,29 @@ fixp_asin(IP, Stack, _Space) ->
 %% @doc N - negate
 -spec fixp_neg(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_neg(IP, Stack, _Space) ->
-	{S1, N} = pop_int(Stack),
+	{S1, N} = pop(Stack),
 	{IP, push(S1, -N)}.
 
 %% @spec fixp_or(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
 %% @doc O - bitwise or
 -spec fixp_or(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_or(IP, Stack, _Space) ->
-	{S1, B} = pop_int(Stack),
-	{S2, A} = pop_int(S1),
+	{S1, B} = pop(Stack),
+	{S2, A} = pop(S1),
 	{IP, push(S2, A bor B)}.
 
 %% @spec fixp_mulpi(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
 %% @doc P - multiply by pi
 -spec fixp_mulpi(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_mulpi(IP, Stack, _Space) ->
-	{S1, N} = pop_int(Stack),
+	{S1, N} = pop(Stack),
 	{IP, push(S1, round(?PI * N))}.
 
 %% @spec fixp_sqrt(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
 %% @doc Q - square root
 -spec fixp_sqrt(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_sqrt(IP, Stack, _Space) ->
-	{S1, N} = pop_int(Stack),
+	{S1, N} = pop(Stack),
 	try
 		R = math:sqrt(N),
 		{IP, push(S1, round(R))}
@@ -170,8 +169,8 @@ fixp_sqrt(IP, Stack, _Space) ->
 %% @doc R - pow
 -spec fixp_pow(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_pow(IP, Stack, _Space) ->
-	{S1, B} = pop_int(Stack),
-	{S2, A} = pop_int(S1),
+	{S1, B} = pop(Stack),
+	{S2, A} = pop(S1),
 	try
 		R = math:pow(A, B),
 		{IP, push(S2, round(R))}
@@ -185,14 +184,14 @@ fixp_pow(IP, Stack, _Space) ->
 %% @doc S - signbit
 -spec fixp_signbit(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_signbit(IP, Stack, _Space) ->
-	{S1, N} = pop_int(Stack),
+	{S1, N} = pop(Stack),
 	{IP, push(S1, signbit(N))}.
 
 %% @spec fixp_tan(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
 %% @doc T - tan
 -spec fixp_tan(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_tan(IP, Stack, _Space) ->
-	{S1, N} = pop_int(Stack),
+	{S1, N} = pop(Stack),
 	R = 10000 * math:tan((N / 10000) * ?F_PI_DIV_180),
 	{IP, push(S1, round(R))}.
 
@@ -200,7 +199,7 @@ fixp_tan(IP, Stack, _Space) ->
 %% @doc U - arctan
 -spec fixp_atan(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_atan(IP, Stack, _Space) ->
-	{S1, N} = pop_int(Stack),
+	{S1, N} = pop(Stack),
 	R = 10000 * math:atan(N / 10000) * ?F_180_DIV_PI,
 	{IP, push(S1, round(R))}.
 
@@ -208,15 +207,15 @@ fixp_atan(IP, Stack, _Space) ->
 %% @doc V - absolute value
 -spec fixp_abs(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_abs(IP, Stack, _Space) ->
-	{S1, N} = pop_int(Stack),
+	{S1, N} = pop(Stack),
 	{IP, push(S1, abs(N))}.
 
 %% @spec fixp_xor(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
 %% @doc X - bitwise xor
 -spec fixp_xor(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 fixp_xor(IP, Stack, _Space) ->
-	{S1, B} = pop_int(Stack),
-	{S2, A} = pop_int(S1),
+	{S1, B} = pop(Stack),
+	{S2, A} = pop(S1),
 	{IP, push(S2, A bxor B)}.
 
 
