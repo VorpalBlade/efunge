@@ -19,8 +19,10 @@
 %% buffers.
 -module(finput).
 -export([read_next_char/1, read_next_integer/1]).
+
 -include("fip.hrl").
 -include("funge_types.hrl").
+%% @headerfile "fip.hrl"
 
 %% @spec fill_buffer(ip()) -> {ok, NewState::ip()} | {eof, NewState::ip()}
 %% @doc Fill up the input line buffer if needed.

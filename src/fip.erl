@@ -17,15 +17,14 @@
 %%%----------------------------------------------------------------------
 %% @doc This module implements manipulation functions for the IP.
 -module(fip).
--export([ip_forward/2, jump/3,
-         set_delta/3, rev_delta/1, set_offset/3,
-         turn_delta_left/1, turn_delta_right/1,
-         find_next_match/3, find_next_non_space/2
-        ]).
+-export([ip_forward/2, jump/3]).
+-export([set_delta/3, rev_delta/1, set_offset/3]).
+-export([turn_delta_left/1, turn_delta_right/1]).
+-export([find_next_match/3, find_next_non_space/2]).
 -include("fip.hrl").
 -include("funge_types.hrl").
-%% @type ip() = #fip{}.
-%%    The IP state. See fip.hrl.
+%% @headerfile "fip.hrl"
+
 
 %% @spec ip_forward(ip(), fungespace()) -> NewIP::ip()
 %% @doc Move IP forward one step.

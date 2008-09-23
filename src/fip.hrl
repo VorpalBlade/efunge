@@ -31,3 +31,6 @@
 		fingerOpStacks  :: array()
 	}
 ).
+
+%% @type ip() = #fip{}.
+%%    A Funge IP, with state.

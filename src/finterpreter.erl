@@ -18,17 +18,19 @@
 %% @doc This module implements the main loop.
 -module(finterpreter).
 -export([loop/3]).
--include("fip.hrl").
--include("funge_types.hrl").
 -import(fspace, [set/4, fetch/3]).
 -import(fstackstack, [push/2, pop/1, pop_int/1, pop_vec/1, dup/1, swap/1]).
 -import(fip, [ip_forward/2, set_delta/3, set_offset/3, rev_delta/1, turn_delta_left/1, turn_delta_right/1]).
+
+-include("fip.hrl").
+-include("funge_types.hrl").
+%% @headerfile "fip.hrl"
 
 %% @type process_instr_ret() = {ip(),stack()} | {dead, integer()}.
 -type process_instr_ret() :: {ip(),stack()} | {dead, integer()}.
 
 %% @spec loop(ip(), stackstack(), tid()) -> integer()
-%% @doc Main loop
+%% @doc Main loop. Do not call from anywhere but efunge:start/2!
 -spec loop(ip(), stackstack(), fungespace()) -> integer().
 loop(#fip{} = IP, Stack, FungeSpace) ->
 	Instr = fspace:fetch(FungeSpace, {IP#fip.x, IP#fip.y}),

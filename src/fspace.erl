@@ -23,18 +23,19 @@
 %% The current implementation also use some special keys to store metadata like
 %% bounds of the Funge-Space.
 -module(fspace).
--include("fip.hrl").
--include("funge_types.hrl").
 -export([load/1, set/3, set/4,
          fetch/2, fetch/3, fetch_int/2, fetch_int/3,
          delete/1, get_bounds/1]).
+-include("fip.hrl").
+-include("funge_types.hrl").
+%% @headerfile "fip.hrl"
 
 %% Public functions
 
 %% @type coord() = {X::integer(), Y::integer()}.
 %%   Funge Space coordinates.
-%% @type fungespace() = integer().
-%%   A Funge Space.
+%% @type fungespace().
+%%   A Funge Space. The actual type is internal.
 
 %% @spec set(fungespace(), ip(), coord(), V::integer()) -> true
 %% @doc Set a cell in Funge Space with storage offset taken from IP.
@@ -85,7 +86,6 @@ fetch_int(Fungespace, {_X,_Y} = Coord) ->
 	end.
 
 
-
 %% @spec load(Filename::string()) -> fungespace()
 %% @doc Create a Funge Space from a file.
 -spec load(string()) -> fungespace().
@@ -95,11 +95,14 @@ load(Filename) ->
 	load_binary(Binary, FungeSpace, 0, 0, false),
 	FungeSpace.
 
+
 %% @spec delete(fungespace()) -> true
+%% @private For use in core on exit only.
 %% @doc Destroy a Funge Space.
 -spec delete(fungespace()) -> true.
 delete(Fungespace) ->
 	ets:delete(Fungespace).
+
 
 %% @spec get_bounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
 %% @doc Get Funge Space bounds.

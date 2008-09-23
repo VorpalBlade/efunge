@@ -15,13 +15,17 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
-%% @doc Fingerprint instruction stack.
+%% @private
+%% @doc Fingerprint instruction stack. Don't use directly, use the functions
+%% in the ffingermanager module for pushing and popping the funs.
 -module(ffingerstack).
--include("fip.hrl").
--include("funge_types.hrl").
 -export([new/0, push/2, peek/1, pop/1]).
 %% For special use (and from NULL
 -export([reflect/3]).
+
+-include("fip.hrl").
+-include("funge_types.hrl").
+%% @headerfile "fip.hrl"
 
 %% @type fingerfun() = function((ip(), stackstack(), fungespace()) -> {ip(), stackstack()}).
 %%   A fingerprint function

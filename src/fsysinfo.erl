@@ -15,14 +15,17 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
+%% @private For use in the finterpreter module only.
 %% @doc This module handles y instruction.
 -module(fsysinfo).
 -export([system_info/4]).
--include("fip.hrl").
--include("funge_types.hrl").
+
 -import(fstack, [push/2, push_vec/2]).
 -define(MAX_FUNGE98, 20).
 
+-include("fip.hrl").
+-include("funge_types.hrl").
+%% @headerfile "fip.hrl"
 
 %% @doc Return value for a specific y request.
 -spec push_request(1..20,ip(),stackstack(),fungespace(),stack()) -> stack().

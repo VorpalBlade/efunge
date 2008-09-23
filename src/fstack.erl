@@ -19,9 +19,12 @@
 -module(fstack).
 -include("fip.hrl").
 -include("funge_types.hrl").
--export([new/0, push/2, peek/1, peek_int/1, pop/1, pop_int/1, dup/1, swap/1,
-         pop_vec/1, push_vec/2,
-         push_list/2, pop_gnirts/1, push_gnirtses/2, pop_drop/2, stack_to_stack/3]).
+-export([new/0]).
+-export([push/2, peek/1, peek_int/1, pop/1, pop_int/1]).
+-export([dup/1, swap/1]).
+-export([pop_vec/1, push_vec/2]).
+-export([push_list/2, pop_gnirts/1, push_gnirtses/2]).
+-export([pop_drop/2, stack_to_stack/3]).
 -define(INTDUMMY, $f).
 
 %% @type stack_item() = integer().
@@ -51,7 +54,7 @@ peek([]) ->
 peek([H|_]) ->
 	H.
 
-%% @spec peek(stack()) -> stack_item()
+%% @spec peek_int(stack()) -> stack_item()
 %% @doc Get the top value of a stack.
 -spec peek_int(stack()) -> stack_item().
 peek_int([]) ->
@@ -69,7 +72,7 @@ pop([]) ->
 pop([H|T]) ->
 	{T, H}.
 
-%% @spec pop(stack()) -> {NewStack::stack(), Value::stack_item()}
+%% @spec pop_int(stack()) -> {NewStack::stack(), Value::stack_item()}
 %% @doc Pop a value from a stack, if it is a type tagged tuple, it will be
 %% replaced with some undefined integer.
 -spec pop_int(stack()) -> {stack(), integer()}.

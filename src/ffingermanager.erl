@@ -17,18 +17,21 @@
 %%%----------------------------------------------------------------------
 %% @doc Fingerprint manager.
 -module(ffingermanager).
--include("fip.hrl").
--include("funge_types.hrl").
 %% These are called from core.
 -export([init/1, load/2, unload/2, execute/4]).
 %% These are called from fingerprint loading functions.
 -export([push_fun/3, push_funs/2]).
 
+-include("fip.hrl").
+-include("funge_types.hrl").
+%% @headerfile "fip.hrl"
+
 %% @type fingerfun() = function((ip(), stackstack(), fungespace()) -> {ip(), stackstack()}).
-%%   A fingerprint function
+%%   A fingerprint function.
 %% @type fingerstack() = [] | list(fingerfun()).
 %%   Stack is a list, access at list head.
 
+%% @private For use from efunge:start/2 only.
 %% @doc Set up array of fingerprint stacks.
 -spec init(ip()) -> ip().
 init(#fip{} = IP) ->
@@ -57,7 +60,8 @@ unload(#fip{} = IP, Fingerprint) ->
 		{Instrs, _Loader} -> unload_ops(IP, Instrs)
 	end.
 
-%% @doc Execute a fingerprint op
+%% @private For use from finterpreter only.
+%% @doc Execute a fingerprint op.
 -spec execute(integer(), ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 execute(Instr, #fip{ fingerOpStacks = Array } = IP, StackStack, FungeSpace) ->
 	Idx = Instr - $A,
