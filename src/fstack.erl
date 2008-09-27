@@ -40,8 +40,6 @@ new() ->
 %% @spec push(stack(), cell()) -> stack()
 %% @doc Push a value on a stack.
 -spec push(stack(), cell()) -> stack().
-push([], V) ->
-	[V];
 push(L, V) ->
 	[V|L].
 

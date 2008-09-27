@@ -41,9 +41,7 @@ new() ->
 %% @spec push(fingerstack(), fingerfun()) -> fingerstack()
 %% @doc Push a value on a stack.
 -spec push(fingerstack(),fingerfun()) -> fingerstack().
-push([], V) when is_function(V) ->
-	[V];
-push(L, V) when is_function(V) ->
+push(L, V) ->
 	[V|L].
 
 %% @spec peek(fingerstack()) -> fingerfun()
@@ -51,7 +49,7 @@ push(L, V) when is_function(V) ->
 -spec peek(fingerstack()) -> fingerfun().
 peek([]) ->
 	fun ?MODULE:reflect/3;
-peek([H|_]) when is_function(H) ->
+peek([H|_]) ->
 	H.
 
 %% @spec pop(fingerstack()) -> {fingerstack(), fingerfun()}
@@ -59,7 +57,7 @@ peek([H|_]) when is_function(H) ->
 -spec pop(fingerstack()) -> {fingerstack(),fingerfun()}.
 pop([]) ->
 	{[], fun ?MODULE:reflect/3 };
-pop([H|T]) when is_function(H) ->
+pop([H|T]) ->
 	{T, H}.
 
 
