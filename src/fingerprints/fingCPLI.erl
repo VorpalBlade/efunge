@@ -107,9 +107,14 @@ cpli_sub(IP, Stack, _Space) ->
 -spec cpli_abs(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 cpli_abs(IP, Stack, _Space) ->
 	{S2, R, I} = pop_complex(Stack),
-	Tmp = math:sqrt(R * R + I * I),
-	S3 = push(S2, round(Tmp)),
-	{IP, S3}.
+	try
+		Tmp = math:sqrt(R * R + I * I),
+		S3 = push(S2, round(Tmp)),
+		{IP, S3}
+	catch
+		error:badarith ->
+			{IP, push(S2, 0)}
+	end.
 
 
 %% Private funtions
