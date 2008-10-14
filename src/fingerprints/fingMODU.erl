@@ -17,20 +17,20 @@
 %%%----------------------------------------------------------------------
 %% @doc MODU fingerprint.
 -module(fingMODU).
--include("../fip.hrl").
+-include("../efunge_ip.hrl").
 -include("../funge_types.hrl").
 -export([load/1]).
 %% The implemented functions
 -export([modu_signed/3, modu_c99/3, modu_unsigned/3]).
 
 %% Import common functions:
--import(fstackstack, [push/2, pop/1]).
+-import(efunge_stackstack, [push/2, pop/1]).
 
 
 %% @doc Load the MODU fingerprint.
 -spec load(ip()) -> {ok, ip()}.
 load(IP) ->
-	IP2 = ffingermanager:push_funs(IP,
+	IP2 = efunge_fingermanager:push_funs(IP,
 		[{$M, fun ?MODULE:modu_signed/3},
 		 {$R, fun ?MODULE:modu_c99/3},
 		 {$U, fun ?MODULE:modu_unsigned/3}]),

@@ -22,13 +22,13 @@
 %%
 %% The current implementation also use some special keys to store metadata like
 %% bounds of the Funge-Space.
--module(fspace).
+-module(efunge_fungespace).
 -export([load/1, set/3, set/4,
          fetch/2, fetch/3,
          delete/1, get_bounds/1]).
--include("fip.hrl").
+-include("efunge_ip.hrl").
 -include("funge_types.hrl").
-%% @headerfile "fip.hrl"
+%% @headerfile "efunge_ip.hrl"
 
 %% Public functions
 

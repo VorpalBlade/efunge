@@ -277,7 +277,7 @@ cat >> "fing${FPRINT}.erl" << EOF
 -include("../funge_types.hrl").
 
 %% Import common functions:
--import(fstackstack, [push/2, pop/1]).
+-import(efunge_stackstack, [push/2, pop/1]).
 
 
 EOF

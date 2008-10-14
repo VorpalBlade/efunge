@@ -17,7 +17,7 @@
 %%%----------------------------------------------------------------------
 %% @doc NULL fingerprint.
 -module(fingNULL).
--include("../fip.hrl").
+-include("../efunge_ip.hrl").
 -include("../funge_types.hrl").
 -export([load/1]).
 
@@ -38,5 +38,5 @@ load(IP) ->
 load_ops(IP, []) ->
 	IP;
 load_ops(IP, [H|T]) ->
-	IP2 = ffingermanager:push_fun(H, IP, fun ffingerstack:reflect/3),
+	IP2 = efunge_fingermanager:push_fun(H, IP, fun efunge_fingerstack:reflect/3),
 	load_ops(IP2, T).

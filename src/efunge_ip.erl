@@ -16,21 +16,21 @@
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
 %% @doc This module implements manipulation functions for the IP.
--module(fip).
+-module(efunge_ip).
 -export([ip_forward/2, jump/3]).
 -export([set_delta/3, rev_delta/1, set_offset/3]).
 -export([turn_delta_left/1, turn_delta_right/1]).
 -export([find_next_match/3, find_next_non_space/2]).
--include("fip.hrl").
+-include("efunge_ip.hrl").
 -include("funge_types.hrl").
-%% @headerfile "fip.hrl"
+%% @headerfile "efunge_ip.hrl"
 
 
 %% @spec ip_forward(ip(), fungespace()) -> NewIP::ip()
 %% @doc Move IP forward one step.
 -spec ip_forward(ip(), fungespace()) -> ip().
 ip_forward(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
-	Bounds = fspace:get_bounds(FungeSpace),
+	Bounds = efunge_fungespace:get_bounds(FungeSpace),
 	NewX = X+DX,
 	NewY = Y+DY,
 	NewIP = IP#fip{ x=NewX, y=NewY },
@@ -83,7 +83,7 @@ turn_delta_right(#fip{dx=DX, dy=DY} = IP) ->
 %% @doc Search in IP's path for the next time value shows up.
 -spec find_next_match(ip(),integer(),fungespace()) -> ip().
 find_next_match(#fip{x=X, y=Y} = IP, Match, FungeSpace) ->
-	Value = fspace:fetch(FungeSpace, {X, Y}),
+	Value = efunge_fungespace:fetch(FungeSpace, {X, Y}),
 	if
 		Value =:= Match -> IP#fip{x = X, y = Y};
 		true -> find_next_match(ip_forward(IP, FungeSpace), Match, FungeSpace)
@@ -92,7 +92,7 @@ find_next_match(#fip{x=X, y=Y} = IP, Match, FungeSpace) ->
 %% @doc Find next one that isn't a whitespace, and isn't in ;;.
 -spec find_next_non_space(ip(),fungespace()) -> {ip(), integer()}.
 find_next_non_space(#fip{x=X, y=Y} = IP, FungeSpace) ->
-	Value = fspace:fetch(FungeSpace, {X, Y}),
+	Value = efunge_fungespace:fetch(FungeSpace, {X, Y}),
 	if
 		Value =:= $\s ->
 			find_next_non_space(ip_forward(IP, FungeSpace), FungeSpace);

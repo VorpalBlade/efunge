@@ -17,12 +17,12 @@
 %%%----------------------------------------------------------------------
 %% @doc This module handles input buffer and extracting values from said
 %% buffers.
--module(finput).
+-module(efunge_input).
 -export([read_next_char/1, read_next_integer/1]).
 
--include("fip.hrl").
+-include("efunge_ip.hrl").
 -include("funge_types.hrl").
-%% @headerfile "fip.hrl"
+%% @headerfile "efunge_ip.hrl"
 
 %% @spec fill_buffer(ip()) -> {ok, NewState::ip()} | {eof, NewState::ip()}
 %% @doc Fill up the input line buffer if needed.

@@ -16,15 +16,15 @@
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
 %% @doc Fingerprint manager.
--module(ffingermanager).
+-module(efunge_fingermanager).
 %% These are called from core.
 -export([init/1, load/2, unload/2, execute/4]).
 %% These are called from fingerprint loading functions.
 -export([push_fun/3, push_funs/2]).
 
--include("fip.hrl").
+-include("efunge_ip.hrl").
 -include("funge_types.hrl").
-%% @headerfile "fip.hrl"
+%% @headerfile "efunge_ip.hrl"
 
 %% @type fingerfun() = function((ip(), stackstack(), fungespace()) -> {ip(), stackstack()}).
 %%   A fingerprint function.
@@ -41,7 +41,7 @@ init(#fip{} = IP) ->
 %% @doc Load a fingerprint.
 -spec load(ip(), integer()) -> {ok | error, ip()}.
 load(#fip{} = IP, Fingerprint) ->
-	case ffingerindex:lookup(Fingerprint) of
+	case efunge_fingerindex:lookup(Fingerprint) of
 		notfound ->
 			{error, IP};
 		{_Instrs, Loader} ->
@@ -55,18 +55,18 @@ load(#fip{} = IP, Fingerprint) ->
 %% @doc Unload a fingerprint.
 -spec unload(ip(), integer()) -> ip().
 unload(#fip{} = IP, Fingerprint) ->
-	case ffingerindex:lookup(Fingerprint) of
-		notfound -> fip:rev_delta(IP);
+	case efunge_fingerindex:lookup(Fingerprint) of
+		notfound -> efunge_ip:rev_delta(IP);
 		{Instrs, _Loader} -> unload_ops(IP, Instrs)
 	end.
 
-%% @private For use from finterpreter only.
+%% @private For use from efunge_interpreter only.
 %% @doc Execute a fingerprint op.
 -spec execute(integer(), ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 execute(Instr, #fip{ fingerOpStacks = Array } = IP, StackStack, FungeSpace) ->
 	Idx = Instr - $A,
 	OpStack = array:get(Idx, Array),
-	Fun = ffingerstack:peek(OpStack),
+	Fun = efunge_fingerstack:peek(OpStack),
 	Fun(IP, StackStack, FungeSpace).
 
 %% @doc Push a fingerprint op on the IP stack.
@@ -74,7 +74,7 @@ execute(Instr, #fip{ fingerOpStacks = Array } = IP, StackStack, FungeSpace) ->
 push_fun(Instr, #fip{ fingerOpStacks = Array } = IP, Fun) when (Instr >= $A) and (Instr =< $Z) ->
 	Idx = Instr - $A,
 	OpStack = array:get(Idx, Array),
-	S2 = ffingerstack:push(OpStack, Fun),
+	S2 = efunge_fingerstack:push(OpStack, Fun),
 	Array2 = array:set(Idx, S2, Array),
 	IP#fip{ fingerOpStacks = Array2 }.
 
@@ -94,7 +94,7 @@ push_funs(IP, [{Instr,Fun}|T]) ->
 unload_op(#fip{ fingerOpStacks = Array } = IP, Instr) ->
 	Idx = Instr - $A,
 	OpStack = array:get(Idx, Array),
-	{S2, _} = ffingerstack:pop(OpStack),
+	{S2, _} = efunge_fingerstack:pop(OpStack),
 	Array2 = array:set(Idx, S2, Array),
 	IP#fip{ fingerOpStacks = Array2 }.
 

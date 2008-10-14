@@ -16,8 +16,8 @@
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
 %% @doc An implementation of a Funge style stack.
--module(fstack).
--include("fip.hrl").
+-module(efunge_stack).
+-include("efunge_ip.hrl").
 -include("funge_types.hrl").
 -export([new/0]).
 -export([push/2, peek/1, pop/1]).
@@ -134,7 +134,7 @@ push_gnirtses(Stack, [H|T]) ->
 pop_drop(0, Stack) ->
 	Stack;
 pop_drop(N, Stack) ->
-	{NewStack, _} = fstack:pop(Stack),
+	{NewStack, _} = efunge_stack:pop(Stack),
 	pop_drop(N-1, NewStack).
 
 %% @spec stack_to_stack(integer(), stack(), stack()) -> {stack(), stack()}
@@ -144,6 +144,6 @@ pop_drop(N, Stack) ->
 stack_to_stack(0, Stack1, Stack2) ->
 	{Stack1, Stack2};
 stack_to_stack(Count, Stack1, Stack2) ->
-	{NewStack1, Item} = fstack:pop(Stack1),
-	NewStack2 = fstack:push(Stack2, Item),
+	{NewStack1, Item} = efunge_stack:pop(Stack1),
+	NewStack2 = efunge_stack:push(Stack2, Item),
 	stack_to_stack(Count-1, NewStack1, NewStack2).

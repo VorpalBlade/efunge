@@ -17,7 +17,7 @@
 %%%----------------------------------------------------------------------
 %% @doc ROMA fingerprint.
 -module(fingROMA).
--include("../fip.hrl").
+-include("../efunge_ip.hrl").
 -include("../funge_types.hrl").
 -export([load/1]).
 
@@ -42,7 +42,7 @@ load(IP) ->
 -spec make_pusher(integer()) -> fun((ip(),stackstack(),fungespace()) -> {ip(),stackstack()}).
 make_pusher(Amount) ->
 	fun(IP, Stack, _Space) ->
-		{IP, fstackstack:push(Stack, Amount)}
+		{IP, efunge_stackstack:push(Stack, Amount)}
 	end.
 
 %% @doc Load functions, constructed using make_pusher/1
@@ -50,5 +50,5 @@ make_pusher(Amount) ->
 load_ops(IP, []) ->
 	IP;
 load_ops(IP, [{Instr,Amount}|T]) ->
-	IP2 = ffingermanager:push_fun(Instr, IP, make_pusher(Amount)),
+	IP2 = efunge_fingermanager:push_fun(Instr, IP, make_pusher(Amount)),
 	load_ops(IP2, T).

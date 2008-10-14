@@ -18,7 +18,7 @@
 %% @doc Main entry point for efunge. Used to start efunge.
 -module(efunge).
 -export([run/1, start/1, start/2]).
--include("fip.hrl").
+-include("efunge_ip.hrl").
 -include("funge_types.hrl").
 
 %% @spec run(list(string())) -> none()
@@ -41,7 +41,7 @@ start(Filename, Parameters) when is_list(Filename) and is_list(Parameters) ->
 	{R1,R2,R3} = now(),
 	put(efungeargs, [Filename|Parameters]),
 	random:seed(R1, R2, R3),
-	Space = fspace:load(Filename),
+	Space = efunge_fungespace:load(Filename),
 	IP = #fip{},
-	IP2 = ffingermanager:init(IP),
-	finterpreter:loop(IP2, fstackstack:new(), Space).
+	IP2 = efunge_fingermanager:init(IP),
+	efunge_interpreter:loop(IP2, efunge_stackstack:new(), Space).

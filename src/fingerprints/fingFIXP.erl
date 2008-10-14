@@ -17,7 +17,7 @@
 %%%----------------------------------------------------------------------
 %% @doc FIXP fingerprint.
 -module(fingFIXP).
--include("../fip.hrl").
+-include("../efunge_ip.hrl").
 -include("../funge_types.hrl").
 -export([load/1]).
 %% The implemented functions
@@ -39,7 +39,7 @@
          fixp_xor/3]).
 
 %% Import common functions:
--import(fstackstack, [push/2, pop/1]).
+-import(efunge_stackstack, [push/2, pop/1]).
 
 -define(PI, 3.14159265358979323846).
 -define(F_PI_DIV_180, (?PI / 180)).
@@ -48,7 +48,7 @@
 %% @doc Load the FIXP fingerprint.
 -spec load(ip()) -> {ok, ip()}.
 load(IP) ->
-	IP2 = ffingermanager:push_funs(IP, [
+	IP2 = efunge_fingermanager:push_funs(IP, [
 		{$A, fun ?MODULE:fixp_and/3},
 		{$B, fun ?MODULE:fixp_acos/3},
 		{$C, fun ?MODULE:fixp_cos/3},
@@ -105,7 +105,7 @@ fixp_cos(IP, Stack, _Space) ->
 fixp_rand(IP, Stack, _Space) ->
 	{S1, N} = pop(Stack),
 	if
-		N =< 0 -> {fip:rev_delta(IP), S1};
+		N =< 0 -> {efunge_ip:rev_delta(IP), S1};
 		true   -> {IP, push(S1, random:uniform(N))}
 	end.
 

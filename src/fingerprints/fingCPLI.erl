@@ -17,7 +17,7 @@
 %%%----------------------------------------------------------------------
 %% @doc CPLI fingerprint.
 -module(fingCPLI).
--include("../fip.hrl").
+-include("../efunge_ip.hrl").
 -include("../funge_types.hrl").
 -export([load/1]).
 %% The implemented functions
@@ -29,13 +29,13 @@
          cpli_abs/3]).
 
 %% Import common functions:
--import(fstackstack, [push/2, pop/1]).
+-import(efunge_stackstack, [push/2, pop/1]).
 
 
 %% @doc Load the CPLI fingerprint.
 -spec load(ip()) -> {ok, ip()}.
 load(IP) ->
-	IP2 = ffingermanager:push_funs(IP, [
+	IP2 = efunge_fingermanager:push_funs(IP, [
 		{$A, fun ?MODULE:cpli_add/3},
 		{$D, fun ?MODULE:cpli_div/3},
 		{$M, fun ?MODULE:cpli_mul/3},

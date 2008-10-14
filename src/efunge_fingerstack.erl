@@ -17,15 +17,15 @@
 %%%----------------------------------------------------------------------
 %% @private
 %% @doc Fingerprint instruction stack. Don't use directly, use the functions
-%% in the ffingermanager module for pushing and popping the funs.
--module(ffingerstack).
+%% in the efunge_fingermanager module for pushing and popping the funs.
+-module(efunge_fingerstack).
 -export([new/0, push/2, peek/1, pop/1]).
 %% For special use (and from NULL
 -export([reflect/3]).
 
--include("fip.hrl").
+-include("efunge_ip.hrl").
 -include("funge_types.hrl").
-%% @headerfile "fip.hrl"
+%% @headerfile "efunge_ip.hrl"
 
 %% @type fingerfun() = function((ip(), stackstack(), fungespace()) -> {ip(), stackstack()}).
 %%   A fingerprint function
@@ -65,4 +65,4 @@ pop([H|T]) ->
 %% @doc Reflect, used for reflect on empty stack.
 -spec reflect(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 reflect(#fip{} = IP, Stack, _Space) ->
-	{fip:rev_delta(IP), Stack}.
+	{efunge_ip:rev_delta(IP), Stack}.

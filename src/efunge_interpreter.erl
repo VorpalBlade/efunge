@@ -16,15 +16,15 @@
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
 %% @doc This module implements the main loop.
--module(finterpreter).
+-module(efunge_interpreter).
 -export([loop/3]).
--import(fspace, [set/4, fetch/3]).
--import(fstackstack, [push/2, pop/1, pop_vec/1, dup/1, swap/1]).
--import(fip, [ip_forward/2, set_delta/3, set_offset/3, rev_delta/1, turn_delta_left/1, turn_delta_right/1]).
+-import(efunge_fungespace, [set/4, fetch/3]).
+-import(efunge_stackstack, [push/2, pop/1, pop_vec/1, dup/1, swap/1]).
+-import(efunge_ip, [ip_forward/2, set_delta/3, set_offset/3, rev_delta/1, turn_delta_left/1, turn_delta_right/1]).
 
--include("fip.hrl").
+-include("efunge_ip.hrl").
 -include("funge_types.hrl").
-%% @headerfile "fip.hrl"
+%% @headerfile "efunge_ip.hrl"
 
 %% @type process_instr_ret() = {ip(),stack()} | {dead, integer()}.
 -type process_instr_ret() :: {ip(),stack()} | {dead, integer()}.
@@ -33,7 +33,7 @@
 %% @doc Main loop. Do not call from anywhere but efunge:start/2!
 -spec loop(ip(), stackstack(), fungespace()) -> integer().
 loop(#fip{} = IP, Stack, FungeSpace) ->
-	Instr = fspace:fetch(FungeSpace, {IP#fip.x, IP#fip.y}),
+	Instr = efunge_fungespace:fetch(FungeSpace, {IP#fip.x, IP#fip.y}),
 	%io:format("~c", [Instr]),
 	%io:format("~c (x=~w y=~w)~n", [Instr, IP#fip.x, IP#fip.y]),
 	case IP#fip.isStringMode of
@@ -44,7 +44,7 @@ loop(#fip{} = IP, Stack, FungeSpace) ->
 			case process_instruction(Instr, IP, Stack, FungeSpace) of
 				% This is for @ and q.
 				{dead, Retval} ->
-					fspace:delete(FungeSpace),
+					efunge_fungespace:delete(FungeSpace),
 					Retval;
 				{NewIP, NewStack} ->
 					loop(ip_forward(NewIP, FungeSpace), NewStack, FungeSpace)
@@ -209,14 +209,14 @@ process_instruction($., #fip{} = IP, Stack, _Space) ->
 
 %% ~ Input Character
 process_instruction($~, #fip{} = IP, Stack, _Space) ->
-	{NewIP, Result} = finput:read_next_char(IP),
+	{NewIP, Result} = efunge_input:read_next_char(IP),
 	if
 		Result =:= eof -> {rev_delta(IP), Stack};
 		true           -> {NewIP, push(Stack, Result)}
 	end;
 %% & Input Integer
 process_instruction($&, #fip{} = IP, Stack, _Space) ->
-	{NewIP, Result} = finput:read_next_integer(IP),
+	{NewIP, Result} = efunge_input:read_next_integer(IP),
 	if
 		Result =:= eof -> {rev_delta(IP), Stack};
 		true           -> {NewIP, push(Stack, Result)}
@@ -238,7 +238,7 @@ process_instruction($], #fip{} = IP, Stack, _Space) ->
 
 %% ; Jump Over
 process_instruction($;, #fip{} = IP, Stack, Space) ->
-	{fip:find_next_match(ip_forward(IP, Space), $;, Space), Stack};
+	{efunge_ip:find_next_match(ip_forward(IP, Space), $;, Space), Stack};
 
 %% k Iterate
 process_instruction($k, #fip{} = IP, Stack, Space) ->
@@ -247,10 +247,10 @@ process_instruction($k, #fip{} = IP, Stack, Space) ->
 		Count < 0 ->
 			{rev_delta(IP), S1};
 		Count =:= 0 ->
-			{IP2, _} = fip:find_next_non_space(ip_forward(IP, Space), Space),
+			{IP2, _} = efunge_ip:find_next_non_space(ip_forward(IP, Space), Space),
 			{IP2, S1};
 		true ->
-			{InstrPos, Instr} = fip:find_next_non_space(ip_forward(IP, Space), Space),
+			{InstrPos, Instr} = efunge_ip:find_next_non_space(ip_forward(IP, Space), Space),
 			if
 				%% This is actually buggy, we somehow need to keep track of
 				%% position here and check after each iteration.
@@ -264,19 +264,19 @@ process_instruction($k, #fip{} = IP, Stack, Space) ->
 %% ' Fetch Character
 process_instruction($', #fip{} = IP, Stack, Space) ->
 	#fip{ x = X, y = Y} = NewIP = ip_forward(IP, Space),
-	Value = fspace:fetch(Space, {X, Y}),
+	Value = efunge_fungespace:fetch(Space, {X, Y}),
 	{NewIP, push(Stack, Value)};
 
 %% s Store Character
 process_instruction($s, #fip{} = IP, Stack, Space) ->
 	#fip{ x = X, y = Y} = NewIP = ip_forward(IP, Space),
 	{S1, Value} = pop(Stack),
-	fspace:set(Space, {X, Y}, Value),
+	efunge_fungespace:set(Space, {X, Y}, Value),
 	{NewIP, S1};
 
 %% n Clear Stack
 process_instruction($n, #fip{} = IP, Stack, _Space) ->
-	{IP, fstackstack:clear(Stack)};
+	{IP, efunge_stackstack:clear(Stack)};
 
 %% w Compare
 process_instruction($w, #fip{} = IP, Stack, _Space) ->
@@ -299,7 +299,7 @@ process_instruction($x, #fip{} = IP, Stack, _Space) ->
 %% j Jump Forward
 process_instruction($j, #fip{} = IP, Stack, Space) ->
 	{S1, Dist} = pop(Stack),
-	{fip:jump(IP, Space, Dist), S1};
+	{efunge_ip:jump(IP, Space, Dist), S1};
 
 
 %% r Reflect
@@ -312,8 +312,8 @@ process_instruction($z, #fip{} = IP, Stack, _Space) ->
 %% { Begin Block
 process_instruction(${, #fip{ x = X, y = Y, dx = DX, dy = DY, offX = OX, offY = OY} = IP, StackStack, _Space) ->
 	{S1, N} = pop(StackStack),
-	S2 = fstackstack:ss_begin(S1, N),
-	S3 = fstackstack:push_vec_SOSS(S2, {OX, OY}),
+	S2 = efunge_stackstack:ss_begin(S1, N),
+	S3 = efunge_stackstack:push_vec_SOSS(S2, {OX, OY}),
 	IP2 = set_offset(IP, X+DX, Y+DY),
 	{IP2, S3};
 
@@ -321,8 +321,8 @@ process_instruction(${, #fip{ x = X, y = Y, dx = DX, dy = DY, offX = OX, offY = 
 process_instruction($}, #fip{} = IP, StackStack, _Space) ->
 	{S1, N} = pop(StackStack),
 	try
-		{S2, {OX, OY}} = fstackstack:pop_vec_SOSS(S1),
-		S3 = fstackstack:ss_end(S2, N),
+		{S2, {OX, OY}} = efunge_stackstack:pop_vec_SOSS(S1),
+		S3 = efunge_stackstack:ss_end(S2, N),
 		IP2 = set_offset(IP, OX, OY),
 		{IP2, S3}
 	catch
@@ -333,7 +333,7 @@ process_instruction($}, #fip{} = IP, StackStack, _Space) ->
 process_instruction($u, #fip{} = IP, StackStack, _Space) ->
 	{S1, Count} = pop(StackStack),
 	try
-		S2 = fstackstack:ss_under(S1, Count),
+		S2 = efunge_stackstack:ss_under(S1, Count),
 		{IP, S2}
 	catch
 		throw:oneStack -> {rev_delta(IP), S1}
@@ -342,7 +342,7 @@ process_instruction($u, #fip{} = IP, StackStack, _Space) ->
 %% y Get SysInfo
 process_instruction($y, #fip{} = IP, Stack, Space) ->
 	{S1, N} = pop(Stack),
-	{IP, fsysinfo:system_info(N, IP, S1, Space)};
+	{IP, efunge_sysinfo:system_info(N, IP, S1, Space)};
 
 %% ( Load Semantics
 process_instruction($(, #fip{} = IP, StackStack, _Space) ->
@@ -351,9 +351,9 @@ process_instruction($(, #fip{} = IP, StackStack, _Space) ->
 		N < 0 -> {rev_delta(IP), S1};
 		true ->
 			{S2, Fingerprint} = build_fingerprint(N, S1, 0),
-			case ffingermanager:load(IP, Fingerprint) of
+			case efunge_fingermanager:load(IP, Fingerprint) of
 				{error, _} ->
-					{fip:rev_delta(IP), S2};
+					{efunge_ip:rev_delta(IP), S2};
 				{ok, IP2} ->
 					S3 = push(S2, Fingerprint),
 					S4 = push(S3, 1),
@@ -367,7 +367,7 @@ process_instruction($), #fip{} = IP, StackStack, _Space) ->
 		N < 0 -> {rev_delta(IP), S1};
 		true ->
 			{S2, Fingerprint} = build_fingerprint(N, S1, 0),
-			#fip{} = IP2 = ffingermanager:unload(IP, Fingerprint),
+			#fip{} = IP2 = efunge_fingermanager:unload(IP, Fingerprint),
 			{IP2, S2}
 	end;
 
@@ -388,7 +388,7 @@ process_instruction(Instr, #fip{} = IP, Stack, _Space) when (Instr >= $a) and (I
 	{IP, push(Stack, Instr - $a + 10)};
 %% A-Z Fingerprints.
 process_instruction(Instr, #fip{} = IP, Stack, Space) when (Instr >= $A) and (Instr =< $Z) ->
-	ffingermanager:execute(Instr, IP, Stack, Space);
+	efunge_fingermanager:execute(Instr, IP, Stack, Space);
 
 %% unimplemented
 process_instruction(_Instr, #fip{} = IP, Stack, _Space) ->

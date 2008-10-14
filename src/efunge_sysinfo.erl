@@ -15,17 +15,17 @@
 %%% You should have received a copy of the GNU General Public License
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
-%% @private For use in the finterpreter module only.
+%% @private For use in the efunge_interpreter module only.
 %% @doc This module handles y instruction.
--module(fsysinfo).
+-module(efunge_sysinfo).
 -export([system_info/4]).
 
--import(fstack, [push/2, push_vec/2]).
+-import(efunge_stack, [push/2, push_vec/2]).
 -define(MAX_FUNGE98, 20).
 
--include("fip.hrl").
+-include("efunge_ip.hrl").
 -include("funge_types.hrl").
-%% @headerfile "fip.hrl"
+%% @headerfile "efunge_ip.hrl"
 
 %% @doc Return value for a specific y request.
 -spec push_request(1..20,ip(),stackstack(),fungespace(),stack()) -> stack().
@@ -70,11 +70,11 @@ push_request(12, #fip{ offX = OX, offY = OY}, _StackStack, _FungeSpace, PushStac
 	push_vec(PushStack, {OX, OY});
 %% 13 Least point
 push_request(13, #fip{} = _IP, _StackStack, FungeSpace, PushStack) ->
-	{Least, _} = fspace:get_bounds(FungeSpace),
+	{Least, _} = efunge_fungespace:get_bounds(FungeSpace),
 	push_vec(PushStack, Least);
 %% 14 Greatest point
 push_request(14, #fip{} = _IP, _StackStack, FungeSpace, PushStack) ->
-	{{Lx, Ly}, {Mx, My}} = fspace:get_bounds(FungeSpace),
+	{{Lx, Ly}, {Mx, My}} = efunge_fungespace:get_bounds(FungeSpace),
 	push_vec(PushStack, {Mx - Lx, My - Ly});
 %% 15 Date
 push_request(15, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
@@ -94,11 +94,11 @@ push_request(18, #fip{} = _IP, StackStack, _FungeSpace, PushStack) ->
 push_request(19, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	Args = lists:reverse(get(efungeargs)),
 	PushStack2 = push(push(PushStack, 0), 0),
-	fstack:push_gnirtses(PushStack2, Args);
+	efunge_stack:push_gnirtses(PushStack2, Args);
 %% 20 Environment
 push_request(20, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	push(PushStack, 0),
-	fstack:push_gnirtses(PushStack, os:getenv()).
+	efunge_stack:push_gnirtses(PushStack, os:getenv()).
 
 
 %% @spec system_info(RequestID, IP, StackStack, FungeSpace) -> stackstack()
@@ -113,7 +113,7 @@ system_info(RequestID, #fip{} = IP, [TOSS|T] = StackStack, FungeSpace) when Requ
 	[NewTOSS|T];
 %% Now we need to create a temp stack..
 system_info(RequestID, #fip{} = IP, [TOSS|_] = StackStack, FungeSpace) ->
-	Tmp1 = fstack:new(),
+	Tmp1 = efunge_stack:new(),
 	Tmp2 = push_all(?MAX_FUNGE98, IP, StackStack, FungeSpace, Tmp1),
 	Len = erlang:length(Tmp2),
 	if
@@ -121,16 +121,16 @@ system_info(RequestID, #fip{} = IP, [TOSS|_] = StackStack, FungeSpace) ->
 		Len < RequestID ->
 			try
 				V = lists:nth(RequestID-Len, TOSS),
-				fstackstack:push(StackStack, V)
+				efunge_stackstack:push(StackStack, V)
 			%% Handle case of too short list.
 			catch
-				error:function_clause -> fstackstack:push(StackStack, 0)
+				error:function_clause -> efunge_stackstack:push(StackStack, 0)
 			end;
 		%% Normal, get it from the temp stack.
 		true ->
-			Tmp3 = fstack:pop_drop(RequestID-1, Tmp2),
-			{_, V} = fstack:pop(Tmp3),
-			fstackstack:push(StackStack, V)
+			Tmp3 = efunge_stack:pop_drop(RequestID-1, Tmp2),
+			{_, V} = efunge_stack:pop(Tmp3),
+			efunge_stackstack:push(StackStack, V)
 	end.
 
 %% Various helper functions
@@ -151,5 +151,5 @@ push_all(RequestID, #fip{} = IP, StackStack, FungeSpace, PushStack) ->
 push_stack_lengths([], PushStack) ->
 	PushStack;
 push_stack_lengths([H|T], PushStack) ->
-	NewPushStack = fstack:push(PushStack, erlang:length(H)),
+	NewPushStack = efunge_stack:push(PushStack, erlang:length(H)),
 	push_stack_lengths(T, NewPushStack).
