@@ -19,7 +19,7 @@
 -module(efunge_interpreter).
 -export([loop/3]).
 -import(efunge_fungespace, [set/4, fetch/3]).
--import(efunge_stackstack, [push/2, pop/1, pop_vec/1, dup/1, swap/1]).
+-import(efunge_stackstack, [push/2, pop/1, pop_vec/1, dup/1, swap/1, pop_gnirts/1, push_vec/2]).
 -import(efunge_ip, [ip_forward/2, set_delta/3, set_offset/3, rev_delta/1, turn_delta_left/1, turn_delta_right/1]).
 
 -include("efunge_ip.hrl").
@@ -343,6 +343,18 @@ process_instruction($u, #fip{} = IP, StackStack, _Space) ->
 process_instruction($y, #fip{} = IP, Stack, Space) ->
 	{S1, N} = pop(Stack),
 	{IP, efunge_sysinfo:system_info(N, IP, S1, Space)};
+
+%% i Input File
+process_instruction($i, #fip{} = IP, Stack, Space) ->
+	{S1, Filename} = pop_gnirts(Stack),
+	{S2, Flags} = pop(S1),
+	{S3, Vector} = pop_vec(S2),
+	IsBinaryMode = (Flags band 1) =:= 1,
+	Retval = efunge_fungespace:load(Space, IP, Filename, IsBinaryMode, Vector),
+	case Retval of
+		error -> {rev_delta(IP), S3};
+		_     -> {IP, push_vec(push_vec(S3, Retval), Vector)}
+	end;
 
 %% ( Load Semantics
 process_instruction($(, #fip{} = IP, StackStack, _Space) ->

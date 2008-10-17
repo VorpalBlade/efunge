@@ -23,7 +23,7 @@
 %% The current implementation also use some special keys to store metadata like
 %% bounds of the Funge-Space.
 -module(efunge_fungespace).
--export([load/1, set/3, set/4,
+-export([create/1, set/3, set/4, load/5,
          fetch/2, fetch/3,
          delete/1, get_bounds/1]).
 -include("efunge_ip.hrl").
@@ -36,6 +36,8 @@
 %%   Funge Space coordinates.
 %% @type fungespace().
 %%   A Funge Space. The actual type is internal.
+
+-type integer_or_undef() :: undefined | integer().
 
 %% @spec set(fungespace(), ip(), coord(), V::integer()) -> true
 %% @doc Set a cell in Funge Space with storage offset taken from IP.
@@ -65,14 +67,37 @@ fetch(Fungespace, {_X,_Y} = Coord) ->
 		[{{_,_},Value}] -> Value
 	end.
 
-%% @spec load(Filename::string()) -> fungespace()
+%% @spec create(Filename::string()) -> fungespace()
 %% @doc Create a Funge Space from a file.
--spec load(string()) -> fungespace().
-load(Filename) ->
+-spec create(string()) -> fungespace().
+create(Filename) ->
 	{ok, Binary} = file:read_file(Filename),
-	FungeSpace = create(),
-	load_binary(Binary, FungeSpace, 0, 0, false),
-	FungeSpace.
+	Fungespace = construct(),
+	load_binary(Binary, Fungespace, 0, 0, false, 0, undefined),
+	Fungespace.
+
+%% @spec load(fungespace(), ip(), Filename::string(), coord()) -> error | coord()
+%% @doc Loads a file into an existing Funge Space, returning the max size.
+-spec load(fungespace(), ip(), string(), bool(), coord()) -> error | coord().
+load(Fungespace, #fip{offX = OffX, offY = OffY}, Filename, IsBinaryMode, {X, Y} = _Coord) ->
+	{Status, Binary} = file:read_file(Filename),
+	% TODO: Make binary mode work.
+	case Status of
+		error ->
+			error;
+		ok ->
+			TrueX = OffX + X,
+			TrueY = OffY + Y,
+			case IsBinaryMode of
+				false ->
+					{MaxX, MaxY} = load_binary(Binary, Fungespace, TrueX, TrueY, false, TrueX, undefined);
+				true ->
+					MaxX = load_binary_no_newlines(Binary, Fungespace, TrueX, TrueY),
+					MaxY = TrueY
+			end,
+			{MaxX - TrueX, MaxY - TrueY}
+	end.
+
 
 
 %% @spec delete(fungespace()) -> true
@@ -95,9 +120,9 @@ get_bounds(Fungespace) ->
 
 %% Private functions
 
-%% @doc Create a Funge Space.
--spec create() -> fungespace().
-create() ->
+%% @doc Construct a Funge Space.
+-spec construct() -> fungespace().
+construct() ->
 	Space = ets:new(fungespace, [set, private]),
 	ets:insert(Space, {minx, undefined}),
 	ets:insert(Space, {miny, undefined}),
@@ -107,13 +132,13 @@ create() ->
 
 
 %% @doc Finds minimum.
--spec find_bounds_min(undefined | integer(), integer()) -> integer().
+-spec find_bounds_min(integer_or_undef(), integer()) -> integer().
 find_bounds_min(undefined, Y)    -> Y;
 find_bounds_min(X, Y) when X < Y -> X;
 find_bounds_min(_X, Y)           -> Y.
 
 %% @doc Finds maximum.
--spec find_bounds_max(undefined | integer(), integer()) -> integer().
+-spec find_bounds_max(integer_or_undef(), integer()) -> integer().
 find_bounds_max(undefined, Y)    -> Y;
 find_bounds_max(X, Y) when X > Y -> X;
 find_bounds_max(_X, Y)           -> Y.
@@ -137,23 +162,36 @@ update_bounds(_V, Space, {X,Y}) ->
 	ets:insert(Space, {maxy, MaxY1}),
 	true.
 
-%% @spec load_binary(Binary, fungespace(), X, Y, LastWasCR) -> true
-%% @doc Load a binary into Funge Space.
--spec load_binary(binary(),fungespace(),non_neg_integer(),non_neg_integer(),bool()) -> true.
-load_binary(<<H,T/binary>>, FungeSpace, X, Y, LastWasCR) ->
+%% @spec load_binary(Binary, fungespace(), X, Y, LastWasCR, MinX, MaxX) -> coord()
+%% @doc
+%% Load a binary into Funge Space. MinX is used for knowing what least X
+%% should be used when resetting due to newline, and not loading from 0,0
+%% MaxX is used for making return value work.
+-spec load_binary(binary(),fungespace(),integer(),integer(),bool(),integer(),integer_or_undef()) -> coord().
+load_binary(<<H,T/binary>>, FungeSpace, X, Y, LastWasCR, MinX, MaxX) ->
 	case H of
 		$\n ->
 			case LastWasCR of
-				true -> load_binary(T, FungeSpace, 0, Y, false);
-				false -> load_binary(T, FungeSpace, 0, Y+1, false)
+				true -> load_binary(T, FungeSpace, MinX, Y, false, MinX, MaxX);
+				false -> load_binary(T, FungeSpace, MinX, Y+1, false, MinX, find_bounds_max(MaxX, X))
 			end;
 		$\r ->
-			load_binary(T, FungeSpace, 0, Y+1, true);
+			load_binary(T, FungeSpace, MinX, Y+1, true, MinX, find_bounds_max(MaxX, X));
 		%% Spaces shouldn't replace.
 		$\s ->
-			load_binary(T, FungeSpace, X+1, Y, false);
+			load_binary(T, FungeSpace, X+1, Y, false, MinX, MaxX);
 		_ ->
 			set(FungeSpace, {X, Y}, H),
-			load_binary(T, FungeSpace, X+1, Y, false)
+			load_binary(T, FungeSpace, X+1, Y, false, MinX, MaxX)
 	end;
-load_binary(<<>>, _FungeSpace, _X, _Y, _LastWasCR) -> true.
+load_binary(<<>>, _FungeSpace, X, Y, _LastWasCR, _MinX, MaxX) ->
+	{find_bounds_max(MaxX, X), Y}.
+
+%% @spec load_binary_no_newlines(Binary, fungespace(), X, Y) -> MaxX
+%% @doc Load everything in the binary, without going to a new row on newline.
+-spec load_binary_no_newlines(binary(),fungespace(),integer(),integer()) -> integer().
+load_binary_no_newlines(<<H,T/binary>>, FungeSpace, X, Y) ->
+	set(FungeSpace, {X, Y}, H),
+	load_binary_no_newlines(T, FungeSpace, X+1, Y);
+load_binary_no_newlines(<<>>, _FungeSpace, X, _Y) ->
+	X.

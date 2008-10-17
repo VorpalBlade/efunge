@@ -41,7 +41,7 @@ start(Filename, Parameters) when is_list(Filename) and is_list(Parameters) ->
 	{R1,R2,R3} = now(),
 	put(efungeargs, [Filename|Parameters]),
 	random:seed(R1, R2, R3),
-	Space = efunge_fungespace:load(Filename),
+	Space = efunge_fungespace:create(Filename),
 	IP = #fip{},
 	IP2 = efunge_fingermanager:init(IP),
 	efunge_interpreter:loop(IP2, efunge_stackstack:new(), Space).
