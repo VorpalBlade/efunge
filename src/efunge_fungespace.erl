@@ -110,13 +110,13 @@ create() ->
 -spec find_bounds_min(undefined | integer(), integer()) -> integer().
 find_bounds_min(undefined, Y)    -> Y;
 find_bounds_min(X, Y) when X < Y -> X;
-find_bounds_min(_X, Y) -> Y.
+find_bounds_min(_X, Y)           -> Y.
 
 %% @doc Finds maximum.
 -spec find_bounds_max(undefined | integer(), integer()) -> integer().
 find_bounds_max(undefined, Y)    -> Y;
 find_bounds_max(X, Y) when X > Y -> X;
-find_bounds_max(_X, Y) -> Y.
+find_bounds_max(_X, Y)           -> Y.
 
 %% @doc Update bounds values in tables.
 -spec update_bounds(integer(), fungespace(), coord()) -> 'true'.
