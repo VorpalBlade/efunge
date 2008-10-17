@@ -209,17 +209,17 @@ process_instruction($., #fip{} = IP, Stack, _Space) ->
 
 %% ~ Input Character
 process_instruction($~, #fip{} = IP, Stack, _Space) ->
-	{NewIP, Result} = efunge_input:read_next_char(IP),
+	Result = efunge_input:read_next_char(),
 	if
 		Result =:= eof -> {rev_delta(IP), Stack};
-		true           -> {NewIP, push(Stack, Result)}
+		true           -> {IP, push(Stack, Result)}
 	end;
 %% & Input Integer
 process_instruction($&, #fip{} = IP, Stack, _Space) ->
-	{NewIP, Result} = efunge_input:read_next_integer(IP),
+	Result = efunge_input:read_next_integer(),
 	if
 		Result =:= eof -> {rev_delta(IP), Stack};
-		true           -> {NewIP, push(Stack, Result)}
+		true           -> {IP, push(Stack, Result)}
 	end;
 
 %% @ Stop

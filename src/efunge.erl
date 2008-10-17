@@ -44,4 +44,7 @@ start(Filename, Parameters) when is_list(Filename) and is_list(Parameters) ->
 	Space = efunge_fungespace:create(Filename),
 	IP = #fip{},
 	IP2 = efunge_fingermanager:init(IP),
-	efunge_interpreter:loop(IP2, efunge_stackstack:new(), Space).
+	efunge_input:start(),
+	Retval = efunge_interpreter:loop(IP2, efunge_stackstack:new(), Space),
+	efunge_input:stop(),
+	Retval.

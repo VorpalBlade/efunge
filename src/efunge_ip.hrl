@@ -27,7 +27,6 @@
 		offY = 0 :: integer(),
 		isStringMode = false :: bool(),
 		lastWasSpace = false :: bool(),
-		stringBuffer = [] :: list(),
 		fingerOpStacks  :: array()
 	}
 ).
