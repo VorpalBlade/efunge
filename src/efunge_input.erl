@@ -45,18 +45,15 @@
 %%====================================================================
 %% API
 %%====================================================================
-%%--------------------------------------------------------------------
-%% Function: start() -> {ok,Pid} | ignore | {error,Error}
-%% Description: Starts the server, standalone
-%%--------------------------------------------------------------------
+
+%% @spec start() -> {ok,Pid} | ignore | {error,Error}
+%% @doc Starts the server, standalone
 -spec start() -> gen_server_start().
 start() ->
 	gen_server:start({global, ?SERVER}, ?MODULE, [], []).
 
-%%--------------------------------------------------------------------
-%% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
-%% Description: Starts the server, linked to supervisor.
-%%--------------------------------------------------------------------
+%% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
+%% @doc Starts the server, linked to supervisor.
 -spec start_link() -> gen_server_start().
 start_link() ->
 	gen_server:start_link({global, ?SERVER}, ?MODULE, [], []).
@@ -81,26 +78,16 @@ read_next_integer() ->
 %% gen_server callbacks
 %%====================================================================
 
-%%--------------------------------------------------------------------
-%% Function: init(Args) -> {ok, State} |
-%%                         {ok, State, Timeout} |
-%%                         ignore               |
-%%                         {stop, Reason}
-%% Description: Initiates the server
-%%--------------------------------------------------------------------
+%% @spec init(Args) -> {ok, State} | {ok, State, Timeout} | ignore | {stop, Reason}
+%% @hidden
+%% @doc Initiates the server
 -spec init([]) -> {'ok',#state{}}.
 init([]) ->
 	{ok, #state{}}.
 
-%%--------------------------------------------------------------------
-%% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
-%%                                      {reply, Reply, State, Timeout} |
-%%                                      {noreply, State} |
-%%                                      {noreply, State, Timeout} |
-%%                                      {stop, Reason, Reply, State} |
-%%                                      {stop, Reason, State}
-%% Description: Handling call messages
-%%--------------------------------------------------------------------
+%% @spec handle_call(Request, From, State) -> {reply, Reply, State} | {stop, Reason, Reply, State}
+%% @hidden
+%% @doc Handling call messages
 -spec handle_call(read_char | read_integer | stop,_,#state{}) -> call_return().
 handle_call(read_char, _From, State) ->
 	{NewState, Reply} = read_next_char(State),
@@ -111,41 +98,30 @@ handle_call(read_integer, _From, State) ->
 handle_call(stop, _From, State) ->
 	{stop, normal, stopped, State}.
 
-%%--------------------------------------------------------------------
-%% Function: handle_cast(Msg, State) -> {noreply, State} |
-%%                                      {noreply, State, Timeout} |
-%%                                      {stop, Reason, State}
-%% Description: Handling cast messages
-%%--------------------------------------------------------------------
+%% @spec handle_cast(Msg, State) -> {noreply, State} | {noreply, State, Timeout} | {stop, Reason, State}
+%% @hidden
+%% @doc Handling cast messages
 -spec handle_cast(_,state()) -> {noreply,state()}.
 handle_cast(_Msg, State) ->
 	{noreply, State}.
 
-%%--------------------------------------------------------------------
-%% Function: handle_info(Info, State) -> {noreply, State} |
-%%                                       {noreply, State, Timeout} |
-%%                                       {stop, Reason, State}
-%% Description: Handling all non call/cast messages
-%%--------------------------------------------------------------------
+%% @spec handle_info(Info, State) -> {noreply, State} | {noreply, State, Timeout} | {stop, Reason, State}
+%% @hidden
+%% @doc Handling all non call/cast messages
 -spec handle_info(_,state()) -> {noreply,state()}.
 handle_info(_Info, State) ->
 	{noreply, State}.
 
-%%--------------------------------------------------------------------
-%% Function: terminate(Reason, State) -> void()
-%% Description: This function is called by a gen_server when it is about to
-%% terminate. It should be the opposite of Module:init/1 and do any necessary
-%% cleaning up. When it returns, the gen_server terminates with Reason.
-%% The return value is ignored.
-%%--------------------------------------------------------------------
+%% @spec terminate(Reason, State) -> void()
+%% @hidden
+%% @doc Clean up on quit
 -spec terminate(_,state()) -> 'ok'.
 terminate(_Reason, _State) ->
 	ok.
 
-%%--------------------------------------------------------------------
-%% Func: code_change(OldVsn, State, Extra) -> {ok, NewState}
-%% Description: Convert process state when code is changed
-%%--------------------------------------------------------------------
+%% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
+%% @hidden
+%% @doc Convert process state when code is changed
 -spec code_change(_,state(),_) -> {'ok',state()}.
 code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
@@ -153,6 +129,7 @@ code_change(_OldVsn, State, _Extra) ->
 %%--------------------------------------------------------------------
 %%% Internal functions
 %%--------------------------------------------------------------------
+
 %% @spec fill_buffer(state()) -> {ok, NewState::ip()} | {eof, NewState::state()}
 %% @doc Fill up the input line buffer if needed.
 -spec fill_buffer(state()) -> {ok, state()} | {eof, state()}.
