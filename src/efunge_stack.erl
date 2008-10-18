@@ -111,7 +111,7 @@ pop_gnirts(Stack) ->
 	pop_gnirts(Stack, []).
 
 %% @spec pop_gnirts(stack(), list(integer())) -> {stack(), list(integer())}
-%% @doc Pop a 0gnirts.
+%% @doc Pop a 0gnirts, internal helper for pop_gnirts/1.
 -spec pop_gnirts(stack(), list()) -> {stack(), list(integer())}.
 pop_gnirts([], Acc) ->
 	{[], lists:reverse(Acc)};

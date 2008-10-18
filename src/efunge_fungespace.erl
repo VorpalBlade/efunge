@@ -76,7 +76,7 @@ create(Filename) ->
 	load_binary(Binary, Fungespace, 0, 0, false, 0, undefined),
 	Fungespace.
 
-%% @spec load(fungespace(), ip(), Filename::string(), coord()) -> error | coord()
+%% @spec load(fungespace(), ip(), Filename::string(), IsBinaryMode::bool(), coord()) -> error | coord()
 %% @doc Loads a file into an existing Funge Space, returning the max size.
 -spec load(fungespace(), ip(), string(), bool(), coord()) -> error | coord().
 load(Fungespace, #fip{offX = OffX, offY = OffY}, Filename, IsBinaryMode, {X, Y} = _Coord) ->
