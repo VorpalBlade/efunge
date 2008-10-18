@@ -31,11 +31,12 @@
 
 -define(SERVER, ?MODULE).
 
+%%% Various types.
+
 %% The string buffer.
 -type state() :: [] | list(integer()).
 
--type gen_server_start_error() :: {error,{already_started, pid()} | any()}.
--type gen_server_start() :: {ok,pid()} | ignore | gen_server_start_error().
+-include("otp_types.hrl").
 
 -type call_return_reply() :: {reply, eof | integer() | char(), state()}.
 -type call_return_stop()  :: {stop,normal,stopped,state()}.
@@ -46,14 +47,14 @@
 %%====================================================================
 
 %% @spec start() -> {ok,Pid} | ignore | {error,Error}
-%% @doc Starts the server, standalone
--spec start() -> gen_server_start().
+%% @doc Starts the server, standalone.
+-spec start() -> otp_start_return().
 start() ->
 	gen_server:start({global, ?SERVER}, ?MODULE, [], []).
 
 %% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the server, linked to supervisor.
--spec start_link() -> gen_server_start().
+-spec start_link() -> otp_start_return().
 start_link() ->
 	gen_server:start_link({global, ?SERVER}, ?MODULE, [], []).
 
