@@ -273,7 +273,7 @@ addtoerl "])."
 
 cat >> "fing${FPRINT}.erl" << EOF
 
--include("../fip.hrl").
+-include("../efunge_ip.hrl").
 -include("../funge_types.hrl").
 
 %% Import common functions:
