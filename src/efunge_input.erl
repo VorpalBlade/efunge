@@ -31,15 +31,14 @@
 
 -define(SERVER, ?MODULE).
 
--record(state, {stringBuffer = [] :: list()}).
-
--type state() :: #state{}.
+%% The string buffer.
+-type state() :: [] | list(integer()).
 
 -type gen_server_start_error() :: {error,{already_started, pid()} | any()}.
 -type gen_server_start() :: {ok,pid()} | ignore | gen_server_start_error().
 
--type call_return_reply() :: {reply, eof | integer() | char(),#state{}}.
--type call_return_stop()  :: {stop,normal,stopped,#state{}}.
+-type call_return_reply() :: {reply, eof | integer() | char(), state()}.
+-type call_return_stop()  :: {stop,normal,stopped,state()}.
 -type call_return()       :: call_return_reply() | call_return_stop().
 
 %%====================================================================
@@ -81,14 +80,14 @@ read_next_integer() ->
 %% @spec init(Args) -> {ok, State} | {ok, State, Timeout} | ignore | {stop, Reason}
 %% @hidden
 %% @doc Initiates the server
--spec init([]) -> {'ok',#state{}}.
+-spec init([]) -> {'ok', state()}.
 init([]) ->
-	{ok, #state{}}.
+	{ok, []}.
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} | {stop, Reason, Reply, State}
 %% @hidden
 %% @doc Handling call messages
--spec handle_call(read_char | read_integer | stop,_,#state{}) -> call_return().
+-spec handle_call(read_char | read_integer | stop,_,state()) -> call_return().
 handle_call(read_char, _From, State) ->
 	{NewState, Reply} = read_next_char(State),
 	{reply, Reply, NewState};
@@ -133,14 +132,13 @@ code_change(_OldVsn, State, _Extra) ->
 %% @spec fill_buffer(state()) -> {ok, NewState::ip()} | {eof, NewState::state()}
 %% @doc Fill up the input line buffer if needed.
 -spec fill_buffer(state()) -> {ok, state()} | {eof, state()}.
-fill_buffer(#state{} = State) ->
+fill_buffer(State) ->
 	if
-		State#state.stringBuffer =:= [] ->
+		State =:= [] ->
 			String = io:get_line(''),
 			if
 				String =:= eof -> {eof, State};
-				true ->
-					{ok, State#state{ stringBuffer=String }}
+				true           -> {ok, String}
 			end;
 		true ->
 			{ok, State}
@@ -149,13 +147,13 @@ fill_buffer(#state{} = State) ->
 %% @spec read_next_char(state()) -> {NewState, Char}
 %% @doc Get a letter from the string buffer.
 -spec read_next_char(state()) -> {state(), char() | eof}.
-read_next_char(#state{} = State) ->
+read_next_char(State) ->
 	case fill_buffer(State) of
-		{eof, _} -> {State, eof};
+		{eof, _} ->
+			{State, eof};
 		{ok, NewState} ->
-			StringBuf = NewState#state.stringBuffer,
-			[H|T] = StringBuf,
-			{NewState#state{ stringBuffer=T }, H}
+			[H|T] = NewState,
+			{T, H}
 	end.
 
 %% @spec parse_integer(string()) -> {integer(), Rest::string()} | error
@@ -181,15 +179,16 @@ parse_integer(String) ->
 %% @spec read_next_integer(state()) -> {NewState::state(), eof | integer()}
 %% @doc Get an integer from the string buffer.
 -spec read_next_integer(state()) -> {state(), eof | integer()}.
-read_next_integer(#state{} = State) ->
+read_next_integer(State) ->
 	case fill_buffer(State) of
-		{eof, _} -> {State, eof};
+		{eof, _} ->
+			{State, eof};
 		{ok, NewState} ->
-			case parse_integer(NewState#state.stringBuffer) of
+			case parse_integer(NewState) of
 				%% Try again!
 				error ->
-					read_next_integer(NewState#state{ stringBuffer=[] });
+					read_next_integer([]);
 				{Int, Rest} ->
-					{NewState#state{ stringBuffer=Rest }, Int}
+					{Rest, Int}
 			end
 	end.
