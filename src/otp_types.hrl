@@ -31,3 +31,5 @@
 
 -type supervisor_return() :: {ok,{supervisor_spec(),child_specs()}} | ignore.
 
+-type app_start_type() :: normal | {takeover, atom()} | {failover, atom()}.
+

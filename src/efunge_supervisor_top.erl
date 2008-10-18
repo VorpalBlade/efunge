@@ -21,12 +21,14 @@
 -behaviour(supervisor).
 
 %% API
--export([start_link/0, start_in_shell_for_testing/0]).
+-export([start_link/1, start_in_shell_for_testing/0]).
 
 %% Supervisor callbacks
 -export([init/1]).
 
 -define(SERVER, ?MODULE).
+%% Scope for distributed Erlang: global or local
+-define(SCOPE, local).
 
 -include("otp_types.hrl").
 
@@ -36,13 +38,13 @@
 
 %% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the supervisor.
--spec start_link() -> otp_start_return().
-start_link() ->
-	supervisor:start_link({global, ?SERVER}, ?MODULE, []).
+-spec start_link(list()) -> otp_start_return().
+start_link(StartArgs) ->
+	supervisor:start_link({?SCOPE, ?SERVER}, ?MODULE, StartArgs).
 
 -spec start_in_shell_for_testing() -> pid().
 start_in_shell_for_testing() ->
-	{ok, Pid} = supervisor:start_link({global, ?SERVER}, ?MODULE, []),
+	{ok, Pid} = supervisor:start_link({?SCOPE, ?SERVER}, ?MODULE, []),
 	unlink(Pid),
 	Pid.
 
@@ -56,10 +58,10 @@ start_in_shell_for_testing() ->
 %% @doc Whenever a supervisor is started using supervisor:start_link/[2,3],
 %% this function is called by the new process to find out about restart
 %% strategy, maximum restart frequency and child specifications.
--spec init([]) -> supervisor_return().
-init([]) ->
+-spec init(list()) -> supervisor_return().
+init(StartArgs) ->
 	ServiceSupervisor = {'efunge_supervisor_services',
-	                     {'efunge_supervisor_services', start_link, []},
+	                     {'efunge_supervisor_services', start_link, [StartArgs]},
 	                     permanent, 2000, supervisor,
 	                     [efunge_supervisor_services]},
 	{ok,{{one_for_one,3,10}, [ServiceSupervisor]}}.

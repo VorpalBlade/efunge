@@ -30,6 +30,8 @@
          terminate/2, code_change/3]).
 
 -define(SERVER, ?MODULE).
+%% Scope for distributed Erlang: global or local
+-define(SCOPE, local).
 
 %%% Various types.
 
@@ -46,33 +48,33 @@
 %% API
 %%====================================================================
 
-%% @spec start() -> {ok,Pid} | ignore | {error,Error}
-%% @doc Starts the server, standalone.
--spec start() -> otp_start_return().
-start() ->
-	gen_server:start({global, ?SERVER}, ?MODULE, [], []).
-
 %% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the server, linked to supervisor.
 -spec start_link() -> otp_start_return().
 start_link() ->
-	gen_server:start_link({global, ?SERVER}, ?MODULE, [], []).
+	gen_server:start_link({?SCOPE, ?SERVER}, ?MODULE, [], []).
+
+%% @spec start() -> {ok,Pid} | ignore | {error,Error}
+%% @doc Starts the server, standalone.
+-spec start() -> otp_start_return().
+start() ->
+	gen_server:start({?SCOPE, ?SERVER}, ?MODULE, [], []).
 
 -spec stop() -> stopped.
 stop() ->
-	gen_server:call({global, ?SERVER}, stop, infinity).
+	gen_server:call({?SCOPE, ?SERVER}, stop, infinity).
 
 %% @spec read_char() -> eof | char()
 %% @doc Get a letter from the string buffer.
 -spec read_char() -> eof | char().
 read_char() ->
-	gen_server:call({global, ?SERVER}, read_char, infinity).
+	gen_server:call({?SCOPE, ?SERVER}, read_char, infinity).
 
 %% @spec read_integer() -> eof | integer()
 %% @doc Get an integer from the string buffer.
 -spec read_integer() -> eof | integer().
 read_integer() ->
-	gen_server:call({global, ?SERVER}, read_integer, infinity).
+	gen_server:call({?SCOPE, ?SERVER}, read_integer, infinity).
 
 %%====================================================================
 %% gen_server callbacks
