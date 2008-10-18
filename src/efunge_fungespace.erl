@@ -98,15 +98,12 @@ load(Fungespace, #fip{offX = OffX, offY = OffY}, Filename, IsBinaryMode, {X, Y} 
 			{MaxX - TrueX, MaxY - TrueY}
 	end.
 
-
-
 %% @spec delete(fungespace()) -> true
 %% @private For use in core on exit only.
 %% @doc Destroy a Funge Space.
 -spec delete(fungespace()) -> true.
 delete(Fungespace) ->
 	ets:delete(Fungespace).
-
 
 %% @spec get_bounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
 %% @doc Get Funge Space bounds.
@@ -118,7 +115,10 @@ get_bounds(Fungespace) ->
 	[{_,MaxY}] = ets:lookup(Fungespace, maxy),
 	{{MinX, MinY}, {MaxX, MaxY}}.
 
-%% Private functions
+
+%%--------------------------------------------------------------------
+%%% Internal functions
+%%--------------------------------------------------------------------
 
 %% @doc Construct a Funge Space.
 -spec construct() -> fungespace().

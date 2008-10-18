@@ -172,7 +172,6 @@ parse_integer(String) ->
 			end
 	end.
 
-
 %% @spec read_integer(state()) -> {NewState::state(), eof | integer()}
 %% @doc Get an integer from the string buffer.
 -spec read_integer(state()) -> {state(), eof | integer()}.

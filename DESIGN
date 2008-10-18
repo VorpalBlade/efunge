@@ -18,4 +18,6 @@ Modules:
 
 
 Process dictionary:
-The process dictionary got one single use: place to put the cmd line arguments.
+* The process dictionary got one single use: place to put the cmd line
+  arguments.
+* Note that the module random (which is used in efunge) from STDLIB also use it.

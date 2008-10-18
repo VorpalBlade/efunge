@@ -63,7 +63,6 @@ set_delta(#fip{} = IP, X, Y) ->
 rev_delta(#fip{dx=DX, dy=DY} = IP) ->
 	IP#fip{ dx = -DX, dy = -DY }.
 
-
 %% @spec set_offset(ip(), integer(), integer()) -> NewState::ip()
 %% @doc Set delta in state.
 -spec set_offset(ip(), integer(), integer()) -> ip().
@@ -103,7 +102,10 @@ find_next_non_space(#fip{x=X, y=Y} = IP, FungeSpace) ->
 			{IP#fip{x = X, y = Y}, Value}
 	end.
 
-%% Private functions
+
+%%--------------------------------------------------------------------
+%%% Internal functions
+%%--------------------------------------------------------------------
 
 %% @doc Check if IP is cardinal
 -spec is_delta_cardinal(ip()) -> bool().

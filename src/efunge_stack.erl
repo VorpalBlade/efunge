@@ -103,7 +103,6 @@ push_list(Stack, []) ->
 push_list(Stack, [H|T]) ->
 	push_list([H|Stack], T).
 
-
 %% @spec pop_gnirts(stack()) -> {stack(), list(integer())}
 %% @doc Pop a 0gnirts.
 -spec pop_gnirts(stack()) -> {stack(), list(integer())}.
