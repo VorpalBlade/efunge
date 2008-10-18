@@ -31,7 +31,7 @@
 
 -define(SERVER, ?MODULE).
 %% Define for global server (in distributed Erlang).
--define(GLOBAL, true).
+%-define(GLOBAL, true).
 
 -ifdef(GLOBAL).
 -define(REGISTER_NAME, {global, ?SERVER}).
@@ -68,6 +68,8 @@ start_link() ->
 start() ->
 	gen_server:start(?REGISTER_NAME, ?MODULE, [], []).
 
+%% @spec stop() -> stopped
+%% @doc Stops the server. Use only for standalone server.
 -spec stop() -> stopped.
 stop() ->
 	gen_server:call(?CALL_NAME, stop, infinity).

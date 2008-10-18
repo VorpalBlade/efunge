@@ -62,7 +62,9 @@ start_in_shell_for_testing() ->
 init([]) ->
 	InputServer = {'efunge_input', {'efunge_input', start_link, []},
 	               permanent, 2000, worker, [efunge_input]},
-	{ok,{{one_for_one,3,10}, [InputServer]}}.
+	IDServer    = {'efunge_id_server', {'efunge_id_server', start_link, []},
+	               permanent, 2000, worker, [efunge_id_server]},
+	{ok,{{one_for_one,3,10}, [InputServer, IDServer]}}.
 
 %%====================================================================
 %% Internal functions

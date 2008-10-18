@@ -5,7 +5,8 @@
   {applications, [kernel, stdlib]},
   {registered, [efunge_supervisor_top,
                 efunge_supervisor_services,
-                efunge_input
+                efunge_input,
+                efunge_id_server
                ]},
   {mod, {efunge_app,[]}}
  ]
