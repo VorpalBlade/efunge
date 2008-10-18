@@ -209,17 +209,15 @@ process_instruction($., #fip{} = IP, Stack, _Space) ->
 
 %% ~ Input Character
 process_instruction($~, #fip{} = IP, Stack, _Space) ->
-	Result = efunge_input:read_char(),
-	if
-		Result =:= eof -> {rev_delta(IP), Stack};
-		true           -> {IP, push(Stack, Result)}
+	case efunge_input:read_char() of
+		eof    -> {rev_delta(IP), Stack};
+		Result -> {IP, push(Stack, Result)}
 	end;
 %% & Input Integer
 process_instruction($&, #fip{} = IP, Stack, _Space) ->
-	Result = efunge_input:read_integer(),
-	if
-		Result =:= eof -> {rev_delta(IP), Stack};
-		true           -> {IP, push(Stack, Result)}
+	case efunge_input:read_integer() of
+		eof    -> {rev_delta(IP), Stack};
+		Result -> {IP, push(Stack, Result)}
 	end;
 
 %% @ Stop
