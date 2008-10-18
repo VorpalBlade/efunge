@@ -66,3 +66,8 @@ Real bugs or issues:
  * k on " may be broken.
  * The code is rather unreadable in many places, a clean up would be a good idea.
  * Better code documentation would be useful.
+
+Missing features:
+ * o isn't supported yet.
+ * = isn't supported yet, and won't use the system() paradigm.
+ * t isn't supported yet, and may never be supported.
