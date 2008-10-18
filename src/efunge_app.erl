@@ -27,8 +27,8 @@
 %% top supervisor of the tree.
 %%--------------------------------------------------------------------
 -spec start(app_start_type(), any()) -> any().
-start(_Type, StartArgs) ->
-	efunge_supervisor_top:start_link(StartArgs).
+start(_Type, _StartArgs) ->
+	efunge_supervisor_top:start_link().
 
 %%--------------------------------------------------------------------
 %% Function: stop(State) -> void()

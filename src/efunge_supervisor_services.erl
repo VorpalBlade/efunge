@@ -21,7 +21,7 @@
 -behaviour(supervisor).
 
 %% API
--export([start_link/1, start_in_shell_for_testing/0]).
+-export([start_link/0, start_in_shell_for_testing/0]).
 
 %% Supervisor callbacks
 -export([init/1]).
@@ -38,9 +38,9 @@
 
 %% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the supervisor.
--spec start_link(list()) -> otp_start_return().
-start_link(StartArgs) ->
-	supervisor:start_link({?SCOPE, ?SERVER}, ?MODULE, StartArgs).
+-spec start_link() -> otp_start_return().
+start_link() ->
+	supervisor:start_link({?SCOPE, ?SERVER}, ?MODULE, []).
 
 -spec start_in_shell_for_testing() -> pid().
 start_in_shell_for_testing() ->
@@ -58,8 +58,8 @@ start_in_shell_for_testing() ->
 %% @doc Whenever a supervisor is started using supervisor:start_link/[2,3],
 %% this function is called by the new process to find out about restart
 %% strategy, maximum restart frequency and child specifications.
--spec init(list()) -> supervisor_return().
-init(_StartArgs) ->
+-spec init([]) -> supervisor_return().
+init([]) ->
 	InputServer = {'efunge_input', {'efunge_input', start_link, []},
 	               permanent, 2000, worker, [efunge_input]},
 	{ok,{{one_for_one,3,10}, [InputServer]}}.
