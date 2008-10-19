@@ -73,30 +73,37 @@ start() ->
 stop() ->
 	gen_server:call(?CALL_NAME, stop).
 
+%% @doc Allocate a thread ID.
 -spec alloc_thread_id() -> thread_id().
 alloc_thread_id() ->
 	gen_server:call(?CALL_NAME, alloc_thread_id).
 
+%% @doc Allocate an IP ID for a thread.
 -spec alloc_ip_id(thread_id()) -> ip_id() | notfound.
 alloc_ip_id(ThreadID) when is_integer(ThreadID) ->
 	gen_server:call(?CALL_NAME, {alloc_ip_id, ThreadID}).
 
+%% @doc Free a thread ID (also freeing all related threads).
 -spec free_thread_id(thread_id()) -> ok | notfound.
 free_thread_id(ThreadID) when is_integer(ThreadID) ->
 	gen_server:call(?CALL_NAME, {free_thread_id, ThreadID}).
 
+%% @doc Free an IP ID.
 -spec free_ip_id(ip_id()) -> ok | notfound.
 free_ip_id(IpID) when is_integer(IpID) ->
 	gen_server:call(?CALL_NAME, {free_ip_id, IpID}).
 
+%% @doc Get PID for a thread.
 -spec lookup_thread(thread_id()) -> notfound | pid().
 lookup_thread(ThreadID) when is_integer(ThreadID)  ->
 	gen_server:call(?CALL_NAME, {lookup_thread, ThreadID}).
 
+%% @doc Get thread ID for an IP.
 -spec lookup_ip_thread(ip_id()) -> notfound | thread_id().
 lookup_ip_thread(IpID) when is_integer(IpID) ->
 	gen_server:call(?CALL_NAME, {lookup_ip_thread, IpID}).
 
+%% @doc Get thread PID for an IP.
 -spec lookup_ip_pid(ip_id()) -> notfound | pid().
 lookup_ip_pid(IpID) when is_integer(IpID) ->
 	gen_server:call(?CALL_NAME, {lookup_ip_pid, IpID}).
