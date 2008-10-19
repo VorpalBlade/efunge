@@ -44,7 +44,6 @@ loop(#fip{} = IP, Stack, FungeSpace) ->
 			case process_instruction(Instr, IP, Stack, FungeSpace) of
 				% This is for @ and q.
 				{dead, Retval} ->
-					efunge_fungespace:delete(FungeSpace),
 					Retval;
 				{NewIP, NewStack} ->
 					loop(ip_forward(NewIP, FungeSpace), NewStack, FungeSpace)

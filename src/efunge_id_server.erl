@@ -125,15 +125,9 @@ init([]) ->
 	create_ets_tables(),
 	{ok, #state{}}.
 
-%%--------------------------------------------------------------------
-%% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
-%%                                      {reply, Reply, State, Timeout} |
-%%                                      {noreply, State} |
-%%                                      {noreply, State, Timeout} |
-%%                                      {stop, Reason, Reply, State} |
-%%                                      {stop, Reason, State}
-%% Description: Handling call messages
-%%--------------------------------------------------------------------
+%% @spec handle_call(Request, From, State) -> {reply, Reply, State} | {stop, Reason, Reply, State}
+%% @hidden
+%% @doc Handling call messages
 -spec handle_call(call_op(), {pid(), _} ,state()) -> call_return().
 handle_call(alloc_thread_id, {Pid, _Tag} = _From, State) ->
 	{NewState, ThreadID} = get_next_thread_id(State),

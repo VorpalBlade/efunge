@@ -41,10 +41,24 @@ start(Filename, Parameters) when is_list(Filename) and is_list(Parameters) ->
 	{R1,R2,R3} = now(),
 	put(efungeargs, [Filename|Parameters]),
 	random:seed(R1, R2, R3),
-	Space = efunge_fungespace:create(Filename),
-	IP = #fip{},
-	IP2 = efunge_fingermanager:init(IP),
+	Space = create_fungespace(Filename),
+	IP = create_ip(),
 	{ok, _} = efunge_input:start(),
-	Retval = efunge_interpreter:loop(IP2, efunge_stackstack:new(), Space),
+	Retval = efunge_interpreter:loop(IP, efunge_stackstack:new(), Space),
 	efunge_input:stop(),
+	efunge_fungespace:stop(),
 	Retval.
+
+%%--------------------------------------------------------------------
+%%% Internal functions
+%%--------------------------------------------------------------------
+-spec create_fungespace(string()) -> fungespace().
+create_fungespace(Filename) ->
+	efunge_fungespace:start(),
+	Space = efunge_fungespace:get_fungespace(),
+	ok = efunge_fungespace:load_initial(Space, Filename),
+	Space.
+
+-spec create_ip() -> ip().
+create_ip() ->
+	efunge_fingermanager:init(#fip{}).
