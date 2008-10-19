@@ -17,20 +17,50 @@
 %%%----------------------------------------------------------------------
 %% @doc This module handles the Funge Space.
 %%
+%% It is a server for Funge-Space ets table (public) as well as handles
+%% G/P/C from ATHR.
+%%
 %% Format of tuples in table is {{X,Y},Value}. The current implementation use
 %% ETS tables, but that may change without prior notice.
 %%
 %% The current implementation also use some special keys to store metadata like
 %% bounds of the Funge-Space.
 -module(efunge_fungespace).
--export([create/1, set/3, set/4, load/5,
-         fetch/2, fetch/3,
-         delete/1, get_bounds/1]).
+
+-behaviour(gen_server).
+
+%% API - OTP stuff
+-export([start/0, start_link/0, stop/0]).
+%% API - Calls to server.
+-export([get_fungespace/0, set_atomic/3, fetch_atomic/2, cmpxchg/4]).
+
+%% API - Non-calls
+-export([load_initial/2, set/3, set/4, load/5,
+         fetch/2, fetch/3, get_bounds/1]).
+
+%% gen_server callbacks
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2,
+         terminate/2, code_change/3]).
+
+-define(SERVER, ?MODULE).
+%% Define for global server (in distributed Erlang).
+%-define(GLOBAL, true).
+
+-ifdef(GLOBAL).
+-define(REGISTER_NAME, {global, ?SERVER}).
+-define(CALL_NAME, {global, ?SERVER}).
+-else.
+-define(REGISTER_NAME, {local, ?SERVER}).
+-define(CALL_NAME, ?SERVER).
+-endif.
+
+%%====================================================================
+%% Various types.
+%%====================================================================
+
 -include("efunge_ip.hrl").
 -include("funge_types.hrl").
 %% @headerfile "efunge_ip.hrl"
-
-%% Public functions
 
 %% @type coord() = {X::integer(), Y::integer()}.
 %%   Funge Space coordinates.
@@ -38,6 +68,74 @@
 %%   A Funge Space. The actual type is internal.
 
 -type integer_or_undef() :: undefined | integer().
+
+%% The state, the funge-space ID.
+-type state() :: fungespace().
+
+-include("otp_types.hrl").
+
+-type load_initial_return() :: notfound | ok.
+-type cmpxchg_return()      :: {ok, integer()} | {failed, integer()}.
+-type call_return_replies() :: true | fungespace() | integer() | cmpxchg_return() | load_initial_return().
+-type call_return_reply() :: {reply, call_return_replies(), state()}.
+-type call_return_stop()  :: {stop,normal,stopped,state()}.
+-type call_return()       :: call_return_reply() | call_return_stop().
+
+-type arg_fetch_atomic() :: {fetch_atomic,fungespace(),coord()}.
+-type arg_load_initial() :: {load_initial,fungespace(),string()}.
+-type arg_set_atomic()   :: {set_atomic,fungespace(),coord(),integer()}.
+-type arg_cmpxchg()      :: {cmpxchg,fungespace(),coord(),integer(),integer()}.
+-type call_arg() :: get_fungespace|stop|arg_fetch_atomic()|arg_load_initial()|arg_set_atomic()|arg_cmpxchg().
+
+%%====================================================================
+%% API - OTP trivia
+%%====================================================================
+%% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
+%% @doc Starts the server, linked to supervisor.
+-spec start_link() -> otp_start_return().
+start_link() ->
+	gen_server:start_link(?REGISTER_NAME, ?MODULE, [], []).
+
+%% @spec start() -> {ok,Pid} | ignore | {error,Error}
+%% @doc Starts the server, standalone.
+-spec start() -> otp_start_return().
+start() ->
+	gen_server:start(?REGISTER_NAME, ?MODULE, [], []).
+
+%% @spec stop() -> stopped
+%% @doc Stops the server. Use only for standalone server.
+-spec stop() -> stopped.
+stop() ->
+	gen_server:call(?CALL_NAME, stop).
+
+%%====================================================================
+%% API - Calls
+%%====================================================================
+
+%% Only call this initially
+-spec get_fungespace() -> fungespace().
+get_fungespace() ->
+	gen_server:call(?CALL_NAME, get_fungespace).
+
+-spec load_initial(fungespace(), string()) -> load_initial_return().
+load_initial(Fungespace, Filename) when is_integer(Fungespace) and is_list(Filename) ->
+	gen_server:call(?CALL_NAME, {load_initial, Fungespace, Filename}).
+
+-spec set_atomic(fungespace(),coord(),integer()) -> true.
+set_atomic(Fungespace, {_X,_Y} = Coord, Value) ->
+	gen_server:call(?CALL_NAME, {set_atomic, Fungespace, Coord, Value}).
+
+-spec fetch_atomic(fungespace(),coord()) -> integer().
+fetch_atomic(Fungespace, {_X,_Y} = Coord) ->
+	gen_server:call(?CALL_NAME, {fetch_atomic, Fungespace, Coord}).
+
+-spec cmpxchg(fungespace(), coord(), integer(), integer()) -> cmpxchg_return().
+cmpxchg(Fungespace, {_X,_Y} = Coord, OldValue, NewValue) ->
+	gen_server:call(?CALL_NAME, {cmpxchg, Fungespace, Coord, OldValue, NewValue}).
+
+%%====================================================================
+%% API - non-calls
+%%====================================================================
 
 %% @spec set(fungespace(), ip(), coord(), V::integer()) -> true
 %% @doc Set a cell in Funge Space with storage offset taken from IP.
@@ -67,15 +165,6 @@ fetch(Fungespace, {_X,_Y} = Coord) ->
 		[{{_,_},Value}] -> Value
 	end.
 
-%% @spec create(Filename::string()) -> fungespace()
-%% @doc Create a Funge Space from a file.
--spec create(string()) -> fungespace().
-create(Filename) ->
-	{ok, Binary} = file:read_file(Filename),
-	Fungespace = construct(),
-	load_binary(Binary, Fungespace, 0, 0, false, 0, undefined),
-	Fungespace.
-
 %% @spec load(fungespace(), ip(), Filename::string(), IsBinaryMode::bool(), coord()) -> error | coord()
 %% @doc Loads a file into an existing Funge Space, returning the max size.
 -spec load(fungespace(), ip(), string(), bool(), coord()) -> error | coord().
@@ -98,13 +187,6 @@ load(Fungespace, #fip{offX = OffX, offY = OffY}, Filename, IsBinaryMode, {X, Y} 
 			{MaxX - TrueX, MaxY - TrueY}
 	end.
 
-%% @spec delete(fungespace()) -> true
-%% @private For use in core on exit only.
-%% @doc Destroy a Funge Space.
--spec delete(fungespace()) -> true.
-delete(Fungespace) ->
-	ets:delete(Fungespace).
-
 %% @spec get_bounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
 %% @doc Get Funge Space bounds.
 -spec get_bounds(fungespace()) -> {coord(), coord()}.
@@ -116,6 +198,81 @@ get_bounds(Fungespace) ->
 	{{MinX, MinY}, {MaxX, MaxY}}.
 
 
+
+
+%%====================================================================
+%% gen_server callbacks
+%%====================================================================
+
+%% @spec init(Args) -> {ok, State} | {ok, State, Timeout} | ignore | {stop, Reason}
+%% @hidden
+%% @doc Initiates the server
+-spec init([]) -> {ok, state()}.
+init([]) ->
+	process_flag(trap_exit, true),
+	{ok, construct()}.
+
+%% @spec handle_call(Request, From, State) -> {reply, Reply, State} | {stop, Reason, Reply, State}
+%% @hidden
+%% @doc Handling call messages
+-spec handle_call(call_arg(), {pid(), _}, state()) -> call_return().
+handle_call(get_fungespace, _From, State) ->
+	{reply, State, State};
+
+handle_call({load_initial, Fungespace, Filename}, _From, State) ->
+	Reply = load_at_origin(Fungespace, Filename),
+	{reply, Reply, State};
+
+handle_call({set_atomic, Fungespace, Coord, Value}, _From, State) ->
+	Reply = set(Fungespace, Coord, Value),
+	{reply, Reply, State};
+
+handle_call({fetch_atomic, Fungespace, Coord}, _From, State) ->
+	Reply = fetch(Fungespace, Coord),
+	{reply, Reply, State};
+
+handle_call({cmpxchg, Fungespace, Coord, OldValue, NewValue}, _From, State) ->
+	case fetch(Fungespace, Coord) of
+		OldValue  ->
+			set(Fungespace, Coord, NewValue),
+			Reply = {ok, OldValue};
+		RealValue ->
+			Reply = {failed, RealValue}
+	end,
+	{reply, Reply, State};
+
+handle_call(stop, _From, State) ->
+	{stop, normal, stopped, State}.
+
+%% @spec handle_cast(Msg, State) -> {noreply, State} | {noreply, State, Timeout} | {stop, Reason, State}
+%% @hidden
+%% @doc Handling cast messages
+-spec handle_cast(_,state()) -> {noreply,state()}.
+handle_cast(_Msg, State) ->
+	{noreply, State}.
+
+%% @spec handle_info(Info, State) -> {noreply, State} | {noreply, State, Timeout} | {stop, Reason, State}
+%% @hidden
+%% @doc Handling all non call/cast messages
+-spec handle_info(_,state()) -> {noreply,state()}.
+handle_info(_Info, State) ->
+	{noreply, State}.
+
+%% @spec terminate(Reason, State) -> void()
+%% @hidden
+%% @doc Clean up on quit
+-spec terminate(_,state()) -> ok.
+terminate(_Reason, State) ->
+	delete(State),
+	ok.
+
+%% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
+%% @hidden
+%% @doc Convert process state when code is changed
+-spec code_change(_,state(),_) -> {'ok',state()}.
+code_change(_OldVsn, State, _Extra) ->
+	{ok, State}.
+
 %%--------------------------------------------------------------------
 %%% Internal functions
 %%--------------------------------------------------------------------
@@ -123,13 +280,31 @@ get_bounds(Fungespace) ->
 %% @doc Construct a Funge Space.
 -spec construct() -> fungespace().
 construct() ->
-	Space = ets:new(fungespace, [set, private]),
+	Space = ets:new(fungespace, [set, public]),
 	ets:insert(Space, {minx, undefined}),
 	ets:insert(Space, {miny, undefined}),
 	ets:insert(Space, {maxx, undefined}),
 	ets:insert(Space, {maxy, undefined}),
 	Space.
 
+%% @spec delete(fungespace()) -> true
+%% @doc Destroy a Funge Space.
+-spec delete(fungespace()) -> true.
+delete(Fungespace) ->
+	ets:delete(Fungespace).
+
+
+%% @spec load_at_origin(Filename::string()) -> fungespace()
+%% @doc Load a Funge Space at 0,0.
+-spec load_at_origin(fungespace(), string()) -> notfound | ok.
+load_at_origin(Fungespace, Filename) ->
+	{Result, Binary} = file:read_file(Filename),
+	case Result of
+		error -> notfound;
+		ok    ->
+			load_binary(Binary, Fungespace, 0, 0, false, 0, undefined),
+			ok
+	end.
 
 %% @doc Finds minimum.
 -spec find_bounds_min(integer_or_undef(), integer()) -> integer().
