@@ -55,7 +55,7 @@
 -endif.
 
 %%====================================================================
-%% Various types.
+%% Types
 %%====================================================================
 
 -include("efunge_ip.hrl").
@@ -87,9 +87,11 @@
 -type arg_cmpxchg()      :: {cmpxchg,fungespace(),coord(),integer(),integer()}.
 -type call_arg() :: get_fungespace|stop|arg_fetch_atomic()|arg_load_initial()|arg_set_atomic()|arg_cmpxchg().
 
+
 %%====================================================================
-%% API - OTP trivia
+%% API - Generic start/stop stuff
 %%====================================================================
+
 %% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the server, linked to supervisor.
 -spec start_link() -> otp_start_return().
@@ -107,6 +109,7 @@ start() ->
 -spec stop() -> stopped.
 stop() ->
 	gen_server:call(?CALL_NAME, stop).
+
 
 %%====================================================================
 %% API - Calls
@@ -132,6 +135,7 @@ fetch_atomic(Fungespace, {_X,_Y} = Coord) ->
 -spec cmpxchg(fungespace(), coord(), integer(), integer()) -> cmpxchg_return().
 cmpxchg(Fungespace, {_X,_Y} = Coord, OldValue, NewValue) ->
 	gen_server:call(?CALL_NAME, {cmpxchg, Fungespace, Coord, OldValue, NewValue}).
+
 
 %%====================================================================
 %% API - non-calls
@@ -196,8 +200,6 @@ get_bounds(Fungespace) ->
 	[{_,MaxX}] = ets:lookup(Fungespace, maxx),
 	[{_,MaxY}] = ets:lookup(Fungespace, maxy),
 	{{MinX, MinY}, {MaxX, MaxY}}.
-
-
 
 
 %%====================================================================
@@ -273,9 +275,10 @@ terminate(_Reason, State) ->
 code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
 
-%%--------------------------------------------------------------------
-%%% Internal functions
-%%--------------------------------------------------------------------
+
+%%====================================================================
+%% Internal functions
+%%====================================================================
 
 %% @doc Construct a Funge Space.
 -spec construct() -> fungespace().

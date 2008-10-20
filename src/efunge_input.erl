@@ -41,7 +41,9 @@
 -define(CALL_NAME, ?SERVER).
 -endif.
 
-%%% Various types.
+%%====================================================================
+%% Types
+%%====================================================================
 
 %% The string buffer.
 -type state() :: [] | list(integer()).
@@ -52,8 +54,9 @@
 -type call_return_stop()  :: {stop,normal,stopped,state()}.
 -type call_return()       :: call_return_reply() | call_return_stop().
 
+
 %%====================================================================
-%% API
+%% API - Generic start/stop stuff
 %%====================================================================
 
 %% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
@@ -74,6 +77,11 @@ start() ->
 stop() ->
 	gen_server:call(?CALL_NAME, stop, infinity).
 
+
+%%====================================================================
+%% API - Calls
+%%====================================================================
+
 %% @spec read_char() -> eof | char()
 %% @doc Get a letter from the string buffer.
 -spec read_char() -> eof | char().
@@ -85,6 +93,7 @@ read_char() ->
 -spec read_integer() -> eof | integer().
 read_integer() ->
 	gen_server:call(?CALL_NAME, read_integer, infinity).
+
 
 %%====================================================================
 %% gen_server callbacks
@@ -138,18 +147,18 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
 
-%%--------------------------------------------------------------------
-%%% Internal functions
-%%--------------------------------------------------------------------
+
+%%====================================================================
+%% Internal functions
+%%====================================================================
 
 %% @spec fill_buffer(state()) -> {ok, NewState::ip()} | {eof, NewState::state()}
 %% @doc Fill up the input line buffer if needed.
 -spec fill_buffer(state()) -> {ok, state()} | {eof, state()}.
 fill_buffer([]) ->
-	String = io:get_line(''),
-	if
-		String =:= eof -> {eof, []};
-		true           -> {ok, String}
+	case io:get_line('') of
+		eof    -> {eof, []};
+		String -> {ok, String}
 	end;
 fill_buffer(State) ->
 	{ok, State}.

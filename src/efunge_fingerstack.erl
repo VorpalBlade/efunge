@@ -20,7 +20,7 @@
 %% in the efunge_fingermanager module for pushing and popping the funs.
 -module(efunge_fingerstack).
 -export([new/0, push/2, peek/1, pop/1]).
-%% For special use (and from NULL
+%% For special use (and from NULL)
 -export([reflect/3]).
 
 -include("efunge_ip.hrl").

@@ -21,6 +21,10 @@
 -include("efunge_ip.hrl").
 -include("funge_types.hrl").
 
+%%====================================================================
+%% API
+%%====================================================================
+
 %% @spec run(list(string())) -> none()
 %% @doc Handler for -run
 -spec run([string(),...]) -> ok.
@@ -48,9 +52,9 @@ start(Filename, Parameters) when is_list(Filename) and is_list(Parameters) ->
 	efunge_fungespace:stop(),
 	Retval.
 
-%%--------------------------------------------------------------------
-%%% Internal functions
-%%--------------------------------------------------------------------
+%%====================================================================
+%% Internal functions
+%%====================================================================
 -spec create_fungespace(string()) -> fungespace().
 create_fungespace(Filename) ->
 	efunge_fungespace:start(),

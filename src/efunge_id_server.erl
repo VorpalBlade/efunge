@@ -17,7 +17,7 @@
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
-		 terminate/2, code_change/3]).
+         terminate/2, code_change/3]).
 
 -define(SERVER, ?MODULE).
 %% Define for global server (in distributed Erlang).
@@ -30,6 +30,10 @@
 -define(REGISTER_NAME, {local, ?SERVER}).
 -define(CALL_NAME, ?SERVER).
 -endif.
+
+%%====================================================================
+%% Types
+%%====================================================================
 
 -record(state,
 	{
@@ -51,8 +55,9 @@
 
 -include("otp_types.hrl").
 
+
 %%====================================================================
-%% API
+%% API - Generic start/stop stuff
 %%====================================================================
 
 %% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
@@ -72,6 +77,11 @@ start() ->
 -spec stop() -> stopped.
 stop() ->
 	gen_server:call(?CALL_NAME, stop).
+
+
+%%====================================================================
+%% API - Calls
+%%====================================================================
 
 %% @doc Allocate a thread ID.
 -spec alloc_thread_id() -> thread_id().
@@ -108,17 +118,14 @@ lookup_ip_thread(IpID) when is_integer(IpID) ->
 lookup_ip_pid(IpID) when is_integer(IpID) ->
 	gen_server:call(?CALL_NAME, {lookup_ip_pid, IpID}).
 
+
 %%====================================================================
 %% gen_server callbacks
 %%====================================================================
 
-%%--------------------------------------------------------------------
-%% Function: init(Args) -> {ok, State} |
-%%                         {ok, State, Timeout} |
-%%                         ignore               |
-%%                         {stop, Reason}
-%% Description: Initiates the server
-%%--------------------------------------------------------------------
+%% @spec init(Args) -> {ok, State} | {ok, State, Timeout} | ignore | {stop, Reason}
+%% @hidden
+%% @doc Initiates the server
 -spec init([]) -> {ok, #state{}}.
 init([]) ->
 	process_flag(trap_exit, true),
@@ -188,9 +195,11 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
 
-%%--------------------------------------------------------------------
-%%% Internal functions
-%%--------------------------------------------------------------------
+
+%%====================================================================
+%% Internal functions
+%%====================================================================
+
 -spec create_ets_tables() -> ok.
 create_ets_tables() ->
 	ets:new(thread_to_pid, [set, private, named_table]),
