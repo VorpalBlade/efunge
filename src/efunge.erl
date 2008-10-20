@@ -43,13 +43,15 @@ start(Filename) when is_list(Filename) ->
 -spec start(string(), [] | [string(),...]) -> integer().
 start(Filename, Parameters) when is_list(Filename) and is_list(Parameters) ->
 	setup_random(),
-	put(efungeargs, [Filename|Parameters]),
+	efunge_global_data:start(),
+	efunge_global_data:set_cmdline([Filename|Parameters]),
 	Space = create_fungespace(Filename),
 	IP = create_ip(),
 	{ok, _} = efunge_input:start(),
 	Retval = efunge_interpreter:loop(IP, efunge_stackstack:new(), Space),
 	efunge_input:stop(),
 	efunge_fungespace:stop(),
+	efunge_global_data:stop(),
 	Retval.
 
 %%====================================================================

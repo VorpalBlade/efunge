@@ -66,8 +66,10 @@ init([]) ->
 	               permanent, 2000, worker, [efunge_input]},
 	IDServer    = {'efunge_id_server', {'efunge_id_server', start_link, []},
 	               permanent, 2000, worker, [efunge_id_server]},
+	DataServer  = {'efunge_global_data', {'efunge_global_data', start_link, []},
+	               permanent, 2000, worker, [efunge_global_data]},
 	{ok,{{one_for_one,3,10},
-	     [FungeSpace, InputServer, IDServer]
+	     [FungeSpace, InputServer, IDServer, DataServer]
 	    }
 	}.
 

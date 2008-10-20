@@ -92,7 +92,7 @@ push_request(18, #fip{} = _IP, StackStack, _FungeSpace, PushStack) ->
 	push_stack_lengths(StackStack, PushStack);
 %% 19 Cmd line args
 push_request(19, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
-	Args = lists:reverse(get(efungeargs)),
+	Args = lists:reverse(efunge_global_data:get_cmdline()),
 	PushStack2 = push(push(PushStack, 0), 0),
 	efunge_stack:push_gnirtses(PushStack2, Args);
 %% 20 Environment
