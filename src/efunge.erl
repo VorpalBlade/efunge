@@ -38,9 +38,8 @@ start(Filename) when is_list(Filename) ->
 %% @doc Load file, set up PRNG, start main loop.
 -spec start(string(), [] | [string(),...]) -> integer().
 start(Filename, Parameters) when is_list(Filename) and is_list(Parameters) ->
-	{R1,R2,R3} = now(),
+	setup_random(),
 	put(efungeargs, [Filename|Parameters]),
-	random:seed(R1, R2, R3),
 	Space = create_fungespace(Filename),
 	IP = create_ip(),
 	{ok, _} = efunge_input:start(),
@@ -62,3 +61,9 @@ create_fungespace(Filename) ->
 -spec create_ip() -> ip().
 create_ip() ->
 	efunge_fingermanager:init(#fip{}).
+
+-spec setup_random() -> ok.
+setup_random() ->
+	{R1,R2,R3} = now(),
+	random:seed(R1, R2, R3),
+	ok.
