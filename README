@@ -11,8 +11,10 @@ Befunge-93.
 To run this you will need to have Erlang installed and erlc in your PATH.
 You will also need make to build the project (or you could use c() in erl).
 
-efunge has been tested on Erlang/OTP R12B-4. It may or may not work on other
-versions.
+efunge requires at least Erlang/OTP R12B-3. However it is possible that the bug
+OTP-7526 (solved in R12B-4) could affect efunge. Further efunge has only been
+tested on Erlang/OTP R12B-4. Newer versions should work but that is not
+guaranteed.
 
 
 Building instructions

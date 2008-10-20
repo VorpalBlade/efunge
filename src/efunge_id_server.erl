@@ -49,9 +49,10 @@
 -type call_return_reply() :: {reply, notfound | ok | pid() | thread_id() | ip_id(), state()}.
 -type call_return_stop()  :: {stop,normal,stopped,state()}.
 -type call_return()       :: call_return_reply() | call_return_stop().
--type call_op_none() :: alloc_thread_id | stop.
--type call_op_int()  :: alloc_ip_id | free_ip_id | free_thread_id | lookup_ip_pid | lookup_ip_thread | lookup_thread.
--type call_op() :: call_op_none() | {call_op_int(), thread_id() | ip_id()}.
+-type call_op_none()      :: alloc_thread_id | stop.
+-type call_op_ipid()      :: free_ip_id | lookup_ip_pid | lookup_ip_thread.
+-type call_op_threadid()  :: alloc_ip_id | free_thread_id | lookup_thread.
+-type call_op() :: call_op_none() | {call_op_ipid(), ip_id()} | {call_op_threadid(), thread_id()}.
 
 -include("otp_types.hrl").
 
@@ -203,7 +204,7 @@ code_change(_OldVsn, State, _Extra) ->
 -spec create_ets_tables() -> ok.
 create_ets_tables() ->
 	ets:new(thread_to_pid, [set, private, named_table]),
-	ets:new(ip_to_thread, [set, private, named_table]),
+	ets:new(ip_to_thread,  [set, private, named_table]),
 	ets:new(thread_to_ips, [bag, private, named_table]),
 	ok.
 
@@ -257,7 +258,7 @@ remove_ip(IpID) ->
 -spec ip_to_thread(ip_id()) -> notfound | thread_id().
 ip_to_thread(IpID) ->
 	case ets:lookup(ip_to_thread, IpID) of
-		[]                -> notfound;
+		[]                 -> notfound;
 		[{IpID, ThreadID}] -> ThreadID
 	end.
 
