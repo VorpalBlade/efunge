@@ -34,11 +34,11 @@
 %% @doc Move IP forward one step.
 -spec ip_forward(ip(), fungespace()) -> ip().
 ip_forward(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
-	Bounds = efunge_fungespace:get_bounds(FungeSpace),
+	Bounds = efunge_fungespace:get_bounds_thread(FungeSpace),
 	NewX = X+DX,
 	NewY = Y+DY,
 	NewIP = IP#fip{ x=NewX, y=NewY },
-	case is_in_range({NewX, NewY}, Bounds) of
+	case efunge_fungespace:is_in_range({NewX, NewY}, Bounds) of
 		true -> NewIP;
 		false ->
 			case is_delta_cardinal(IP) of
@@ -137,24 +137,10 @@ ip_forward_cardinal(#fip{x=X, y=Y} = IP, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	end,
 	IP#fip{ x=NewX, y=NewY }.
 
-%% @doc Is X, Y in range of the box created by the second parameter?
--spec is_in_range(coord(),{coord(),coord()}) -> bool().
-is_in_range({X, Y}, {{MinX, MinY}, {MaxX, MaxY}}) ->
-	if
-		X < MinX -> false;
-		X > MaxX -> false;
-		true     ->
-			if
-				Y < MinY -> false;
-				Y > MaxY -> false;
-				true     -> true
-			end
-	end.
-
 %% @doc Move forward for flying IPs.
 -spec ip_forward_flying(ip(),{coord(),coord()}) -> ip().
 ip_forward_flying(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, Bounds) ->
-	case is_in_range({X, Y}, Bounds) of
+	case efunge_fungespace:is_in_range({X, Y}, Bounds) of
 		false -> rev_delta(IP);
 		true -> ip_forward_flying(IP#fip{ x=X+DX, y=Y+DY }, Bounds)
 	end.

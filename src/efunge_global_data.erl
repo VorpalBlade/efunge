@@ -85,11 +85,11 @@ stop() ->
 %% API - Calls
 %%====================================================================
 
--spec set_cmdline(string()) -> ok.
+-spec set_cmdline([string()]) -> ok.
 set_cmdline(Commandline) ->
 	gen_server:call(?CALL_NAME, {set_cmdline, Commandline}).
 
--spec get_cmdline() -> string().
+-spec get_cmdline() -> [string()].
 get_cmdline() ->
 	gen_server:call(?CALL_NAME, get_cmdline).
 
@@ -107,7 +107,7 @@ init([]) ->
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} | {stop, Reason, Reply, State}
 %% @hidden
 %% @doc Handling call messages
--spec handle_call(get_cmdline | {set_cmdline, string()} | stop,_,state()) -> call_return().
+-spec handle_call(get_cmdline | {set_cmdline, [string()]} | stop,_,state()) -> call_return().
 handle_call(get_cmdline, _From, State) ->
 	{reply, State#state.command_line, State};
 handle_call({set_cmdline, Commandline}, _From, State) ->

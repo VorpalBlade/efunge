@@ -42,34 +42,27 @@ start(Filename) when is_list(Filename) ->
 %% @doc Load file, set up PRNG, start main loop.
 -spec start(string(), [] | [string(),...]) -> integer().
 start(Filename, Parameters) when is_list(Filename) and is_list(Parameters) ->
-	setup_random(),
-	efunge_global_data:start(),
-	efunge_global_data:set_cmdline([Filename|Parameters]),
-	Space = create_fungespace(Filename),
-	IP = create_ip(),
+	%% FIXME: This is hackish until the application bit gets properly working.
+	process_flag(trap_exit, true),
+	{ok, _} = efunge_global_data:start(),
+	{ok, _} = efunge_fungespace:start(),
 	{ok, _} = efunge_input:start(),
-	Retval = efunge_interpreter:loop(IP, efunge_stackstack:new(), Space),
-	efunge_input:stop(),
-	efunge_fungespace:stop(),
-	efunge_global_data:stop(),
-	Retval.
-
-%%====================================================================
-%% Internal functions
-%%====================================================================
--spec create_fungespace(string()) -> fungespace().
-create_fungespace(Filename) ->
-	efunge_fungespace:start(),
+	efunge_global_data:set_cmdline([Filename|Parameters]),
 	Space = efunge_fungespace:get_fungespace(),
 	ok = efunge_fungespace:load_initial(Space, Filename),
-	Space.
-
--spec create_ip() -> ip().
-create_ip() ->
-	efunge_fingermanager:init(#fip{}).
-
--spec setup_random() -> ok.
-setup_random() ->
-	{R1,R2,R3} = now(),
-	random:seed(R1, R2, R3),
-	ok.
+	{ok, Pid} = efunge_thread:start(Space),
+	%% FIXME: Temp hack until proper fix is done.
+	receive
+		{Pid, shutdown, Retval} ->
+			efunge_input:stop(),
+			efunge_fungespace:stop(),
+			efunge_global_data:stop(),
+			Retval;
+		Other ->
+			io:format("*BUG* Parent got ~p. Thread pid was ~p. Terminating.~n", [Other, Pid]),
+			efunge_input:stop(),
+			efunge_fungespace:stop(),
+			efunge_global_data:stop(),
+			exit(Pid, kill),
+			127
+	end.

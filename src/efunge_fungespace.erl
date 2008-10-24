@@ -23,8 +23,8 @@
 %% Format of tuples in table is {{X,Y},Value}. The current implementation use
 %% ETS tables, but that may change without prior notice.
 %%
-%% The current implementation also use some special keys to store metadata like
-%% bounds of the Funge-Space.
+%% The current implementation also use a special key to store the bounds of the
+%% Funge-Space.
 -module(efunge_fungespace).
 
 -behaviour(gen_server).
@@ -36,7 +36,10 @@
 
 %% API - Non-calls
 -export([load_initial/2, set/3, set/4, load/5,
-         fetch/2, fetch/3, get_bounds/1]).
+         fetch/2, fetch/3, get_bounds_thread/1, get_bounds/1, get_block/3]).
+
+%% API - Utility functions
+-export([is_in_range/2, set_process_bounds_initial/1]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -115,7 +118,7 @@ stop() ->
 %% API - Calls
 %%====================================================================
 
-%% Only call this initially
+%% @doc Only call this to initially load the file.
 -spec get_fungespace() -> fungespace().
 get_fungespace() ->
 	gen_server:call(?CALL_NAME, get_fungespace).
@@ -152,7 +155,7 @@ set(Fungespace, #fip{offX = OffX, offY = OffY}, {X,Y}, V) ->
 -spec set(fungespace(), coord(), integer()) -> true.
 set(Fungespace, {_X,_Y} = Coord, V) ->
 	ets:insert(Fungespace, {Coord, V}),
-	update_bounds(V, Fungespace, Coord).
+	cast_update_bounds(V, Fungespace, Coord).
 
 %% @spec fetch(fungespace(), ip(), coord()) -> integer()
 %% @doc Get a cell from a specific Funge Space. Will use storage offset of IP.
@@ -192,15 +195,59 @@ load(Fungespace, #fip{offX = OffX, offY = OffY}, Filename, IsBinaryMode, {X, Y} 
 	end.
 
 %% @spec get_bounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
-%% @doc Get Funge Space bounds.
+%% @doc Get Funge Space bounds from global data only.
 -spec get_bounds(fungespace()) -> {coord(), coord()}.
 get_bounds(Fungespace) ->
-	[{_,MinX}] = ets:lookup(Fungespace, minx),
-	[{_,MinY}] = ets:lookup(Fungespace, miny),
-	[{_,MaxX}] = ets:lookup(Fungespace, maxx),
-	[{_,MaxY}] = ets:lookup(Fungespace, maxy),
-	{{MinX, MinY}, {MaxX, MaxY}}.
+	[{_,Min,Max}] = ets:lookup(Fungespace, bounds),
+	{Min, Max}.
 
+%% @spec get_bounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
+%% @doc Get Funge Space bounds. Take thread local bounds in consideration.
+-spec get_bounds_thread(fungespace()) -> {coord(), coord()}.
+get_bounds_thread(Fungespace) ->
+	[{_,Min,Max}] = ets:lookup(Fungespace, bounds),
+	ThreadBounds = get(efunge_bounds),
+	rect_union(ThreadBounds, {Min, Max}).
+
+%% @spec get_block(fungespace(), Min::coord(), Max::coord()) -> list({coord(), Value})
+%% @doc Returns a block of funge space, only return those values actually set in
+%% said block, non-present ones are space. This is absolute, not relative offset.
+%%
+%% Note this is experimental and may or may not be removed in the future.
+-spec get_block(fungespace(),coord(),coord()) -> [{coord(), integer()}].
+get_block(Fungespace, {MinX, MinY}, {MaxX, MaxY}) ->
+	Results = ets:select(Fungespace,
+	                     [{{{'$1','$2'}, '$3'},
+	                       [{'>=', '$1', MinX},
+	                        {'=<', '$1', MaxX},
+	                        {'>=', '$2', MinY},
+	                        {'=<', '$2', MaxY}],
+	                       ['$_']}
+	                     ]),
+	Results.
+
+
+%%====================================================================
+%% API - Utility functions
+%%====================================================================
+
+%% @doc Is X, Y in range of the box created by the second parameter?
+-spec is_in_range(coord(),{coord(),coord()}) -> bool().
+is_in_range({X, Y}, {{MinX, MinY}, {MaxX, MaxY}}) ->
+	if
+		X < MinX -> false;
+		X > MaxX -> false;
+		true     ->
+			if
+				Y < MinY -> false;
+				Y > MaxY -> false;
+				true     -> true
+			end
+	end.
+
+%% @doc Set bounds in process dict. Use once at start of thread.
+set_process_bounds_initial(Fungespace) ->
+	put(efunge_bounds, get_bounds(Fungespace)).
 
 %%====================================================================
 %% gen_server callbacks
@@ -249,7 +296,10 @@ handle_call(stop, _From, State) ->
 %% @spec handle_cast(Msg, State) -> {noreply, State} | {noreply, State, Timeout} | {stop, Reason, State}
 %% @hidden
 %% @doc Handling cast messages
--spec handle_cast(_,state()) -> {noreply,state()}.
+-spec handle_cast(update_bounds,state()) -> {noreply,state()}.
+handle_cast({update_bounds, Fungespace, Coord}, State) ->
+	update_bounds(Fungespace, Coord),
+	{noreply, State};
 handle_cast(_Msg, State) ->
 	{noreply, State}.
 
@@ -277,17 +327,66 @@ code_change(_OldVsn, State, _Extra) ->
 
 
 %%====================================================================
-%% Internal functions
+%% Internal functions - utility functions
+%%====================================================================
+
+%% Extend rect to contain point.
+rect_point_union({X, Y}, {{MinX,MinY},{MaxX,MaxY}}) ->
+	MinX1 = find_bounds_min(MinX, X),
+	MinY1 = find_bounds_min(MinY, Y),
+	MaxX1 = find_bounds_max(MaxX, X),
+	MaxY1 = find_bounds_max(MaxY, Y),
+	{{MinX1, MinY1}, {MaxX1, MaxY1}}.
+
+%% Largest rect of the two.
+rect_union({{MinAX,MinAY},{MaxAX,MaxAY}}, {{MinBX,MinBY},{MaxBX,MaxBY}}) ->
+	MinX1 = find_bounds_min(MinAX, MinBX),
+	MinY1 = find_bounds_min(MinAY, MinBY),
+	MaxX1 = find_bounds_max(MaxAX, MaxBX),
+	MaxY1 = find_bounds_max(MaxAY, MaxBY),
+	{{MinX1, MinY1}, {MaxX1, MaxY1}}.
+
+%% @doc Finds minimum.
+-spec find_bounds_min(integer_or_undef(), integer()) -> integer().
+find_bounds_min(undefined, Y)    -> Y;
+find_bounds_min(X, Y) when X < Y -> X;
+find_bounds_min(_X, Y)           -> Y.
+
+%% @doc Finds maximum.
+-spec find_bounds_max(integer_or_undef(), integer()) -> integer().
+find_bounds_max(undefined, Y)    -> Y;
+find_bounds_max(X, Y) when X > Y -> X;
+find_bounds_max(_X, Y)           -> Y.
+
+
+%%====================================================================
+%% Internal functions - client
+%%====================================================================
+
+cast_update_bounds($\s, _Space, _Coord) ->
+	true;
+cast_update_bounds(_V, Space, Coord) ->
+	Bounds = get_bounds(Space),
+	case is_in_range(Coord, Bounds) of
+		false ->
+			gen_server:cast(?CALL_NAME, {update_bounds, Space, Coord}),
+			OldThreadBounds = get(efunge_bounds),
+			NewBounds = rect_union(OldThreadBounds, rect_point_union(Coord, Bounds)),
+			put(efunge_bounds, NewBounds),
+			true;
+		true ->
+			true
+	end.
+
+%%====================================================================
+%% Internal functions - server
 %%====================================================================
 
 %% @doc Construct a Funge Space.
 -spec construct() -> fungespace().
 construct() ->
 	Space = ets:new(fungespace, [set, public]),
-	ets:insert(Space, {minx, undefined}),
-	ets:insert(Space, {miny, undefined}),
-	ets:insert(Space, {maxx, undefined}),
-	ets:insert(Space, {maxy, undefined}),
+	ets:insert(Space, {bounds, {undefined, undefined}, {undefined, undefined}}),
 	Space.
 
 %% @spec delete(fungespace()) -> true
@@ -304,41 +403,74 @@ load_at_origin(Fungespace, Filename) ->
 	{Result, Binary} = file:read_file(Filename),
 	case Result of
 		error -> notfound;
-		ok    ->
-			load_binary(Binary, Fungespace, 0, 0, false, 0, undefined),
-			ok
+		ok    -> load_initial(Binary, Fungespace, 0, 0, false)
 	end.
 
-%% @doc Finds minimum.
--spec find_bounds_min(integer_or_undef(), integer()) -> integer().
-find_bounds_min(undefined, Y)    -> Y;
-find_bounds_min(X, Y) when X < Y -> X;
-find_bounds_min(_X, Y)           -> Y.
+%% @spec set_server(fungespace(), coord(), V::integer()) -> true
+%% @doc Set a cell in Funge Space.
+-spec set_server(fungespace(), coord(), integer()) -> true.
+set_server(Fungespace, {_X,_Y} = Coord, V) ->
+	ets:insert(Fungespace, {Coord, V}),
+	update_bounds(V, Fungespace, Coord).
 
-%% @doc Finds maximum.
--spec find_bounds_max(integer_or_undef(), integer()) -> integer().
-find_bounds_max(undefined, Y)    -> Y;
-find_bounds_max(X, Y) when X > Y -> X;
-find_bounds_max(_X, Y)           -> Y.
 
-%% @doc Update bounds values in tables.
--spec update_bounds(integer(), fungespace(), coord()) -> 'true'.
-update_bounds($\s, _Space, _Coord) ->
-	true;
-update_bounds(_V, Space, {X,Y}) ->
-	[{_,MinX}] = ets:lookup(Space, minx),
-	[{_,MinY}] = ets:lookup(Space, miny),
-	[{_,MaxX}] = ets:lookup(Space, maxx),
-	[{_,MaxY}] = ets:lookup(Space, maxy),
+%%====================================================================
+%% Internal functions - Client/Server - Bounds updates.
+%%====================================================================
+
+%% @doc Update bounds values in tables, do not care about value.
+-spec update_bounds(fungespace(), coord()) -> true.
+update_bounds(Space, {X,Y}) ->
+	[{_,{MinX,MinY},{MaxX,MaxY}}] = ets:lookup(Space, bounds),
 	MinX1 = find_bounds_min(MinX, X),
 	MinY1 = find_bounds_min(MinY, Y),
 	MaxX1 = find_bounds_max(MaxX, X),
 	MaxY1 = find_bounds_max(MaxY, Y),
-	ets:insert(Space, {minx, MinX1}),
-	ets:insert(Space, {miny, MinY1}),
-	ets:insert(Space, {maxx, MaxX1}),
-	ets:insert(Space, {maxy, MaxY1}),
+	ets:insert(Space, {bounds, {MinX1, MinY1}, {MaxX1, MaxY1}}),
 	true.
+
+%% @doc Update bounds values in tables, only if value isn't space.
+-spec update_bounds(integer(), fungespace(), coord()) -> true.
+update_bounds($\s, _Space, _Coord) ->
+	true;
+update_bounds(_V, Space, {X,Y}) ->
+	[{_,{MinX,MinY},{MaxX,MaxY}}] = ets:lookup(Space, bounds),
+	MinX1 = find_bounds_min(MinX, X),
+	MinY1 = find_bounds_min(MinY, Y),
+	MaxX1 = find_bounds_max(MaxX, X),
+	MaxY1 = find_bounds_max(MaxY, Y),
+	ets:insert(Space, {bounds, {MinX1, MinY1}, {MaxX1, MaxY1}}),
+	true.
+
+%%====================================================================
+%% Internal functions - Server - Bulk loading.
+%%====================================================================
+
+
+
+%% @spec load_initial(Binary, fungespace(), X, Y, LastWasCR, MinX, MaxX) -> coord()
+%% @doc
+%% Load a binary into Funge Space. Loads at 0,0. Assumes no race conditions.
+-spec load_initial(binary(),fungespace(),integer(),integer(),bool()) -> ok.
+load_initial(<<H,T/binary>>, FungeSpace, X, Y, LastWasCR) ->
+	case H of
+		$\n ->
+			case LastWasCR of
+				true -> load_initial(T, FungeSpace, 0, Y, false);
+				false -> load_initial(T, FungeSpace, 0, Y+1, false)
+			end;
+		$\r ->
+			load_initial(T, FungeSpace, 0, Y+1, true);
+		%% Spaces shouldn't replace.
+		$\s ->
+			load_initial(T, FungeSpace, X+1, Y, false);
+		_ ->
+			set_server(FungeSpace, {X, Y}, H),
+			load_initial(T, FungeSpace, X+1, Y, false)
+	end;
+load_initial(<<>>, _FungeSpace, _X, _Y, _LastWasCR) ->
+	ok.
+
 
 %% @spec load_binary(Binary, fungespace(), X, Y, LastWasCR, MinX, MaxX) -> coord()
 %% @doc

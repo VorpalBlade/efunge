@@ -16,39 +16,147 @@
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
 %% @doc This module implements the main loop.
--module(efunge_interpreter).
--export([loop/3]).
+-module(efunge_thread).
+
+%% API - OTP stuff
+-export([start/1, start_link/1, init/2]).
+-export([system_continue/3, system_terminate/4, system_code_change/4]).
+
+
+%% Imports
 -import(efunge_fungespace, [set/4, fetch/3]).
 -import(efunge_stackstack, [push/2, pop/1, pop_vec/1, dup/1, swap/1, pop_gnirts/1, push_vec/2]).
 -import(efunge_ip, [ip_forward/2, set_delta/3, set_offset/3, rev_delta/1, turn_delta_left/1, turn_delta_right/1]).
+
+%%====================================================================
+%% Types
+%%====================================================================
 
 -include("efunge_ip.hrl").
 -include("funge_types.hrl").
 %% @headerfile "efunge_ip.hrl"
 
-%% @type process_instr_ret() = {ip(),stack()} | {dead, integer()}.
--type process_instr_ret() :: {ip(),stack()} | {dead, integer()}.
+-type quit_types() :: exited | quit | athr_quit.
+%% @type process_instr_ret() = {ip(),stack()} | {dead, {Type, integer()}}.
+-type process_instr_ret() :: {ip(),stack()} | {dead, {quit_types(), integer()}}.
 
-%% @spec loop(ip(), stackstack(), tid()) -> integer()
-%% @doc Main loop. Do not call from anywhere but efunge:start/2!
--spec loop(ip(), stackstack(), fungespace()) -> integer().
-loop(#fip{} = IP, Stack, FungeSpace) ->
-	Instr = efunge_fungespace:fetch(FungeSpace, {IP#fip.x, IP#fip.y}),
+-type state_tuple() :: {ip(),stackstack(),fungespace()}.
+
+
+%%====================================================================
+%% API - OTP stuff
+%%====================================================================
+
+-spec start(fungespace()) -> {ok, pid()}.
+start(FungeSpace) ->
+	proc_lib:start(?MODULE, init, [self(), FungeSpace]).
+
+-spec start_link(fungespace()) -> {ok, pid()}.
+start_link(FungeSpace) ->
+	proc_lib:start_link(?MODULE, init, [self(), FungeSpace]).
+
+%% dialyzer bug, won't actually return.
+-spec init(pid(),fungespace()) -> any().
+init(Parent, FungeSpace) ->
+	process_flag(trap_exit, true),
+	Deb = sys:debug_options([]),
+	setup_random(),
+	efunge_fungespace:set_process_bounds_initial(FungeSpace),
+	IP = create_ip(),
+	proc_lib:init_ack(Parent, {ok, self()}),
+	loop(IP, efunge_stackstack:new(), FungeSpace, Parent, Deb).
+
+%% dialyzer bug, won't actually return.
+-spec system_continue(pid(),_,state_tuple()) -> any().
+system_continue(Parent, Deb, {IP, Stack, FungeSpace}) ->
+	loop(IP, Stack, FungeSpace, Parent, Deb).
+
+-spec system_terminate(_,pid(),_,state_tuple()) -> none().
+system_terminate(Reason, _Parent, _Deb, {_IP, _Stack, _FungeSpace}) ->
+	%% TODO Add cleanup code
+	exit(Reason).
+
+-spec system_code_change(state_tuple(),atom(),_,_) -> {'ok',_}.
+system_code_change(State, _Module, _OldVsn, _Extra) ->
+	{ok, State}.
+
+%%====================================================================
+%% Main loop(s)
+%%====================================================================
+
+%% In reality it doesn't actually return, but typer and dialyzer fails to
+%% understand that sys:handle_system_msg won't return.
+-spec loop(ip(),stackstack(),fungespace(),pid(),_) -> any().
+loop(IP, Stack, FungeSpace, Parent, Deb) ->
+	receive
+		code_change ->
+			efunge_thread:loop(IP, Stack, FungeSpace, Parent, Deb);
+		stop ->
+			exit(normal);
+		{system, From, Request} ->
+			sys:handle_system_msg(Request, From, Parent, ?MODULE, Deb,
+			                      {IP, Stack, FungeSpace});
+		{'EXIT', Parent, Reason} ->
+			%% TODO Add cleanup code
+			exit(Reason);
+		%% For debugging.
+		Other ->
+			print_error("Got unknown message ~p~n", [Other]),
+			loop(IP, Stack, FungeSpace, Parent, Deb)
+	after 0 ->
+		case run_ip(IP, Stack, FungeSpace) of
+			{dead, {Type, Retval}} ->
+				%% TODO Handle Type and Retval correctly!
+				Parent ! {self(), shutdown, Retval},
+				exit(normal);
+			{NewIP, NewStack} ->
+				loop(NewIP, NewStack, FungeSpace, Parent, Deb)
+		end
+	end.
+
+-spec run_ip(ip(),stackstack(),fungespace()) -> process_instr_ret().
+run_ip(#fip{ x = X, y = Y } = IP, Stack, FungeSpace) ->
+	Instr = efunge_fungespace:fetch(FungeSpace, {X, Y}),
 	%io:format("~c", [Instr]),
 	%io:format("~c (x=~w y=~w)~n", [Instr, IP#fip.x, IP#fip.y]),
 	case IP#fip.isStringMode of
 		true ->
 			{NewIP, NewStack} = handle_string_mode(Instr, IP, Stack),
-			loop(ip_forward(NewIP, FungeSpace), NewStack, FungeSpace);
+			{ip_forward(NewIP, FungeSpace), NewStack};
 		false ->
 			case process_instruction(Instr, IP, Stack, FungeSpace) of
-				% This is for @ and q.
-				{dead, Retval} ->
-					Retval;
+				% This is for @, q and ATHR quit.
+				{dead, _} = ReturnValue ->
+					ReturnValue;
 				{NewIP, NewStack} ->
-					loop(ip_forward(NewIP, FungeSpace), NewStack, FungeSpace)
+					{ip_forward(NewIP, FungeSpace), NewStack}
 			end
 	end.
+
+%%====================================================================
+%% Internal functions
+%%====================================================================
+
+-spec setup_random() -> ok.
+setup_random() ->
+	{R1,R2,R3} = now(),
+	random:seed(R1, R2, R3),
+	ok.
+
+-spec create_ip() -> ip().
+create_ip() ->
+	efunge_fingermanager:init(#fip{}).
+
+-spec print_error(string(),[any(),...]) -> 'ok'.
+print_error(Format, Parameters) ->
+	io:format("Thread ~p: ", [self()]),
+	io:format(Format, Parameters),
+	ok.
+
+
+%%====================================================================
+%% The actual interpreter
+%%====================================================================
 
 %% @spec handle_string_mode(integer(), ip(), stackstack()) -> {ip(), stack()}
 %% @doc Handle reading stuff in string mode.
@@ -221,7 +329,7 @@ process_instruction($&, #fip{} = IP, Stack, _Space) ->
 
 %% @ Stop
 process_instruction($@, _IP, _Stack, _Space) ->
-	{dead, 0};
+	{dead, {exited, 0}};
 
 
 %% Begin Funge-98 instructions.
@@ -383,7 +491,7 @@ process_instruction($), #fip{} = IP, StackStack, _Space) ->
 %% q Quit
 process_instruction($q, _IP, Stack, _Space) ->
 	{_S2, Retval} = pop(Stack),
-	{dead, Retval};
+	{dead, {quit, Retval}};
 
 
 
@@ -408,13 +516,13 @@ process_instruction(_Instr, #fip{} = IP, Stack, _Space) ->
 
 %% @spec iterate(Count, Instr, IP, Stack, Space) -> process_instr_ret()
 %% @doc Iterate helper. Calls the relevant process_instruction Count times.
--spec iterate(non_neg_integer(),integer(),ip()|dead,stackstack()|integer(),fungespace()) -> process_instr_ret().
+-spec iterate(non_neg_integer(),integer(),ip()|dead,stackstack()|tuple(),fungespace()) -> process_instr_ret().
 iterate(0, _Instr, IP, Stack, _Space) ->
 	{IP, Stack};
 %% For @ and q.
-iterate(_Count, _Instr, dead, Retval, _Space) ->
-	{dead, Retval};
-%% Should insert cases for k here.
+iterate(_Count, _Instr, dead, Result, _Space) ->
+	{dead, Result};
+%% Should insert cases for nested k here.
 iterate(Count, Instr, IP, Stack, Space) ->
 	{IP2, Stack2} = process_instruction(Instr, IP, Stack, Space),
 	iterate(Count-1, Instr, IP2, Stack2, Space).
