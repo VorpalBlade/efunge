@@ -119,9 +119,9 @@ pop_gnirts([0|T], Acc) ->
 pop_gnirts([H|T] = _Stack, Acc) ->
 	pop_gnirts(T, [H|Acc]).
 
-%% @spec push_gnirtses(stack(), list(list(integer()))) -> stack()
+%% @spec push_gnirtses(stack(), list(string())) -> stack()
 %% @doc Push a list of strings as a series of 0"gnirts"
--spec push_gnirtses(stack(), [[integer(),...],...]) -> stack().
+-spec push_gnirtses(stack(), [string(),...]) -> stack().
 push_gnirtses(Stack, []) ->
 	Stack;
 push_gnirtses(Stack, [H|T]) ->
