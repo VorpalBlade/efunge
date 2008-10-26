@@ -246,8 +246,11 @@ is_in_range({X, Y}, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	end.
 
 %% @doc Set bounds in process dict. Use once at start of thread.
+-spec set_process_bounds_initial(fungespace()) -> ok.
 set_process_bounds_initial(Fungespace) ->
-	put(efunge_bounds, get_bounds(Fungespace)).
+	put(efunge_bounds, get_bounds(Fungespace)),
+	ok.
+
 
 %%====================================================================
 %% gen_server callbacks
@@ -331,6 +334,7 @@ code_change(_OldVsn, State, _Extra) ->
 %%====================================================================
 
 %% Extend rect to contain point.
+-spec rect_point_union(coord(),rect()) -> rect().
 rect_point_union({X, Y}, {{MinX,MinY},{MaxX,MaxY}}) ->
 	MinX1 = find_bounds_min(MinX, X),
 	MinY1 = find_bounds_min(MinY, Y),
@@ -339,6 +343,7 @@ rect_point_union({X, Y}, {{MinX,MinY},{MaxX,MaxY}}) ->
 	{{MinX1, MinY1}, {MaxX1, MaxY1}}.
 
 %% Largest rect of the two.
+-spec rect_union(rect(), rect()) -> rect().
 rect_union({{MinAX,MinAY},{MaxAX,MaxAY}}, {{MinBX,MinBY},{MaxBX,MaxBY}}) ->
 	MinX1 = find_bounds_min(MinAX, MinBX),
 	MinY1 = find_bounds_min(MinAY, MinBY),
@@ -363,6 +368,7 @@ find_bounds_max(_X, Y)           -> Y.
 %% Internal functions - client
 %%====================================================================
 
+-spec cast_update_bounds(integer(),fungespace(),coord()) -> true.
 cast_update_bounds($\s, _Space, _Coord) ->
 	true;
 cast_update_bounds(_V, Space, Coord) ->

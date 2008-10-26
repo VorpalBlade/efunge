@@ -19,6 +19,7 @@
 -type stack() :: [] | list(cell()).
 -type stackstack() :: [] | list(stack()).
 -type coord() :: {integer(), integer()}.
+-type rect() :: {coord(), coord()}.
 -type ip() :: #fip{}.
 -type fungespace() :: integer().
 -type fingerfun() :: fun((ip(), stackstack(), fungespace()) -> {ip(), stackstack()}).
