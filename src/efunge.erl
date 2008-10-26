@@ -44,9 +44,7 @@ start(Filename) when is_list(Filename) ->
 start(Filename, Parameters) when is_list(Filename) and is_list(Parameters) ->
 	%% FIXME: This is hackish until the application bit gets properly working.
 	process_flag(trap_exit, true),
-	{ok, _} = efunge_global_data:start(),
-	{ok, _} = efunge_fungespace:start(),
-	{ok, _} = efunge_input:start(),
+	ok = application:start(efunge),
 	efunge_global_data:set_cmdline([Filename|Parameters]),
 	Space = efunge_fungespace:get_fungespace(),
 	ok = efunge_fungespace:load_initial(Space, Filename),
@@ -54,15 +52,15 @@ start(Filename, Parameters) when is_list(Filename) and is_list(Parameters) ->
 	%% FIXME: Temp hack until proper fix is done.
 	receive
 		{Pid, shutdown, Retval} ->
-			efunge_input:stop(),
-			efunge_fungespace:stop(),
-			efunge_global_data:stop(),
+			error_logger:tty(false),
+			application:stop(efunge),
+			error_logger:tty(true),
 			Retval;
 		Other ->
 			io:format("*BUG* Parent got ~p. Thread pid was ~p. Terminating.~n", [Other, Pid]),
-			efunge_input:stop(),
-			efunge_fungespace:stop(),
-			efunge_global_data:stop(),
+			error_logger:tty(false),
+			application:stop(efunge),
+			error_logger:tty(true),
 			exit(Pid, kill),
 			127
 	end.
