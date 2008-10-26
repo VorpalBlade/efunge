@@ -42,7 +42,7 @@ ip_forward(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
 		true -> NewIP;
 		false ->
 			case is_delta_cardinal(IP) of
-				true -> ip_forward_cardinal(NewIP, Bounds);
+				true  -> ip_forward_cardinal(NewIP, Bounds);
 				false -> ip_forward_flying(rev_delta(IP), Bounds)
 			end
 	end.

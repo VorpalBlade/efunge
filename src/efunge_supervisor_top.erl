@@ -60,6 +60,8 @@ start_in_shell_for_testing() ->
 %% strategy, maximum restart frequency and child specifications.
 -spec init([]) -> supervisor_return().
 init([]) ->
+	%% First thing: Insert error handler.
+	efunge_report:register_handler(),
 	ServiceSupervisor = {'efunge_supervisor_services',
 	                     {'efunge_supervisor_services', start_link, []},
 	                     permanent, 2000, supervisor,
