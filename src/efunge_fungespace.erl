@@ -124,7 +124,7 @@ get_fungespace() ->
 	gen_server:call(?CALL_NAME, get_fungespace).
 
 -spec load_initial(fungespace(), string()) -> load_initial_return().
-load_initial(Fungespace, Filename) when is_integer(Fungespace) and is_list(Filename) ->
+load_initial(Fungespace, Filename) when is_integer(Fungespace), is_list(Filename) ->
 	gen_server:call(?CALL_NAME, {load_initial, Fungespace, Filename}).
 
 -spec set_atomic(fungespace(),coord(),integer()) -> true.

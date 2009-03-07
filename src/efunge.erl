@@ -41,7 +41,7 @@ start(Filename) when is_list(Filename) ->
 %% @spec start(string(), list(string())) -> integer()
 %% @doc Load file, set up PRNG, start main loop.
 -spec start(string(), [] | [string(),...]) -> integer().
-start(Filename, Parameters) when is_list(Filename) and is_list(Parameters) ->
+start(Filename, Parameters) when is_list(Filename), is_list(Parameters) ->
 	%% FIXME: This is hackish until the application bit gets properly working.
 	process_flag(trap_exit, true),
 	ok = application:start(efunge),
