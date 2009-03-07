@@ -70,4 +70,3 @@ stop_quiet() ->
 	application:stop(efunge),
 	error_logger:tty(true),
 	ok.
-
