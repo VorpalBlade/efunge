@@ -99,6 +99,11 @@ genfprintinfo() {
 	fi
 	parse_spec "${FPRINT}"
 
+	# Check for unsupported features.
+	if [[ $fp_CONDITION ]]; then
+		die "Sorry, efunge doesn't support %condition"
+	fi
+
 	progresslvl2 "Generating data for list"
 	local FPRINTHEX FPRINTERLANGHEX
 	for (( i = 0; i < ${#FPRINT}; i++ )); do
