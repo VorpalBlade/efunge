@@ -52,15 +52,22 @@ start(Filename, Parameters) when is_list(Filename) and is_list(Parameters) ->
 	%% FIXME: Temp hack until proper fix is done.
 	receive
 		{Pid, shutdown, Retval} ->
-			error_logger:tty(false),
-			application:stop(efunge),
-			error_logger:tty(true),
+			stop_quiet(),
 			Retval;
 		Other ->
 			io:format("*BUG* Parent got ~p. Thread pid was ~p. Terminating.~n", [Other, Pid]),
-			error_logger:tty(false),
-			application:stop(efunge),
-			error_logger:tty(true),
+			stop_quiet(),
 			exit(Pid, kill),
 			127
 	end.
+
+
+%% @doc This is quite a hack: It will turn off tty logging, stop efunge then
+%% turn on tty logging again.
+-spec stop_quiet() -> ok.
+stop_quiet() ->
+	error_logger:tty(false),
+	application:stop(efunge),
+	error_logger:tty(true),
+	ok.
+
