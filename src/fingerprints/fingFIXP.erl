@@ -105,7 +105,7 @@ fixp_cos(IP, Stack, _Space) ->
 fixp_rand(IP, Stack, _Space) ->
 	{S1, N} = pop(Stack),
 	if
-		N =< 0 -> {efunge_ip:rev_delta(IP), S1};
+		N =< 0 -> {IP, push(S1, 0)};
 		true   -> {IP, push(S1, random:uniform(N))}
 	end.
 
