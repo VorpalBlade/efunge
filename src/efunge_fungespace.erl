@@ -175,6 +175,9 @@ load_binary(<<H,T/binary>>, FungeSpace, X, Y, LastWasCR, MinX, MaxX) ->
 				true -> load_binary(T, FungeSpace, MinX, Y, false, MinX, MaxX);
 				false -> load_binary(T, FungeSpace, MinX, Y+1, false, MinX, find_bounds_max(MaxX, X))
 			end;
+		%% Form feed is ignored.
+		$\f ->
+			load_binary(T, FungeSpace, X, Y, false, MinX, MaxX);
 		$\r ->
 			load_binary(T, FungeSpace, MinX, Y+1, true, MinX, find_bounds_max(MaxX, X));
 		%% Spaces shouldn't replace.
