@@ -47,6 +47,7 @@ You can run efunge in two ways:
   is important, do not try to use a semi-colon or such, just use a dot.
   Use "q()." (without the quotes) to exit the Erlang shell.
 
+
 Debugging build
 ---------------
 If you want to report a bug with a backtrace, compile with:
