@@ -21,7 +21,7 @@
 -type coord() :: {integer(), integer()}.
 -type rect() :: {coord(), coord()}.
 -type ip() :: #fip{}.
--type fungespace() :: integer().
+-type fungespace() :: atom() | tid().
 -type fingerfun() :: fun((ip(), stackstack(), fungespace()) -> {ip(), stackstack()}).
 -type fingerloadingfun() :: fun((ip()) -> {ok, ip()} | {error, ip()}).
 -type fingerstack() :: [] | list(fingerfun()).
