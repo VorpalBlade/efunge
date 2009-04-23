@@ -20,7 +20,7 @@
 -type stackstack() :: [] | list(stack()).
 -type coord() :: {integer(), integer()}.
 -type ip() :: #fip{}.
--type fungespace() :: integer().
+-type fungespace() :: atom() | tid().
 -type fingerfun() :: fun((ip(), stackstack(), fungespace()) -> {ip(), stackstack()}).
 -type fingerloadingfun() :: fun((ip()) -> {ok, ip()} | {error, ip()}).
 -type fingerstack() :: [] | list(fingerfun()).
