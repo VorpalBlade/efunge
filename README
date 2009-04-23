@@ -1,30 +1,34 @@
 efunge
 ======
-This is a simple Befunge-98 interpreter coded in what I aim to make idiomatic
-Erlang. As this is my first "real" Erlang project I'm sure there are lot of
-code that is done the wrong way.
+This is a simple Befunge-98 interpreter coded in Erlang.
 
 efunge uses arbitrary-sized integers, this is a side effect of Erlang using that
-by default. This means that Efunge is Turing complete unlike "normal"
-Befunge-93.
+by default.
 
-To run this you will need to have Erlang installed and erlc in your PATH.
-You will also need make to build the project (or you could use c() in erl).
-
-efunge requires at least Erlang/OTP R12B-3. However it is possible that the bug
-OTP-7526 (solved in R12B-4) could affect efunge. Further efunge has only been
-tested on Erlang/OTP R12B-4. Newer versions should work but that is not
-guaranteed.
+To build and run efunge you will need:
+* Erlang. Version R13B-0 is currently recommended. Newer minor versions should
+  usually work too (but that is not guaranteed). When a new stable major version
+  of Erlang is released, efunge is generally upgraded to it (after a few days or
+  weeks) and "support" for the older Erlang version is dropped. Older versions
+  may still work (if you are lucky) but are neither tested nor "supported".
+  Warning: R12B-3 and older versions most certainly not work due to the bug
+  OTP-7526 (fixed in R12B-4).
+* A *nix make (or you could compile efunge manually, but details about that is
+  undocumented).
+* Optional: A POSIX compatible shell for the wrapper script. You can also run
+  efunge from inside the Erlang shell.
 
 
 Building instructions
 ---------------------
+* Make sure the program "erl" (without quotes) is in your PATH.
 * Run "make" (without the quotes) in your shell while you are in the efunge
   directory.
 * To build a high performance build use:
      ERL_COMPILER_OPTIONS='[inline,native,{hipe,[o3]}]' make
   Note that your Erlang needs HIPE support for this, and debugging is near
-  impossible in such a build.
+  impossible in such a build (see below for how do properly build a debugging
+  build).
 
 
 Running instructions
@@ -36,32 +40,47 @@ You can run efunge in two ways:
 * Start an Erlang shell in the build directory using:
      erl -pa ./ebin
   Then run:
-     efunge:start("path/to/befunge/program.bf").
+     efunge:start("path/to/befunge/program.b98").
   or
-     efunge:start("path/to/befunge/program.bf", ["parameters", "to", "the program"]).
+     efunge:start("path/to/befunge/program.b98", ["parameters", "to", "the program"]).
   inside the Erlang shell to run efunge. Note that the dot after the statement
   is important, do not try to use a semi-colon or such, just use a dot.
   Use "q()." (without the quotes) to exit the Erlang shell.
 
+Debugging build
+---------------
 If you want to report a bug with a backtrace, compile with:
    ERL_COMPILER_OPTIONS='[debug_info]' make clean all
-Then run the resulting program from *inside* erl as shown in example two. The
-backtrace produced when running the interpreter freestanding is much less
-detailed.
+Then run the resulting program from *inside* erl as shown in example two above.
+The backtrace produced when running the interpreter freestanding is much less
+detailed (and less useful).
+
+Remember to also include:
+ * Details on how to reproduce the issue.
+ * If possible include the program causing the bug in efunge.
+   Or even better: A minimal test case.
+ * Which OS you use. (Linux, Windows, OS X, ...)
+ * Which architecture you use. (x86, x86_64, ARM, PPC, ...)
+ * Erlang version. (You are looking for something like "R13B-0" here)
+ * Runtime variant. (Run erl and copy the entire first line of output, will be
+   a long line beginning with something similar to:
+   "Erlang R13B (erts-5.7.1) [source] [64-bit] [rq:1] [hipe]".)
+ * efunge version or branch and revision.
+ * And if the bug causes a crash don't forget the backtrace (as described above).
 
 
 Known bugs and limitations
 --------------------------
 Limitations or bugs caused by Erlang:
- * When running inside the shell, non-printable characters will be escaped. This
-   is an Erlang "feature", if it is a problem just run it freestanding.
- * Erlang adds some environment variables by itself, and also modifies $PATH. It
-   is not possible to fix or work around this.
+* When running inside the shell, non-printable characters will be escaped. This
+  is an Erlang "feature", if it is a problem just run it freestanding.
+* Erlang adds some environment variables by itself, and also modifies $PATH. It
+  is not possible to fix or work around this.
 Both of these issues can be resolved by defining Erlang itself to be the OS.
 
- * It is slow, but that will not be fixed, if you want a faster Befunge interpreter
-   try cfunge (http://rage.kuonet.org/~anmaster/cfunge/) that is coded in C.
-   cfunge also handles Funge-108. However, cfunge only works on POSIX platforms.
+* It is slow, but that will not be fixed, if you want a faster Befunge interpreter
+  try cfunge (http://rage.kuonet.org/~anmaster/cfunge/) that is coded in C.
+  cfunge also handles Funge-109. However, cfunge only works on POSIX platforms.
 
 Real bugs or issues:
  * k on k is broken.
