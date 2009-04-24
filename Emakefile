@@ -1,6 +1,5 @@
 {['src/*'],
  [{outdir, ebin},
-  {warn_format,2},
   warn_export_all,
   warn_shadow_vars,
   warn_obsolete_guard,
