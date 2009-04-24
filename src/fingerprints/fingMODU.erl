@@ -74,5 +74,5 @@ floordiv(X, Y) ->
 	R = X div Y,
 	if
 		R < 0 -> R-1;
-		true   -> R
+		true  -> R
 	end.
