@@ -20,8 +20,8 @@
 %% Format of tuples in table is {{X,Y},Value}. The current implementation use
 %% ETS tables, but that may change without prior notice.
 %%
-%% The current implementation also use some special keys to store metadata like
-%% bounds of the Funge-Space.
+%% The current implementation also uses the process dictionary key fspacebounds
+%% to store the bounds of the Funge-Space. This may change without prior notice.
 -module(efunge_fungespace).
 -export([create/1, set/3, set/4, load/5,
          fetch/2, fetch/3,
@@ -50,7 +50,7 @@ set(Fungespace, #fip{offX = OffX, offY = OffY}, {X,Y}, V) ->
 -spec set(fungespace(), coord(), integer()) -> true.
 set(Fungespace, {_X,_Y} = Coord, V) ->
 	ets:insert(Fungespace, {Coord, V}),
-	update_bounds(V, Fungespace, Coord).
+	update_bounds(V, Coord).
 
 %% @spec fetch(fungespace(), ip(), coord()) -> integer()
 %% @doc Get a cell from a specific Funge Space. Will use storage offset of IP.
@@ -108,12 +108,8 @@ delete(Fungespace) ->
 %% @spec get_bounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
 %% @doc Get Funge Space bounds.
 -spec get_bounds(fungespace()) -> {coord(), coord()}.
-get_bounds(Fungespace) ->
-	[{_,MinX}] = ets:lookup(Fungespace, minx),
-	[{_,MinY}] = ets:lookup(Fungespace, miny),
-	[{_,MaxX}] = ets:lookup(Fungespace, maxx),
-	[{_,MaxY}] = ets:lookup(Fungespace, maxy),
-	{{MinX, MinY}, {MaxX, MaxY}}.
+get_bounds(_Fungespace) ->
+	get(fspacebounds).
 
 
 %%--------------------------------------------------------------------
@@ -124,10 +120,7 @@ get_bounds(Fungespace) ->
 -spec construct() -> fungespace().
 construct() ->
 	Space = ets:new(fungespace, [set, private]),
-	ets:insert(Space, {minx, undefined}),
-	ets:insert(Space, {miny, undefined}),
-	ets:insert(Space, {maxx, undefined}),
-	ets:insert(Space, {maxy, undefined}),
+	put(fspacebounds, {{undefined, undefined}, {undefined, undefined}}),
 	Space.
 
 
@@ -144,22 +137,16 @@ find_bounds_max(X, Y) when X > Y -> X;
 find_bounds_max(_X, Y)           -> Y.
 
 %% @doc Update bounds values in tables.
--spec update_bounds(integer(), fungespace(), coord()) -> 'true'.
-update_bounds($\s, _Space, _Coord) ->
+-spec update_bounds(integer(), coord()) -> 'true'.
+update_bounds($\s, _Coord) ->
 	true;
-update_bounds(_V, Space, {X,Y}) ->
-	[{_,MinX}] = ets:lookup(Space, minx),
-	[{_,MinY}] = ets:lookup(Space, miny),
-	[{_,MaxX}] = ets:lookup(Space, maxx),
-	[{_,MaxY}] = ets:lookup(Space, maxy),
+update_bounds(_V, {X,Y}) ->
+	{{MinX,MinY},{MaxX,MaxY}} = get(fspacebounds),
 	MinX1 = find_bounds_min(MinX, X),
 	MinY1 = find_bounds_min(MinY, Y),
 	MaxX1 = find_bounds_max(MaxX, X),
 	MaxY1 = find_bounds_max(MaxY, Y),
-	ets:insert(Space, {minx, MinX1}),
-	ets:insert(Space, {miny, MinY1}),
-	ets:insert(Space, {maxx, MaxX1}),
-	ets:insert(Space, {maxy, MaxY1}),
+	put(fspacebounds, {{MinX1,MinY1},{MaxX1,MaxY1}}),
 	true.
 
 %% @spec load_binary(Binary, fungespace(), X, Y, LastWasCR, MinX, MaxX) -> coord()
