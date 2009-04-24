@@ -130,6 +130,13 @@ construct() ->
 	ets:insert(Space, {maxy, undefined}),
 	Space.
 
+
+%% @doc Finds minimum.
+-spec find_bounds_min(integer_or_undef(), integer()) -> integer().
+find_bounds_min(undefined, Y)    -> Y;
+find_bounds_min(X, Y) when X < Y -> X;
+find_bounds_min(_X, Y)           -> Y.
+
 %% @doc Finds maximum.
 -spec find_bounds_max(integer_or_undef(), integer()) -> integer().
 find_bounds_max(undefined, Y)    -> Y;
@@ -145,10 +152,8 @@ update_bounds(_V, Space, {X,Y}) ->
 	[{_,MinY}] = ets:lookup(Space, miny),
 	[{_,MaxX}] = ets:lookup(Space, maxx),
 	[{_,MaxY}] = ets:lookup(Space, maxy),
-	% We can use erlang:min but not erlang:max since atoms always compare
-	% greater than numbers.
-	MinX1 = erlang:min(MinX, X),
-	MinY1 = erlang:min(MinY, Y),
+	MinX1 = find_bounds_min(MinX, X),
+	MinY1 = find_bounds_min(MinY, Y),
 	MaxX1 = find_bounds_max(MaxX, X),
 	MaxY1 = find_bounds_max(MaxY, Y),
 	ets:insert(Space, {minx, MinX1}),
