@@ -285,7 +285,7 @@ EOF
 addtoerl "%% @doc Load the $FPRINT fingerprint."
 addtoerl "-spec load(ip()) -> {ok, ip()}."
 addtoerl "load(IP) ->"
-addtoerl "	IP2 = ffingermanager:push_funs(IP, ["
+addtoerl "	IP2 = efunge_fingermanager:push_funs(IP, ["
 for (( i = 0; i < ${#OPCODES}; i++ )); do
 	ord number "${OPCODES:$i:1}"
 	addtoerl_nolf "		{\$${OPCODES:$i:1}, fun ?MODULE:${FPRINTLOW}_${OPCODE_NAMES[$number]}/3}"
@@ -308,7 +308,7 @@ for (( i = 0; i < ${#OPCODES}; i++ )); do
 	addtoerl "%% @doc ${OPCODES:$i:1} - ${OPCODE_DESC[$number]}"
 	addtoerl "-spec ${funname}(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}."
 	addtoerl "${funname}(IP, Stack, Space) ->"
-	addtoerl "	{fip:rev_delta(IP), Stack}."
+	addtoerl "	{efunge_ip:rev_delta(IP), Stack}."
 	addtoerl ''
 done
 
