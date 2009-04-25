@@ -26,8 +26,8 @@
 -include("funge_types.hrl").
 %% @headerfile "efunge_ip.hrl"
 
-%% @type process_instr_ret() = {ip(),stack()} | {dead, integer()}.
--type process_instr_ret() :: {ip(),stack()} | {dead, integer()}.
+%% @type process_instr_ret() = {ip(),stackstack()} | {dead, integer()}.
+-type process_instr_ret() :: {ip(),stackstack()} | {dead, integer()}.
 
 %% @spec loop(ip(), stackstack(), tid()) -> integer()
 %% @doc Main loop. Do not call from anywhere but efunge:start/2!
@@ -53,7 +53,7 @@ loop(#fip{} = IP, Stack, FungeSpace) ->
 
 %% @spec handle_string_mode(integer(), ip(), stackstack()) -> {ip(), stack()}
 %% @doc Handle reading stuff in string mode.
--spec handle_string_mode(integer(),ip(),stackstack()) -> {ip(),stack()}.
+-spec handle_string_mode(integer(),ip(),stackstack()) -> {ip(),stackstack()}.
 handle_string_mode(Instr, #fip{ lastWasSpace = LastSpace } = IP, Stack) ->
 	if
 		%% This code is needed to handle SGML spaces.
