@@ -16,8 +16,9 @@
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
 -type cell() :: integer().
--type stack() :: [] | list(cell()).
--type stackstack() :: [] | list(stack()).
+-type stack() :: [cell()].
+-type stack_non_empty() :: [cell(),...].
+-type stackstack() :: [stack(),...].
 -type coord() :: {integer(), integer()}.
 -type rect() :: {coord(), coord()}.
 -type ip() :: #fip{}.

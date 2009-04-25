@@ -38,8 +38,8 @@
 
 -type quit_types() :: exited | quit | athr_quit.
 -type dead_tuple() :: {dead, {quit_types(), integer()}}.
-%% @type process_instr_ret() = {ip(),stack()} | {dead, {Type, integer()}}.
--type process_instr_ret() :: {ip(),stack()} | dead_tuple().
+%% @type process_instr_ret() = {ip(),stackstack()} | {dead, {Type, integer()}}.
+-type process_instr_ret() :: {ip(),stackstack()} | dead_tuple().
 
 -type state_tuple() :: {ip(),stackstack(),fungespace()}.
 
@@ -161,7 +161,7 @@ print_error(Format, Parameters) ->
 
 %% @spec handle_string_mode(integer(), ip(), stackstack()) -> {ip(), stack()}
 %% @doc Handle reading stuff in string mode.
--spec handle_string_mode(integer(),ip(),stackstack()) -> {ip(),stack()}.
+-spec handle_string_mode(integer(),ip(),stackstack()) -> {ip(),stackstack()}.
 handle_string_mode(Instr, #fip{ lastWasSpace = LastSpace } = IP, Stack) ->
 	if
 		%% This code is needed to handle SGML spaces.

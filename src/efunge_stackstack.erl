@@ -125,7 +125,7 @@ push_vec_SOSS([TOSS,SOSS|T], V) ->
 
 %% @spec new() -> stackstack()
 %% @doc Create a new stack-stack.
--spec new() -> [[]].
+-spec new() -> [[],...].
 new() ->
 	[[]].
 

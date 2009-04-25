@@ -222,7 +222,7 @@ fixp_xor(IP, Stack, _Space) ->
 %% Private funtions
 
 %% @doc This function returns the signbit for a given number.
--spec signbit(number()) -> -1 | 0 | 1.
+-spec signbit(integer()) -> -1 | 0 | 1.
 signbit(N) when N > 0 ->  1;
 signbit(N) when N < 0 -> -1;
 signbit(_N)           ->  0.

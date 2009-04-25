@@ -27,7 +27,7 @@
 
 %% @spec run(list(string())) -> none()
 %% @doc Handler for -run
--spec run([string(),...]) -> ok.
+-spec run([string(),...]) -> no_return().
 run([Filename|Parameters]) when is_list(Filename) ->
 	Retval = start(Filename, Parameters),
 	init:stop(Retval).
