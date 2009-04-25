@@ -39,7 +39,7 @@ new() ->
 
 %% @spec push(stack(), cell()) -> stack()
 %% @doc Push a value on a stack.
--spec push(stack(), cell()) -> stack().
+-spec push(stack(), cell()) -> stack_non_empty().
 push(L, V) ->
 	[V|L].
 
@@ -61,7 +61,7 @@ pop([H|T]) ->
 
 %% @spec dup(stack()) -> stack()
 %% @doc Duplicate the top value on a stack.
--spec dup(stack()) -> stack().
+-spec dup(stack()) -> stack_non_empty().
 dup([]) ->
 	[0, 0];
 dup([H|T]) ->
@@ -69,7 +69,7 @@ dup([H|T]) ->
 
 %% @spec swap(stack()) -> stack()
 %% @doc Swap the two top values on a stack.
--spec swap(stack()) -> stack().
+-spec swap(stack()) -> stack_non_empty().
 swap([]) ->
 	[0, 0];
 swap([H1,H2|T]) ->
@@ -89,7 +89,7 @@ pop_vec([Y,X|T]) ->
 
 %% @spec push_vec(stack(), coord()) -> stack()
 %% @doc Pop a Funge vector from a stack.
--spec push_vec(stack(), coord()) -> stack().
+-spec push_vec(stack(), coord()) -> stack_non_empty().
 push_vec([], {X, Y}) ->
 	[Y,X];
 push_vec(S, {X, Y})->
@@ -97,7 +97,7 @@ push_vec(S, {X, Y})->
 
 %% @spec push_list(stack(), list(integer())) -> stack()
 %% @doc Push a list on the stack.
--spec push_list(stack(), [integer(),...]) -> stack().
+-spec push_list(stack(), list(integer())) -> stack_non_empty().
 push_list(Stack, []) ->
 	Stack;
 push_list(Stack, [H|T]) ->
@@ -121,7 +121,7 @@ pop_gnirts([H|T] = _Stack, Acc) ->
 
 %% @spec push_gnirtses(stack(), list(list(integer()))) -> stack()
 %% @doc Push a list of strings as a series of 0"gnirts"
--spec push_gnirtses(stack(), [[integer(),...],...]) -> stack().
+-spec push_gnirtses(stack(), [[integer(),...],...]) -> stack_non_empty().
 push_gnirtses(Stack, []) ->
 	Stack;
 push_gnirtses(Stack, [H|T]) ->

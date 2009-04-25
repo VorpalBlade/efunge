@@ -30,6 +30,7 @@
 %%   A fingerprint function.
 %% @type fingerstack() = [] | list(fingerfun()).
 %%   Stack is a list, access at list head.
+-type fingeropcode() :: 65..90.
 
 %% @private For use from efunge:start/2 only.
 %% @doc Set up array of fingerprint stacks.
@@ -62,7 +63,7 @@ unload(#fip{} = IP, Fingerprint) ->
 
 %% @private For use from efunge_interpreter only.
 %% @doc Execute a fingerprint op.
--spec execute(integer(), ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec execute(fingeropcode(), ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
 execute(Instr, #fip{ fingerOpStacks = Array } = IP, StackStack, FungeSpace) ->
 	Idx = Instr - $A,
 	OpStack = array:get(Idx, Array),
@@ -70,7 +71,7 @@ execute(Instr, #fip{ fingerOpStacks = Array } = IP, StackStack, FungeSpace) ->
 	Fun(IP, StackStack, FungeSpace).
 
 %% @doc Push a fingerprint op on the IP stack.
--spec push_fun(pos_integer(), ip(), fingerfun()) -> ip().
+-spec push_fun(fingeropcode(), ip(), fingerfun()) -> ip().
 push_fun(Instr, #fip{ fingerOpStacks = Array } = IP, Fun) when (Instr >= $A) and (Instr =< $Z) ->
 	Idx = Instr - $A,
 	OpStack = array:get(Idx, Array),
@@ -90,7 +91,7 @@ push_funs(IP, [{Instr,Fun}|T]) ->
 %% Private functions
 
 %% @doc Unload an op.
--spec unload_op(ip(),pos_integer()) -> ip().
+-spec unload_op(ip(),fingeropcode()) -> ip().
 unload_op(#fip{ fingerOpStacks = Array } = IP, Instr) ->
 	Idx = Instr - $A,
 	OpStack = array:get(Idx, Array),
@@ -99,7 +100,7 @@ unload_op(#fip{ fingerOpStacks = Array } = IP, Instr) ->
 	IP#fip{ fingerOpStacks = Array2 }.
 
 %% @doc Given a string, will unload those ops.
--spec unload_ops(ip(),string()) -> ip().
+-spec unload_ops(ip(),[fingeropcode()]) -> ip().
 unload_ops(IP, []) ->
 	IP;
 unload_ops(IP, [H|T]) ->
