@@ -17,7 +17,7 @@
 %%%----------------------------------------------------------------------
 %% @doc This module implements manipulation functions for the IP.
 -module(efunge_ip).
--export([ip_forward/2, jump/3]).
+-export([ip_forward/1, jump/2]).
 -export([set_delta/3, rev_delta/1, set_offset/3]).
 -export([turn_delta_left/1, turn_delta_right/1]).
 -export([find_next_match/3, find_next_non_space/2]).
@@ -32,9 +32,9 @@
 
 %% @spec ip_forward(ip(), fungespace()) -> NewIP::ip()
 %% @doc Move IP forward one step.
--spec ip_forward(ip(), fungespace()) -> ip().
-ip_forward(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
-	Bounds = efunge_fungespace:get_bounds_thread(FungeSpace),
+-spec ip_forward(ip()) -> ip().
+ip_forward(#fip{x=X, y=Y, dx=DX, dy=DY} = IP) ->
+	Bounds = efunge_fungespace:get_bounds_thread(),
 	NewX = X+DX,
 	NewY = Y+DY,
 	NewIP = IP#fip{ x=NewX, y=NewY },
@@ -49,10 +49,10 @@ ip_forward(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, FungeSpace) ->
 
 %% @doc Handles j correctly, it will temporarly change delta for the IP then
 %% jump forward, and finally restore delta.
--spec jump(ip(), fungespace(), integer()) -> ip().
-jump(#fip{dx=DX, dy=DY} = IP, FungeSpace, Distance) ->
+-spec jump(ip(), integer()) -> ip().
+jump(#fip{dx=DX, dy=DY} = IP, Distance) ->
 	IPNewDelta = IP#fip{ dx = DX * Distance, dy = DY * Distance},
-	IPNewPos = ip_forward(IPNewDelta, FungeSpace),
+	IPNewPos = ip_forward(IPNewDelta),
 	IPNewPos#fip{ dx = DX, dy = DY }.
 
 %% @spec set_delta(ip(), integer(), integer()) -> NewState::ip()
@@ -89,7 +89,7 @@ find_next_match(#fip{x=X, y=Y} = IP, Match, FungeSpace) ->
 	Value = efunge_fungespace:fetch(FungeSpace, {X, Y}),
 	if
 		Value =:= Match -> IP#fip{x = X, y = Y};
-		true -> find_next_match(ip_forward(IP, FungeSpace), Match, FungeSpace)
+		true -> find_next_match(ip_forward(IP), Match, FungeSpace)
 	end.
 
 %% @doc Find next one that isn't a whitespace, and isn't in ;;.
@@ -98,10 +98,10 @@ find_next_non_space(#fip{x=X, y=Y} = IP, FungeSpace) ->
 	Value = efunge_fungespace:fetch(FungeSpace, {X, Y}),
 	if
 		Value =:= $\s ->
-			find_next_non_space(ip_forward(IP, FungeSpace), FungeSpace);
+			find_next_non_space(ip_forward(IP), FungeSpace);
 		Value =:= $; ->
-			IP2 = find_next_match(ip_forward(IP, FungeSpace), $;, FungeSpace),
-			find_next_non_space(ip_forward(IP2, FungeSpace), FungeSpace);
+			IP2 = find_next_match(ip_forward(IP), $;, FungeSpace),
+			find_next_non_space(ip_forward(IP2), FungeSpace);
 		true ->
 			{IP#fip{x = X, y = Y}, Value}
 	end.

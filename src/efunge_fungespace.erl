@@ -36,7 +36,7 @@
 
 %% API - Non-calls
 -export([load_initial/2, set/3, set/4, load/5,
-         fetch/2, fetch/3, get_bounds_thread/1, get_bounds/1, get_block/3]).
+         fetch/2, fetch/3, get_bounds_thread/0, get_bounds/1, get_block/3]).
 
 %% API - Utility functions
 -export([is_in_range/2, set_process_bounds_initial/1]).
@@ -203,11 +203,9 @@ get_bounds(Fungespace) ->
 
 %% @spec get_bounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
 %% @doc Get Funge Space bounds. Take thread local bounds in consideration.
--spec get_bounds_thread(fungespace()) -> {coord(), coord()}.
-get_bounds_thread(Fungespace) ->
-	[{_,Min,Max}] = ets:lookup(Fungespace, bounds),
-	ThreadBounds = get(efunge_bounds),
-	rect_union(ThreadBounds, {Min, Max}).
+-spec get_bounds_thread() -> {coord(), coord()}.
+get_bounds_thread() ->
+	get(efunge_bounds).
 
 %% @spec get_block(fungespace(), Min::coord(), Max::coord()) -> list({coord(), Value})
 %% @doc Returns a block of funge space, only return those values actually set in

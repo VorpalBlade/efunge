@@ -26,7 +26,7 @@
 %% Imports
 -import(efunge_fungespace, [set/4, fetch/3]).
 -import(efunge_stackstack, [push/2, pop/1, pop_vec/1, dup/1, swap/1, pop_gnirts/1, push_vec/2]).
--import(efunge_ip, [ip_forward/2, set_delta/3, set_offset/3, rev_delta/1, turn_delta_left/1, turn_delta_right/1]).
+-import(efunge_ip, [ip_forward/1, set_delta/3, set_offset/3, rev_delta/1, turn_delta_left/1, turn_delta_right/1]).
 
 %%====================================================================
 %% Types
@@ -37,8 +37,9 @@
 %% @headerfile "efunge_ip.hrl"
 
 -type quit_types() :: exited | quit | athr_quit.
+-type dead_tuple() :: {dead, {quit_types(), integer()}}.
 %% @type process_instr_ret() = {ip(),stack()} | {dead, {Type, integer()}}.
--type process_instr_ret() :: {ip(),stack()} | {dead, {quit_types(), integer()}}.
+-type process_instr_ret() :: {ip(),stack()} | dead_tuple().
 
 -type state_tuple() :: {ip(),stackstack(),fungespace()}.
 
@@ -122,14 +123,14 @@ run_ip(#fip{ x = X, y = Y } = IP, Stack, FungeSpace) ->
 	case IP#fip.isStringMode of
 		true ->
 			{NewIP, NewStack} = handle_string_mode(Instr, IP, Stack),
-			{ip_forward(NewIP, FungeSpace), NewStack};
+			{ip_forward(NewIP), NewStack};
 		false ->
 			case process_instruction(Instr, IP, Stack, FungeSpace) of
 				% This is for @, q and ATHR quit.
 				{dead, _} = ReturnValue ->
 					ReturnValue;
 				{NewIP, NewStack} ->
-					{ip_forward(NewIP, FungeSpace), NewStack}
+					{ip_forward(NewIP), NewStack}
 			end
 	end.
 
@@ -281,8 +282,8 @@ process_instruction($$, #fip{} = IP, Stack, _Space) ->
 	{IP, S1};
 
 %% # Trampoline
-process_instruction($#, #fip{} = IP, Stack, Space) ->
-	{ip_forward(IP, Space), Stack};
+process_instruction($#, #fip{} = IP, Stack, _Space) ->
+	{ip_forward(IP), Stack};
 
 %% _ North-South If
 process_instruction($_, #fip{} = IP, Stack, _Space) ->
@@ -343,7 +344,7 @@ process_instruction($], #fip{} = IP, Stack, _Space) ->
 
 %% ; Jump Over
 process_instruction($;, #fip{} = IP, Stack, Space) ->
-	{efunge_ip:find_next_match(ip_forward(IP, Space), $;, Space), Stack};
+	{efunge_ip:find_next_match(ip_forward(IP), $;, Space), Stack};
 
 %% k Iterate
 process_instruction($k, #fip{} = IP, Stack, Space) ->
@@ -352,10 +353,10 @@ process_instruction($k, #fip{} = IP, Stack, Space) ->
 		Count < 0 ->
 			{rev_delta(IP), S1};
 		Count =:= 0 ->
-			{IP2, _} = efunge_ip:find_next_non_space(ip_forward(IP, Space), Space),
+			{IP2, _} = efunge_ip:find_next_non_space(ip_forward(IP), Space),
 			{IP2, S1};
 		true ->
-			{InstrPos, Instr} = efunge_ip:find_next_non_space(ip_forward(IP, Space), Space),
+			{InstrPos, Instr} = efunge_ip:find_next_non_space(ip_forward(IP), Space),
 			if
 				%% This is actually buggy, we somehow need to keep track of
 				%% position here and check after each iteration.
@@ -368,13 +369,13 @@ process_instruction($k, #fip{} = IP, Stack, Space) ->
 
 %% ' Fetch Character
 process_instruction($', #fip{} = IP, Stack, Space) ->
-	#fip{ x = X, y = Y} = NewIP = ip_forward(IP, Space),
+	#fip{ x = X, y = Y} = NewIP = ip_forward(IP),
 	Value = efunge_fungespace:fetch(Space, {X, Y}),
 	{NewIP, push(Stack, Value)};
 
 %% s Store Character
 process_instruction($s, #fip{} = IP, Stack, Space) ->
-	#fip{ x = X, y = Y} = NewIP = ip_forward(IP, Space),
+	#fip{ x = X, y = Y} = NewIP = ip_forward(IP),
 	{S1, Value} = pop(Stack),
 	efunge_fungespace:set(Space, {X, Y}, Value),
 	{NewIP, S1};
@@ -402,9 +403,9 @@ process_instruction($x, #fip{} = IP, Stack, _Space) ->
 	{set_delta(IP, X,  Y), S1};
 
 %% j Jump Forward
-process_instruction($j, #fip{} = IP, Stack, Space) ->
+process_instruction($j, #fip{} = IP, Stack, _Space) ->
 	{S1, Dist} = pop(Stack),
-	{efunge_ip:jump(IP, Space, Dist), S1};
+	{efunge_ip:jump(IP, Dist), S1};
 
 
 %% r Reflect
@@ -516,7 +517,7 @@ process_instruction(_Instr, #fip{} = IP, Stack, _Space) ->
 
 %% @spec iterate(Count, Instr, IP, Stack, Space) -> process_instr_ret()
 %% @doc Iterate helper. Calls the relevant process_instruction Count times.
--spec iterate(non_neg_integer(),integer(),ip()|dead,stackstack()|tuple(),fungespace()) -> process_instr_ret().
+-spec iterate(non_neg_integer(),integer(),ip()|dead,stackstack()|dead_tuple(),fungespace()) -> process_instr_ret().
 iterate(0, _Instr, IP, Stack, _Space) ->
 	{IP, Stack};
 %% For @ and q.
