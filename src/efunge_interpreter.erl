@@ -199,8 +199,14 @@ process_instruction($|, #fip{} = IP, Stack, _Space) ->
 %% , Output Character
 process_instruction($, , #fip{} = IP, Stack, _Space) ->
 	{NewStack, Val} = pop(Stack),
-	io:put_chars([abs(Val)]),
-	{IP, NewStack};
+	try
+		io:put_chars([abs(Val)]),
+		{IP, NewStack}
+	catch
+		error:badarg ->
+			{rev_delta(IP), NewStack}
+	end;
+
 %% . Output Integer
 process_instruction($., #fip{} = IP, Stack, _Space) ->
 	{NewStack, Val} = pop(Stack),
@@ -211,12 +217,14 @@ process_instruction($., #fip{} = IP, Stack, _Space) ->
 process_instruction($~, #fip{} = IP, Stack, _Space) ->
 	case efunge_input:read_char() of
 		eof    -> {rev_delta(IP), Stack};
+		error  -> {rev_delta(IP), Stack};
 		Result -> {IP, push(Stack, Result)}
 	end;
 %% & Input Integer
 process_instruction($&, #fip{} = IP, Stack, _Space) ->
 	case efunge_input:read_integer() of
 		eof    -> {rev_delta(IP), Stack};
+		error  -> {rev_delta(IP), Stack};
 		Result -> {IP, push(Stack, Result)}
 	end;
 
