@@ -23,7 +23,7 @@
 
 %% @spec run(list(string())) -> none()
 %% @doc Handler for -run
--spec run([string(),...]) -> ok.
+-spec run([string(),...]) -> no_return().
 run([Filename|Parameters]) when is_list(Filename) ->
 	Retval = start(Filename, Parameters),
 	init:stop(Retval).
@@ -37,7 +37,7 @@ start(Filename) when is_list(Filename) ->
 %% @spec start(string(), list(string())) -> integer()
 %% @doc Load file, set up PRNG, start main loop.
 -spec start(string(), [] | [string(),...]) -> integer().
-start(Filename, Parameters) when is_list(Filename) and is_list(Parameters) ->
+start(Filename, Parameters) when is_list(Filename), is_list(Parameters) ->
 	{R1,R2,R3} = now(),
 	put(efungeargs, [Filename|Parameters]),
 	random:seed(R1, R2, R3),

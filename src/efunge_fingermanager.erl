@@ -72,7 +72,7 @@ execute(Instr, #fip{ fingerOpStacks = Array } = IP, StackStack, FungeSpace) ->
 
 %% @doc Push a fingerprint op on the IP stack.
 -spec push_fun(fingeropcode(), ip(), fingerfun()) -> ip().
-push_fun(Instr, #fip{ fingerOpStacks = Array } = IP, Fun) when (Instr >= $A) and (Instr =< $Z) ->
+push_fun(Instr, #fip{ fingerOpStacks = Array } = IP, Fun) when Instr >= $A, Instr =< $Z ->
 	Idx = Instr - $A,
 	OpStack = array:get(Idx, Array),
 	S2 = efunge_fingerstack:push(OpStack, Fun),

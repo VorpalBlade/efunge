@@ -57,7 +57,7 @@ loop(#fip{} = IP, Stack, FungeSpace) ->
 handle_string_mode(Instr, #fip{ lastWasSpace = LastSpace } = IP, Stack) ->
 	if
 		%% This code is needed to handle SGML spaces.
-		(Instr =:= $\s) and (not LastSpace) ->
+		Instr =:= $\s, not LastSpace ->
 			{IP#fip{ lastWasSpace=true }, push(Stack, Instr)};
 		Instr =:= $\s ->
 			{IP, Stack};
@@ -391,13 +391,13 @@ process_instruction($q, _IP, Stack, _Space) ->
 %% Handle ranges and unimplemented.
 
 %% 0-9 Any number.
-process_instruction(Instr, #fip{} = IP, Stack, _Space) when (Instr >= $0) and (Instr =< $9) ->
+process_instruction(Instr, #fip{} = IP, Stack, _Space) when Instr >= $0, Instr =< $9 ->
 	{IP, push(Stack, Instr - $0)};
 %% a-f Hexdecimal numbers.
-process_instruction(Instr, #fip{} = IP, Stack, _Space) when (Instr >= $a) and (Instr =< $f) ->
+process_instruction(Instr, #fip{} = IP, Stack, _Space) when Instr >= $a, Instr =< $f ->
 	{IP, push(Stack, Instr - $a + 10)};
 %% A-Z Fingerprints.
-process_instruction(Instr, #fip{} = IP, Stack, Space) when (Instr >= $A) and (Instr =< $Z) ->
+process_instruction(Instr, #fip{} = IP, Stack, Space) when Instr >= $A, Instr =< $Z ->
 	efunge_fingermanager:execute(Instr, IP, Stack, Space);
 
 %% unimplemented
