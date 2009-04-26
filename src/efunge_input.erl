@@ -47,10 +47,12 @@
 
 %% The string buffer.
 -type state() :: [] | list(integer()).
+%% The possible client visible error replies.
+-type error_replies() :: eof | error.
 
 -include("otp_types.hrl").
 
--type call_return_reply() :: {reply, eof | integer() | char(), state()}.
+-type call_return_reply() :: {reply, error_replies() | integer() | char(), state()}.
 -type call_return_stop()  :: {stop,normal,stopped,state()}.
 -type call_return()       :: call_return_reply() | call_return_stop().
 
@@ -84,13 +86,13 @@ stop() ->
 
 %% @spec read_char() -> eof | char()
 %% @doc Get a letter from the string buffer.
--spec read_char() -> eof | char().
+-spec read_char() -> error_replies() | char().
 read_char() ->
 	gen_server:call(?CALL_NAME, read_char, infinity).
 
 %% @spec read_integer() -> eof | integer()
 %% @doc Get an integer from the string buffer.
--spec read_integer() -> eof | integer().
+-spec read_integer() -> error_replies() | integer().
 read_integer() ->
 	gen_server:call(?CALL_NAME, read_integer, infinity).
 
@@ -154,23 +156,33 @@ code_change(_OldVsn, State, _Extra) ->
 
 %% @spec fill_buffer(state()) -> {ok, NewState::ip()} | {eof, NewState::state()}
 %% @doc Fill up the input line buffer if needed.
--spec fill_buffer(state()) -> {ok, state()} | {eof, state()}.
+-spec fill_buffer(state()) -> {ok | error, state()} | {eof, []}.
 fill_buffer([]) ->
 	case io:get_line('') of
-		eof    -> {eof, []};
-		String -> {ok, String}
+		eof       -> {eof, []};
+		{error,_} -> {error, []};
+		String    ->
+			% TODO: Maybe handle the remaining data somehow?
+			io:format("~p~n",[String]),
+			case unicode:characters_to_list(String, unicode) of
+				{error, StringList, _Rest}      -> {error, StringList};
+				{incomplete, StringList, _Rest} -> {error, StringList};
+				StringList                      -> {ok, StringList}
+			end
 	end;
 fill_buffer(State) ->
 	{ok, State}.
 
 %% @spec read_char(state()) -> {NewState, Char}
 %% @doc Get a letter from the string buffer.
--spec read_char(state()) -> {state(), char() | eof}.
+-spec read_char(state()) -> {state(), char() | error_replies()}.
 read_char(State) ->
-	case fill_buffer(State) of
-		{eof, _} ->
-			{State, eof};
-		{ok, NewState} ->
+	{Result, NewState} = fill_buffer(State),
+	case Result of
+		eof   -> {NewState, eof};
+		% TODO: Not sure this is right way to handle it.
+		error -> {NewState, error};
+		ok ->
 			[H|T] = NewState,
 			{T, H}
 	end.
@@ -190,18 +202,19 @@ parse_integer(String) ->
 			[H|T] = Rest,
 			case H of
 				$\n -> {Int, T};
-				_ -> Result
+				_   -> Result
 			end
 	end.
 
-%% @spec read_integer(state()) -> {NewState::state(), eof | integer()}
+%% @spec read_integer(state()) -> {NewState::state(), eof | error | integer()}
 %% @doc Get an integer from the string buffer.
--spec read_integer(state()) -> {state(), eof | integer()}.
+-spec read_integer(state()) -> {state(), integer() | error_replies()}.
 read_integer(State) ->
-	case fill_buffer(State) of
-		{eof, _} ->
-			{State, eof};
-		{ok, NewState} ->
+	{Result, NewState} = fill_buffer(State),
+	case Result of
+		eof   -> {NewState, eof};
+		error -> {NewState, error};
+		ok ->
 			case parse_integer(NewState) of
 				%% Try again!
 				error ->

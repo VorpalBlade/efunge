@@ -89,7 +89,7 @@ push_fun(Instr, #fip{ fingerOpStacks = Array } = IP, Fun) when Instr >= $A, Inst
 	IP#fip{ fingerOpStacks = Array2 }.
 
 %% @doc Push a list of fingerprint ops on the IP stack.
--spec push_funs(ip(),[{pos_integer(), fingerfun()}]) -> ip().
+-spec push_funs(ip(),[{fingeropcode(), fingerfun()}]) -> ip().
 push_funs(IP, []) ->
 	IP;
 push_funs(IP, [{Instr,Fun}|T]) ->

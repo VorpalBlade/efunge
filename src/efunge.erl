@@ -29,19 +29,21 @@
 %% @doc Handler for -run
 -spec run([string(),...]) -> no_return().
 run([Filename|Parameters]) when is_list(Filename) ->
+	%% HACK: Make unicode IO work.
+	io:setopts(standard_io, [{encoding,unicode}]),
 	Retval = start(Filename, Parameters),
 	init:stop(Retval).
 
 %% @spec start(string()) -> integer()
 %% @doc Run efunge with a file.
 -spec start(string()) -> integer().
-start(Filename) when is_list(Filename) ->
+start([_|_] = Filename) ->
 	start(Filename, []).
 
 %% @spec start(string(), list(string())) -> integer()
 %% @doc Load file, set up PRNG, start main loop.
 -spec start(string(), [] | [string(),...]) -> integer().
-start(Filename, Parameters) when is_list(Filename), is_list(Parameters) ->
+start([_|_] = Filename, Parameters) when is_list(Parameters) ->
 	%% FIXME: This is hackish until the application bit gets properly working.
 	process_flag(trap_exit, true),
 	ok = application:start(efunge),
