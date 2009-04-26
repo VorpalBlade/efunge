@@ -104,7 +104,7 @@ read_integer() ->
 %% @spec init(Args) -> {ok, State} | {ok, State, Timeout} | ignore | {stop, Reason}
 %% @hidden
 %% @doc Initiates the server
--spec init([]) -> {'ok', state()}.
+-spec init([]) -> {'ok', []}.
 init([]) ->
 	{ok, []}.
 
