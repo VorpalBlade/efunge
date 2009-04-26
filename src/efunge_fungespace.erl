@@ -36,7 +36,8 @@
 
 %% API - Non-calls
 -export([load_initial/2, set/3, set/4, load/5,
-         fetch/2, fetch/3, get_bounds_thread/0, get_bounds/1, get_block/3]).
+         fetch/2, fetch/3, get_block/3,
+         get_bounds_thread/0, get_bounds_thread_exact/1, get_bounds/1]).
 
 %% API - Utility functions
 -export([is_in_range/2, set_process_bounds_initial/1]).
@@ -153,6 +154,9 @@ set(Fungespace, #fip{offX = OffX, offY = OffY}, {X,Y}, V) ->
 %% @spec set(fungespace(), coord(), V::integer()) -> true
 %% @doc Set a cell in Funge Space.
 -spec set(fungespace(), coord(), integer()) -> true.
+set(Fungespace, {_X,_Y} = Coord, $\s) ->
+	ets:delete(Fungespace, Coord),
+	cast_update_bounds($\s, Fungespace, Coord);
 set(Fungespace, {_X,_Y} = Coord, V) ->
 	ets:insert(Fungespace, {Coord, V}),
 	cast_update_bounds(V, Fungespace, Coord).
@@ -169,7 +173,7 @@ fetch(Fungespace, #fip{offX = OffX, offY = OffY}, {X,Y}) ->
 fetch(Fungespace, {_X,_Y} = Coord) ->
 	case ets:lookup(Fungespace, Coord) of
 		[] -> $\s;
-		[{{_,_},Value}] -> Value
+		[{_,Value}] -> Value
 	end.
 
 %% @spec load(fungespace(), ip(), Filename::string(), IsBinaryMode::bool(), coord()) -> error | coord()
@@ -202,10 +206,21 @@ get_bounds(Fungespace) ->
 	{Min, Max}.
 
 %% @spec get_bounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
-%% @doc Get Funge Space bounds. Take thread local bounds in consideration.
+%% @doc Get Funge Space bounds from the thread local bounds.
 -spec get_bounds_thread() -> {coord(), coord()}.
 get_bounds_thread() ->
 	get(efunge_bounds).
+
+%% @spec get_bounds_thread_exact(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
+%% @doc Get exact Funge Space bounds, or thread local ones.
+-spec get_bounds_thread_exact(fungespace()) -> {coord(), coord()}.
+get_bounds_thread_exact(Fungespace) ->
+	case get(efunge_bounds_exact) of
+		true ->
+			get(efunge_bounds);
+		false ->
+			recalculate_bounds_exact(Fungespace)
+	end.
 
 %% @spec get_block(fungespace(), Min::coord(), Max::coord()) -> list({coord(), Value})
 %% @doc Returns a block of funge space, only return those values actually set in
@@ -247,6 +262,8 @@ is_in_range({X, Y}, {{MinX, MinY}, {MaxX, MaxY}}) ->
 -spec set_process_bounds_initial(fungespace()) -> ok.
 set_process_bounds_initial(Fungespace) ->
 	put(efunge_bounds, get_bounds(Fungespace)),
+	%% TODO: Work out if they are exact or not instead.
+	put(efunge_bounds_exact, false),
 	ok.
 
 
@@ -361,16 +378,35 @@ find_bounds_max(undefined, Y)    -> Y;
 find_bounds_max(X, Y) when X > Y -> X;
 find_bounds_max(_X, Y)           -> Y.
 
+%% @doc Find the extreme values in the list.
+-spec find_extremes([{cell(),cell()}],cell(),cell(),cell(),cell()) -> {coord(), coord()}.
+find_extremes([], MinX, MinY, MaxX, MaxY) ->
+	{{MinX,MinY},{MaxX,MaxY}};
+find_extremes([{X,Y}|T], MinX, MinY, MaxX, MaxY) ->
+	find_extremes(T, erlang:min(MinX,X),erlang:min(MinY,Y),
+	                 erlang:max(MaxX,X),erlang:max(MaxY,Y)).
+
 
 %%====================================================================
 %% Internal functions - client
 %%====================================================================
 
 -spec cast_update_bounds(integer(),fungespace(),coord()) -> true.
-cast_update_bounds($\s, _Space, _Coord) ->
-	true;
+cast_update_bounds($\s, _Space, {X,Y}) ->
+	case get(efunge_bounds_exact) of
+		false -> true;
+		true  ->
+			{{MinX,MinY},{MaxX,MaxY}} = get(efunge_bounds),
+			if
+				X =:= MinX; X =:= MaxX; Y =:= MinY; Y =:= MaxY ->
+					put(efunge_bounds_exact, false),
+					true;
+				true ->
+					true
+			end
+	end;
 cast_update_bounds(_V, Space, Coord) ->
-	Bounds = get_bounds(Space),
+	Bounds = get(efunge_bounds),
 	case is_in_range(Coord, Bounds) of
 		false ->
 			gen_server:cast(?CALL_NAME, {update_bounds, Space, Coord}),
@@ -382,6 +418,16 @@ cast_update_bounds(_V, Space, Coord) ->
 			true
 	end.
 
+-spec recalculate_bounds_exact(fungespace()) -> {coord(), coord()}.
+recalculate_bounds_exact(Fungespace) ->
+	% Get first item as base for new bounds.
+	[{FirstX,FirstY}|Coordinates] = ets:select(Fungespace, [{{'$1','$2'},[{'=/=','$2',$\s}],['$1']}]),
+	NewBounds = find_extremes(Coordinates, FirstX, FirstY, FirstX, FirstY),
+	put(efunge_bounds, NewBounds),
+	put(efunge_bounds_exact, true),
+	NewBounds.
+
+
 %%====================================================================
 %% Internal functions - server
 %%====================================================================
@@ -391,6 +437,8 @@ cast_update_bounds(_V, Space, Coord) ->
 construct() ->
 	Space = ets:new(fungespace, [set, public]),
 	ets:insert(Space, {bounds, {undefined, undefined}, {undefined, undefined}}),
+% TODO
+% 	put(fspacebounds_exact, true),
 	Space.
 
 %% @spec delete(fungespace()) -> true
@@ -446,10 +494,10 @@ update_bounds(_V, Space, {X,Y}) ->
 	ets:insert(Space, {bounds, {MinX1, MinY1}, {MaxX1, MaxY1}}),
 	true.
 
+
 %%====================================================================
 %% Internal functions - Server - Bulk loading.
 %%====================================================================
-
 
 
 %% @spec load_initial(Binary, fungespace(), X, Y, LastWasCR, MinX, MaxX) -> coord()

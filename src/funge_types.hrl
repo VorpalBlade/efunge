@@ -19,7 +19,7 @@
 -type stack() :: [cell()].
 -type stack_non_empty() :: [cell(),...].
 -type stackstack() :: [stack(),...].
--type coord() :: {integer(), integer()}.
+-type coord() :: {cell(), cell()}.
 -type rect() :: {coord(), coord()}.
 -type ip() :: #fip{}.
 -type fungespace() :: atom() | tid().
