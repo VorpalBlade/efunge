@@ -70,11 +70,11 @@ push_request(12, #fip{ offX = OX, offY = OY}, _StackStack, _FungeSpace, PushStac
 	push_vec(PushStack, {OX, OY});
 %% 13 Least point
 push_request(13, #fip{} = _IP, _StackStack, FungeSpace, PushStack) ->
-	{Least, _} = efunge_fungespace:get_bounds(FungeSpace),
+	{Least, _} = efunge_fungespace:get_bounds_exact(FungeSpace),
 	push_vec(PushStack, Least);
 %% 14 Greatest point
 push_request(14, #fip{} = _IP, _StackStack, FungeSpace, PushStack) ->
-	{{Lx, Ly}, {Mx, My}} = efunge_fungespace:get_bounds(FungeSpace),
+	{{Lx, Ly}, {Mx, My}} = efunge_fungespace:get_bounds_exact(FungeSpace),
 	push_vec(PushStack, {Mx - Lx, My - Ly});
 %% 15 Date
 push_request(15, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
@@ -137,7 +137,7 @@ system_info(RequestID, #fip{} = IP, [TOSS|_] = StackStack, FungeSpace) ->
 
 %% @doc Push all requests.
 -spec push_all(0..20,ip(),stackstack(),fungespace(),stack()) -> stack().
-push_all(0, _, _, _, PushStack) ->
+push_all(0, _IP, _StackStack, _FungeSpace, PushStack) ->
 	PushStack;
 push_all(RequestID, #fip{} = IP, StackStack, FungeSpace, PushStack) ->
 	PushStack2 = push_request(RequestID, #fip{} = IP, StackStack, FungeSpace, PushStack),
