@@ -163,7 +163,6 @@ fill_buffer([]) ->
 		{error,_} -> {error, []};
 		String    ->
 			% TODO: Maybe handle the remaining data somehow?
-			io:format("~p~n",[String]),
 			case unicode:characters_to_list(String, unicode) of
 				{error, StringList, _Rest}      -> {error, StringList};
 				{incomplete, StringList, _Rest} -> {error, StringList};
