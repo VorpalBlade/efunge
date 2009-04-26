@@ -70,18 +70,56 @@ Remember to also include:
  * And if the bug causes a crash don't forget the backtrace (as described above).
 
 
+Implementation oddities
+-----------------------
+These notes apply to efunge running on R13B-0. It is possible that it will
+exhibit other behaviour under other versions. Some of these oddities can be
+resolved by defining Erlang itself to be the OS that efunge runs under. Some
+other ones are undefined in the Funge-98 standard.
+ * Standard IO:
+   - When running inside the shell, many non-printable characters will be
+     escaped on output. This is an Erlang "feature", if it is a problem just run
+     efunge freestanding.
+   - Standard input is read one line at a time and buffered internally. Those
+     instructions reading chars fetch one char from this buffer, leaving the
+     rest (if any) including any ending newline. Instructions reading an integer
+     will leave anything after the integer in the buffer with one exception: if
+     the next char is a newline it will be discarded.
+   - Standard IO uses Unicode. This means:
+     o The argument to , (output character) is a Unicode code point which is
+       encoded by Erlang in a platform-specific way before being output (to
+       UTF-8 most of the time). Invalid codepoints will make , reflect. See the
+       Erlang documentation for which codepoints are invalid.
+     o Input will reflect on EOF (as expected) but also on invalid Unicode.
+       Since Erlang normally expects the user's terminal to use UTF-8 this means
+       invalid UTF-8 will make input (~ and & for example) reflect. Any other
+       input on the same line is lost.
+ * File IO:
+   - File IO is byte based (this means loading the program, i and o). Values are
+     truncated in an undefined way for o. The bytes are considered unsigned.
+   - In non-binary mode (this includes initial program loading) form feed is
+     ignored, not advancing either x or y coordinate. This is due to form feed
+     being used to increment z in Trefunge. Ignoring form feed in Befunge is
+     consistent with the way newlines are treated in Unefunge.
+ * Erlang adds some environment variables of it's own. It also modifies $PATH.
+   It is not possible to fix or work around this in a reliable way, thus the
+   environment variables as reported by y may differ slightly from what you
+   would have expected.
+ * efunge uses arbitrary precision integers for the cells.
+   Due to this y reports -1 for cell size.
+ * y pushes time in UTC (not local time).
+ * k with a negative argument reflects.
+ * # across edge of funge-space may or may not skip first instruction after
+   wrapping depending on the exact situation.
+ * ( and ) with a negative count reflects and doesn't pop any fingerprint.
+
+
 Known bugs and limitations
 --------------------------
-Limitations or bugs caused by Erlang:
-* When running inside the shell, non-printable characters will be escaped. This
-  is an Erlang "feature", if it is a problem just run it freestanding.
-* Erlang adds some environment variables by itself, and also modifies $PATH. It
-  is not possible to fix or work around this.
-Both of these issues can be resolved by defining Erlang itself to be the OS.
-
-* It is slow, but that will not be fixed, if you want a faster Befunge interpreter
-  try cfunge (http://rage.kuonet.org/~anmaster/cfunge/) that is coded in C.
-  cfunge also handles Funge-109. However, cfunge only works on POSIX platforms.
+* efunge is slow, but that will not be fixed, if you want a faster Befunge
+  interpreter try cfunge (http://rage.kuonet.org/~anmaster/cfunge/) that is
+  coded in C. cfunge also handles Funge-109. However, cfunge only works on POSIX
+  platforms.
 
 Real bugs or issues:
  * k on k is broken.
