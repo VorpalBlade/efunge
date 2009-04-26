@@ -17,20 +17,29 @@
 %%%----------------------------------------------------------------------
 %% @doc An implementation of a Funge style stack-stack.
 -module(efunge_stackstack).
--include("efunge_ip.hrl").
--include("funge_types.hrl").
 -export([new/0, ss_begin/2, ss_end/2, ss_under/2]).
 -export([clear/1, pop_vec_SOSS/1, push_vec_SOSS/2]).
 %% Wrappers for working on TOSS. Calls functions from the efunge_stack module:
 -export([push/2, peek/1, pop/1, pop_vec/1, push_vec/2]).
 -export([dup/1, swap/1, pop_gnirts/1]).
 
+
+%%====================================================================
+%% Types
+%%====================================================================
+
+-include("efunge_ip.hrl").
+-include("funge_types.hrl").
+
 %% @type stack() = [] | list(integer()).
 %%   Stack is a list, access at list head.
 %% @type stackstack() = [] | list(stack()).
 %%   Stack Stack, access at list head.
 
-%% Functions to work on TOSS
+
+%%====================================================================
+%% API - Stack wrappers for TOSS
+%%====================================================================
 
 %% @doc Push to TOSS.
 %% @see efunge_stack:push/2
@@ -87,7 +96,10 @@ clear([_|T]) ->
 	NewTOSS = efunge_stack:new(),
 	[NewTOSS|T].
 
-%% Functions working on SOSS
+
+%%====================================================================
+%% API - Stack wrappers for SOSS
+%%====================================================================
 
 %% @doc Pop a vector from SOSS. If no SOSS exists, throw 'oneStack'.
 %% @see efunge_stack:pop_vec/1
@@ -105,6 +117,11 @@ push_vec_SOSS([_], _) ->
 push_vec_SOSS([TOSS,SOSS|T], V) ->
 	NewSOSS = efunge_stack:push_vec(SOSS, V),
 	[TOSS, NewSOSS|T].
+
+
+%%====================================================================
+%% API - Stack Stack API
+%%====================================================================
 
 %% @spec new() -> stackstack()
 %% @doc Create a new stack-stack.
@@ -152,7 +169,10 @@ ss_under([TOSS,SOSS|Tail], Count) ->
 	{NewSOSS, NewTOSS} = efunge_stack:stack_to_stack(Count, SOSS, TOSS),
 	[NewTOSS, NewSOSS|Tail].
 
-%% Private functions
+
+%%====================================================================
+%% Internal functions
+%%====================================================================
 
 %% @doc Push N zeros on a stack.
 -spec push_zeros(non_neg_integer(),stack()) -> stack().

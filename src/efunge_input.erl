@@ -30,6 +30,20 @@
          terminate/2, code_change/3]).
 
 -define(SERVER, ?MODULE).
+%% Define for global server (in distributed Erlang).
+%-define(GLOBAL, true).
+
+-ifdef(GLOBAL).
+-define(REGISTER_NAME, {global, ?SERVER}).
+-define(CALL_NAME, {global, ?SERVER}).
+-else.
+-define(REGISTER_NAME, {local, ?SERVER}).
+-define(CALL_NAME, ?SERVER).
+-endif.
+
+%%====================================================================
+%% Types
+%%====================================================================
 
 %% The string buffer.
 -type state() :: [] | list(integer()).
@@ -43,37 +57,46 @@
 -type call_return_stop()  :: {stop,normal,stopped,state()}.
 -type call_return()       :: call_return_reply() | call_return_stop().
 
-%%====================================================================
-%% API
-%%====================================================================
 
-%% @spec start() -> {ok,Pid} | ignore | {error,Error}
-%% @doc Starts the server, standalone
--spec start() -> gen_server_start().
-start() ->
-	gen_server:start({global, ?SERVER}, ?MODULE, [], []).
+%%====================================================================
+%% API - Generic start/stop stuff
+%%====================================================================
 
 %% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the server, linked to supervisor.
 -spec start_link() -> gen_server_start().
 start_link() ->
-	gen_server:start_link({global, ?SERVER}, ?MODULE, [], []).
+	gen_server:start_link(?REGISTER_NAME, ?MODULE, [], []).
 
+%% @spec start() -> {ok,Pid} | ignore | {error,Error}
+%% @doc Starts the server, standalone.
+-spec start() -> gen_server_start().
+start() ->
+	gen_server:start(?REGISTER_NAME, ?MODULE, [], []).
+
+%% @spec stop() -> stopped
+%% @doc Stops the server. Use only for standalone server.
 -spec stop() -> stopped.
 stop() ->
-	gen_server:call({global, ?SERVER}, stop, infinity).
+	gen_server:call(?CALL_NAME, stop, infinity).
+
+
+%%====================================================================
+%% API - Calls
+%%====================================================================
 
 %% @spec read_char() -> eof | char()
 %% @doc Get a letter from the string buffer.
 -spec read_char() -> error_replies() | char().
 read_char() ->
-	gen_server:call({global, ?SERVER}, read_char, infinity).
+	gen_server:call(?CALL_NAME, read_char, infinity).
 
 %% @spec read_integer() -> eof | integer()
 %% @doc Get an integer from the string buffer.
 -spec read_integer() -> error_replies() | integer().
 read_integer() ->
-	gen_server:call({global, ?SERVER}, read_integer, infinity).
+	gen_server:call(?CALL_NAME, read_integer, infinity).
+
 
 %%====================================================================
 %% gen_server callbacks
@@ -127,9 +150,10 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
 
-%%--------------------------------------------------------------------
-%%% Internal functions
-%%--------------------------------------------------------------------
+
+%%====================================================================
+%% Internal functions
+%%====================================================================
 
 %% @spec fill_buffer(state()) -> {ok, NewState::ip()} | {eof, NewState::state()}
 %% @doc Fill up the input line buffer if needed.

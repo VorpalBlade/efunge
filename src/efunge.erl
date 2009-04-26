@@ -21,6 +21,10 @@
 -include("efunge_ip.hrl").
 -include("funge_types.hrl").
 
+%%====================================================================
+%% API
+%%====================================================================
+
 %% @spec run(list(string())) -> none()
 %% @doc Handler for -run
 -spec run([string(),...]) -> no_return().

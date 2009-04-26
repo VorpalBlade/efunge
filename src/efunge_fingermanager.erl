@@ -22,6 +22,10 @@
 %% These are called from fingerprint loading functions.
 -export([push_fun/3, push_funs/2]).
 
+%%====================================================================
+%% Types
+%%====================================================================
+
 -include("efunge_ip.hrl").
 -include("funge_types.hrl").
 %% @headerfile "efunge_ip.hrl"
@@ -31,6 +35,11 @@
 %% @type fingerstack() = [] | list(fingerfun()).
 %%   Stack is a list, access at list head.
 -type fingeropcode() :: 65..90.
+
+
+%%====================================================================
+%% API
+%%====================================================================
 
 %% @private For use from efunge:start/2 only.
 %% @doc Set up array of fingerprint stacks.
@@ -88,7 +97,9 @@ push_funs(IP, [{Instr,Fun}|T]) ->
 	push_funs(IP2, T).
 
 
-%% Private functions
+%%====================================================================
+%% Internal functions
+%%====================================================================
 
 %% @doc Unload an op.
 -spec unload_op(ip(),fingeropcode()) -> ip().
