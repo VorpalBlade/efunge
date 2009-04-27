@@ -26,6 +26,15 @@
 -type sup_restart_strategy() :: one_for_all | one_for_one | rest_for_one | simple_one_for_one.
 -type supervisor_spec() :: {sup_restart_strategy(),non_neg_integer(),non_neg_integer()}.
 
+-type supervisor_child_pid() :: pid() | undefined.
+-type supervisor_child_error() :: already_present
+                                | {already_started, supervisor_child_pid()}
+                                | any().
+-type supervisor_start_child_result() :: {ok, supervisor_child_pid()}
+                                       | {ok,  supervisor_child_pid(), _}
+                                       | {error, supervisor_child_error()}.
+
+
 -type otp_start_error() :: {error,{already_started, pid()} | any()}.
 -type otp_start_return() :: {ok,pid()} | ignore | otp_start_error().
 
