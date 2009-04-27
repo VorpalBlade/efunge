@@ -64,15 +64,15 @@
 %% API - Generic start/stop stuff
 %%====================================================================
 
-%% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
+%% @spec start_link() -> {ok,Pid} | {error,Error}
 %% @doc Starts the server, linked to supervisor.
--spec start_link() -> otp_start_return().
+-spec start_link() -> otp_start_return_no_ignore().
 start_link() ->
 	gen_server:start_link(?REGISTER_NAME, ?MODULE, [], []).
 
-%% @spec start() -> {ok,Pid} | ignore | {error,Error}
+%% @spec start() -> {ok,Pid} | {error,Error}
 %% @doc Starts the server, standalone.
--spec start() -> otp_start_return().
+-spec start() -> otp_start_return_no_ignore().
 start() ->
 	gen_server:start(?REGISTER_NAME, ?MODULE, [], []).
 
