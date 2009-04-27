@@ -55,7 +55,7 @@ jump(#fip{dx=DX, dy=DY} = IP, FungeSpace, Distance) ->
 	IPNewPos = ip_forward(IPNewDelta, FungeSpace),
 	IPNewPos#fip{ dx = DX, dy = DY }.
 
-%% @spec set_delta(ip(), integer(), integer()) -> NewState::ip()
+%% @spec set_delta(ip(), X::integer(), Y::integer()) -> NewState::ip()
 %% @doc Set delta in state.
 -spec set_delta(ip(), integer(), integer()) -> ip().
 set_delta(#fip{} = IP, X, Y) ->
@@ -67,7 +67,7 @@ set_delta(#fip{} = IP, X, Y) ->
 rev_delta(#fip{dx=DX, dy=DY} = IP) ->
 	IP#fip{ dx = -DX, dy = -DY }.
 
-%% @spec set_offset(ip(), integer(), integer()) -> NewState::ip()
+%% @spec set_offset(ip(), X::integer(), Y::integer()) -> NewState::ip()
 %% @doc Set delta in state.
 -spec set_offset(ip(), integer(), integer()) -> ip().
 set_offset(#fip{} = IP, X, Y) ->
@@ -84,7 +84,7 @@ turn_delta_right(#fip{dx=DX, dy=DY} = IP) ->
 	IP#fip{ dx = -DY, dy = DX }.
 
 %% @doc Search in IP's path for the next time value shows up.
--spec find_next_match(ip(),integer(),fungespace()) -> ip().
+-spec find_next_match(ip(), integer(), fungespace()) -> ip().
 find_next_match(#fip{x=X, y=Y} = IP, Match, FungeSpace) ->
 	Value = efunge_fungespace:fetch(FungeSpace, {X, Y}),
 	if
@@ -93,7 +93,7 @@ find_next_match(#fip{x=X, y=Y} = IP, Match, FungeSpace) ->
 	end.
 
 %% @doc Find next one that isn't a whitespace, and isn't in ;;.
--spec find_next_non_space(ip(),fungespace()) -> {ip(), integer()}.
+-spec find_next_non_space(ip(), fungespace()) -> {ip(), integer()}.
 find_next_non_space(#fip{x=X, y=Y} = IP, FungeSpace) ->
 	Value = efunge_fungespace:fetch(FungeSpace, {X, Y}),
 	if
@@ -123,7 +123,7 @@ is_delta_cardinal(#fip{dx=DX, dy=DY}) ->
 	end.
 
 %% @doc Move forward for Cardinal IPs
--spec ip_forward_cardinal(ip(),{coord(),coord()}) -> ip().
+-spec ip_forward_cardinal(ip(), rect()) -> ip().
 ip_forward_cardinal(#fip{x=X, y=Y} = IP, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	if
 		X < MinX -> NewX = MaxX+1;
@@ -138,7 +138,7 @@ ip_forward_cardinal(#fip{x=X, y=Y} = IP, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	IP#fip{ x=NewX, y=NewY }.
 
 %% @doc Is X, Y in range of the box created by the second parameter?
--spec is_in_range(coord(),{coord(),coord()}) -> bool().
+-spec is_in_range(coord(), rect()) -> bool().
 is_in_range({X, Y}, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	if
 		X < MinX -> false;
@@ -152,7 +152,7 @@ is_in_range({X, Y}, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	end.
 
 %% @doc Move forward for flying IPs.
--spec ip_forward_flying(ip(),{coord(),coord()}) -> ip().
+-spec ip_forward_flying(ip(), rect()) -> ip().
 ip_forward_flying(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, Bounds) ->
 	case is_in_range({X, Y}, Bounds) of
 		false -> rev_delta(IP);

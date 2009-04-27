@@ -110,14 +110,14 @@ delete(Fungespace) ->
 
 %% @spec get_bounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
 %% @doc Get Funge Space bounds.
--spec get_bounds(fungespace()) -> {coord(), coord()}.
+-spec get_bounds(fungespace()) -> rect().
 get_bounds(_Fungespace) ->
 	get(fspacebounds).
 
 
 %% @spec get_bounds_exact(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
 %% @doc Get exact Funge Space bounds.
--spec get_bounds_exact(fungespace()) -> {coord(), coord()}.
+-spec get_bounds_exact(fungespace()) -> rect().
 get_bounds_exact(Fungespace) ->
 	case get(fspacebounds_exact) of
 		true ->
@@ -176,14 +176,14 @@ update_bounds(_V, {X,Y}) ->
 	true.
 
 %% @doc Find the extreme values in the list.
--spec find_extremes([{cell(),cell()}],cell(),cell(),cell(),cell()) -> {coord(), coord()}.
+-spec find_extremes([{cell(),cell()}],cell(),cell(),cell(),cell()) -> rect().
 find_extremes([], MinX, MinY, MaxX, MaxY) ->
 	{{MinX,MinY},{MaxX,MaxY}};
 find_extremes([{X,Y}|T], MinX, MinY, MaxX, MaxY) ->
 	find_extremes(T, erlang:min(MinX,X),erlang:min(MinY,Y),
 	                 erlang:max(MaxX,X),erlang:max(MaxY,Y)).
 
--spec recalculate_bounds_exact(fungespace()) -> {coord(), coord()}.
+-spec recalculate_bounds_exact(fungespace()) -> rect().
 recalculate_bounds_exact(Fungespace) ->
 	% Get first item as base for new bounds.
 	[{FirstX,FirstY}|Coordinates] = ets:select(Fungespace, [{{'$1','$2'},[{'=/=','$2',$\s}],['$1']}]),
