@@ -80,16 +80,21 @@
 
 -type load_initial_return() :: notfound | ok.
 -type cmpxchg_return()      :: {ok, integer()} | {failed, integer()}.
--type call_return_replies() :: true | fungespace() | integer() | cmpxchg_return() | load_initial_return().
--type call_return_reply() :: {reply, call_return_replies(), state()}.
--type call_return_stop()  :: {stop,normal,stopped,state()}.
--type call_return()       :: call_return_reply() | call_return_stop().
+-type call_return_replies() :: true | fungespace() | integer()
+                             | cmpxchg_return() | load_initial_return().
+-type call_return_reply()   :: {reply, call_return_replies(), state()}.
+-type call_return_stop()    :: {stop,normal,stopped,state()}.
+-type call_return()         :: call_return_reply() | call_return_stop().
 
 -type arg_fetch_atomic() :: {fetch_atomic,fungespace(),coord()}.
 -type arg_load_initial() :: {load_initial,fungespace(),string()}.
 -type arg_set_atomic()   :: {set_atomic,fungespace(),coord(),integer()}.
 -type arg_cmpxchg()      :: {cmpxchg,fungespace(),coord(),integer(),integer()}.
--type call_arg() :: get_fungespace|stop|arg_fetch_atomic()|arg_load_initial()|arg_set_atomic()|arg_cmpxchg().
+-type call_arg()         :: get_fungespace | stop
+                          | arg_fetch_atomic()
+                          | arg_load_initial()
+                          | arg_set_atomic()
+                          | arg_cmpxchg().
 
 
 %%====================================================================
@@ -205,7 +210,7 @@ get_bounds(Fungespace) ->
 	[{_,Min,Max}] = ets:lookup(Fungespace, bounds),
 	{Min, Max}.
 
-%% @spec get_bounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
+%% @spec get_bounds_thread() -> {LeastPoint::coord(), GreatestPoint::coord()}
 %% @doc Get Funge Space bounds from the thread local bounds.
 -spec get_bounds_thread() -> {coord(), coord()}.
 get_bounds_thread() ->
@@ -448,7 +453,7 @@ delete(Fungespace) ->
 	ets:delete(Fungespace).
 
 
-%% @spec load_at_origin(Filename::string()) -> fungespace()
+%% @spec load_at_origin(fungespace(), Filename::string()) -> notfound | ok
 %% @doc Load a Funge Space at 0,0.
 -spec load_at_origin(fungespace(), string()) -> notfound | ok.
 load_at_origin(Fungespace, Filename) ->
@@ -500,7 +505,7 @@ update_bounds(_V, Space, {X,Y}) ->
 %%====================================================================
 
 
-%% @spec load_initial(Binary, fungespace(), X, Y, LastWasCR, MinX, MaxX) -> coord()
+%% @spec load_initial(Binary, fungespace(), X, Y, LastWasCR) -> ok
 %% @doc
 %% Load a binary into Funge Space. Loads at 0,0. Assumes no race conditions.
 -spec load_initial(binary(),fungespace(),integer(),integer(),bool()) -> ok.
