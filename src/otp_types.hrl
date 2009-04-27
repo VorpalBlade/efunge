@@ -35,8 +35,9 @@
                                        | {error, supervisor_child_error()}.
 
 
--type otp_start_error() :: {error,{already_started, pid()} | any()}.
--type otp_start_return() :: {ok,pid()} | ignore | otp_start_error().
+-type otp_start_error()            :: {error,{already_started, pid()} | any()}.
+-type otp_start_return_no_ignore() :: {ok,pid()} | otp_start_error().
+-type otp_start_return()           :: otp_start_return_no_ignore() | ignore.
 
 -type supervisor_return() :: {ok,{supervisor_spec(),child_specs()}} | ignore.
 
