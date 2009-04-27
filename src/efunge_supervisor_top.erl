@@ -36,9 +36,9 @@
 %% API functions
 %%====================================================================
 
-%% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
+%% @spec start_link() -> {ok,Pid} | {error,Error}
 %% @doc Starts the supervisor.
--spec start_link() -> otp_start_return().
+-spec start_link() -> otp_start_return_no_ignore().
 start_link() ->
 	supervisor:start_link({?SCOPE, ?SERVER}, ?MODULE, []).
 
@@ -62,11 +62,12 @@ start_in_shell_for_testing() ->
 init([]) ->
 	%% First thing: Insert error handler.
 	efunge_report:register_handler(),
+	SupSpec           = {one_for_one,3,10},
 	ServiceSupervisor = {'efunge_supervisor_services',
 	                     {'efunge_supervisor_services', start_link, []},
 	                     permanent, 2000, supervisor,
 	                     [efunge_supervisor_services]},
-	{ok,{{one_for_one,3,10}, [ServiceSupervisor]}}.
+	{ok,{SupSpec, [ServiceSupervisor]}}.
 
 %%====================================================================
 %% Internal functions
