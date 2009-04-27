@@ -30,7 +30,7 @@
 %% API
 %%====================================================================
 
-%% @spec ip_forward(ip(), fungespace()) -> NewIP::ip()
+%% @spec ip_forward(ip()) -> NewIP::ip()
 %% @doc Move IP forward one step.
 -spec ip_forward(ip()) -> ip().
 ip_forward(#fip{x=X, y=Y, dx=DX, dy=DY} = IP) ->
@@ -47,6 +47,7 @@ ip_forward(#fip{x=X, y=Y, dx=DX, dy=DY} = IP) ->
 			end
 	end.
 
+%% @spec jump(ip(), Distance::integer()) -> ip()
 %% @doc Handles j correctly, it will temporarly change delta for the IP then
 %% jump forward, and finally restore delta.
 -spec jump(ip(), integer()) -> ip().
@@ -55,7 +56,7 @@ jump(#fip{dx=DX, dy=DY} = IP, Distance) ->
 	IPNewPos = ip_forward(IPNewDelta),
 	IPNewPos#fip{ dx = DX, dy = DY }.
 
-%% @spec set_delta(ip(), integer(), integer()) -> NewState::ip()
+%% @spec set_delta(ip(), X::integer(), Y::integer()) -> NewState::ip()
 %% @doc Set delta in state.
 -spec set_delta(ip(), integer(), integer()) -> ip().
 set_delta(#fip{} = IP, X, Y) ->
@@ -67,22 +68,25 @@ set_delta(#fip{} = IP, X, Y) ->
 rev_delta(#fip{dx=DX, dy=DY} = IP) ->
 	IP#fip{ dx = -DX, dy = -DY }.
 
-%% @spec set_offset(ip(), integer(), integer()) -> NewState::ip()
+%% @spec set_offset(ip(), X::integer(), Y::integer()) -> NewState::ip()
 %% @doc Set delta in state.
 -spec set_offset(ip(), integer(), integer()) -> ip().
 set_offset(#fip{} = IP, X, Y) ->
 	IP#fip{ offX = X, offY = Y }.
 
+%% @spec turn_delta_left(ip()) -> NewState::ip()
 %% @doc Turn IP left.
 -spec turn_delta_left(ip()) -> ip().
 turn_delta_left(#fip{dx=DX, dy=DY} = IP) ->
 	IP#fip{ dx = DY, dy = -DX }.
 
+%% @spec turn_delta_right(ip()) -> NewState::ip()
 %% @doc Turn IP right.
 -spec turn_delta_right(ip()) -> ip().
 turn_delta_right(#fip{dx=DX, dy=DY} = IP) ->
 	IP#fip{ dx = -DY, dy = DX }.
 
+%% @spec find_next_match(ip(), Value::integer(), fungespace()) -> NewState::ip()
 %% @doc Search in IP's path for the next time value shows up.
 -spec find_next_match(ip(),integer(),fungespace()) -> ip().
 find_next_match(#fip{x=X, y=Y} = IP, Match, FungeSpace) ->
@@ -92,6 +96,7 @@ find_next_match(#fip{x=X, y=Y} = IP, Match, FungeSpace) ->
 		true -> find_next_match(ip_forward(IP), Match, FungeSpace)
 	end.
 
+%% @spec find_next_non_space(ip(), fungespace()) -> {ip(), InstrFound::integer()}
 %% @doc Find next one that isn't a whitespace, and isn't in ;;.
 -spec find_next_non_space(ip(),fungespace()) -> {ip(), integer()}.
 find_next_non_space(#fip{x=X, y=Y} = IP, FungeSpace) ->
@@ -111,6 +116,7 @@ find_next_non_space(#fip{x=X, y=Y} = IP, FungeSpace) ->
 %% Internal functions
 %%====================================================================
 
+%% @spec is_delta_cardinal(ip()) -> bool()
 %% @doc Check if IP is cardinal
 -spec is_delta_cardinal(ip()) -> bool().
 is_delta_cardinal(#fip{dx=DX, dy=DY}) ->
@@ -122,6 +128,7 @@ is_delta_cardinal(#fip{dx=DX, dy=DY}) ->
 		_ -> false
 	end.
 
+%% @spec ip_forward_cardinal(ip(),{coord(),coord()}) -> ip()
 %% @doc Move forward for Cardinal IPs
 -spec ip_forward_cardinal(ip(),{coord(),coord()}) -> ip().
 ip_forward_cardinal(#fip{x=X, y=Y} = IP, {{MinX, MinY}, {MaxX, MaxY}}) ->
@@ -137,6 +144,7 @@ ip_forward_cardinal(#fip{x=X, y=Y} = IP, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	end,
 	IP#fip{ x=NewX, y=NewY }.
 
+%% @spec ip_forward_flying(ip(),{coord(),coord()}) -> ip()
 %% @doc Move forward for flying IPs.
 -spec ip_forward_flying(ip(),{coord(),coord()}) -> ip().
 ip_forward_flying(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, Bounds) ->
