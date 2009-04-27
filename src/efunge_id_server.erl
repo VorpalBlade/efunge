@@ -20,8 +20,9 @@
 
 -behaviour(gen_server).
 
-%% API
+%% API - OTP stuff
 -export([start/0, start_link/0, stop/0]).
+%% API - Calls to server.
 -export([alloc_thread_id/0, alloc_ip_id/1,
          free_thread_id/1, free_ip_id/1,
          lookup_thread/1, lookup_ip_pid/1, lookup_ip_thread/1]).
