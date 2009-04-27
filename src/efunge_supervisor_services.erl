@@ -60,6 +60,7 @@ start_in_shell_for_testing() ->
 %% strategy, maximum restart frequency and child specifications.
 -spec init([]) -> supervisor_return().
 init([]) ->
+	SupSpec     = {one_for_one,3,10},
 	FungeSpace  = {'efunge_fungespace', {'efunge_fungespace', start_link, []},
 	               permanent, 2000, worker, [efunge_fungespace]},
 	InputServer = {'efunge_input', {'efunge_input', start_link, []},
@@ -68,10 +69,7 @@ init([]) ->
 	               permanent, 2000, worker, [efunge_id_server]},
 	DataServer  = {'efunge_global_data', {'efunge_global_data', start_link, []},
 	               permanent, 2000, worker, [efunge_global_data]},
-	{ok,{{one_for_one,3,10},
-	     [FungeSpace, InputServer, IDServer, DataServer]
-	    }
-	}.
+	{ok,{SupSpec,[FungeSpace, InputServer, IDServer, DataServer]}}.
 
 %%====================================================================
 %% Internal functions
