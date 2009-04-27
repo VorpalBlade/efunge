@@ -25,7 +25,8 @@
 %% API - Calls to server.
 -export([alloc_thread_id/0, alloc_ip_id/1,
          free_thread_id/1, free_ip_id/1,
-         lookup_thread/1, lookup_ip_pid/1, lookup_ip_thread/1]).
+         lookup_thread/1, lookup_ip_pid/1, lookup_ip_thread/1,
+         get_all_threads/0]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -58,13 +59,16 @@
 -type thread_id() :: integer().
 -type ip_id()     :: integer().
 
--type call_return_reply() :: {reply, notfound | ok | pid() | thread_id() | ip_id(), state()}.
--type call_return_stop()  :: {stop,normal,stopped,state()}.
--type call_return()       :: call_return_reply() | call_return_stop().
--type call_op_none()      :: alloc_thread_id | stop.
--type call_op_ipid()      :: free_ip_id | lookup_ip_pid | lookup_ip_thread.
--type call_op_threadid()  :: alloc_ip_id | free_thread_id | lookup_thread.
--type call_op() :: call_op_none() | {call_op_ipid(), ip_id()} | {call_op_threadid(), thread_id()}.
+-type call_return_replies() :: notfound | ok | pid() | thread_id() | ip_id() | [pid()].
+-type call_return_reply()   :: {reply, call_return_replies(), state()}.
+-type call_return_stop()    :: {stop,normal,stopped,state()}.
+-type call_return()         :: call_return_reply() | call_return_stop().
+-type call_op_none()        :: get_all_threads | alloc_thread_id | stop.
+-type call_op_ipid()        :: free_ip_id | lookup_ip_pid | lookup_ip_thread.
+-type call_op_threadid()    :: alloc_ip_id | free_thread_id | lookup_thread.
+-type call_op()             :: call_op_none()
+                            | {call_op_ipid(), ip_id()}
+                            | {call_op_threadid(), thread_id()}.
 
 -include("otp_types.hrl").
 
@@ -131,6 +135,11 @@ lookup_ip_thread(IpID) when is_integer(IpID) ->
 lookup_ip_pid(IpID) when is_integer(IpID) ->
 	gen_server:call(?CALL_NAME, {lookup_ip_pid, IpID}).
 
+%% @doc Get thread PIDs.
+-spec get_all_threads() -> [pid()].
+get_all_threads() ->
+	gen_server:call(?CALL_NAME, get_all_threads).
+
 
 %%====================================================================
 %% gen_server callbacks
@@ -176,6 +185,9 @@ handle_call({lookup_ip_thread, IpID}, _From, State) ->
 
 handle_call({lookup_ip_pid, IpID}, _From, State) ->
 	{reply, thread_to_pid(ip_to_thread(IpID)), State};
+
+handle_call(get_all_threads, _From, State) ->
+	{reply, get_all_thread_pids(), State};
 
 handle_call(stop, _From, State) ->
 	{stop, normal, stopped, State}.
@@ -248,6 +260,11 @@ thread_to_pid(ThreadID) ->
 		[]                -> notfound;
 		[{ThreadID, Pid}] -> Pid
 	end.
+
+-spec get_all_thread_pids() -> [pid()].
+get_all_thread_pids() ->
+	ets:select(thread_to_pid,
+	           [{{'_','$2'},[],['$2']}]).
 
 %% Add an IP
 -spec add_ip(thread_id(), ip_id()) -> true.
