@@ -116,6 +116,8 @@ other ones are undefined in the Funge-98 standard.
 
 Known bugs and limitations
 --------------------------
+* It seems like the Erlang runtime system sometimes eat program arguments
+  starting with a dash. No workaround has yet been found.
 * efunge is slow, but that will not be fixed, if you want a faster Befunge
   interpreter try cfunge (http://rage.kuonet.org/~anmaster/cfunge/) that is
   coded in C. cfunge also handles Funge-109. However, cfunge only works on POSIX
