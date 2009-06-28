@@ -46,4 +46,4 @@ if ! type erl > /dev/null 2>&1; then
 	exit 1
 fi
 # Run it then...
-exec erl -noshell -pa "$EFUNGE_ROOT" -run efunge run ${1+"$@"}
+exec erl -noshell -pa "$EFUNGE_ROOT" -run efunge run -extra ${1+"$@"}
