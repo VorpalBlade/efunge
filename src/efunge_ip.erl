@@ -86,23 +86,21 @@ turn_delta_right(#fip{dx=DX, dy=DY} = IP) ->
 %% @doc Search in IP's path for the next time value shows up.
 -spec find_next_match(ip(), integer(), fungespace()) -> ip().
 find_next_match(#fip{x=X, y=Y} = IP, Match, FungeSpace) ->
-	Value = efunge_fungespace:fetch(FungeSpace, {X, Y}),
-	if
-		Value =:= Match -> IP#fip{x = X, y = Y};
-		true -> find_next_match(ip_forward(IP, FungeSpace), Match, FungeSpace)
+	case efunge_fungespace:fetch(FungeSpace, {X, Y}) of
+		Match -> IP#fip{x = X, y = Y};
+		_ -> find_next_match(ip_forward(IP, FungeSpace), Match, FungeSpace)
 	end.
 
 %% @doc Find next one that isn't a whitespace, and isn't in ;;.
 -spec find_next_non_space(ip(), fungespace()) -> {ip(), integer()}.
 find_next_non_space(#fip{x=X, y=Y} = IP, FungeSpace) ->
-	Value = efunge_fungespace:fetch(FungeSpace, {X, Y}),
-	if
-		Value =:= $\s ->
+	case efunge_fungespace:fetch(FungeSpace, {X, Y}) of
+		$\s ->
 			find_next_non_space(ip_forward(IP, FungeSpace), FungeSpace);
-		Value =:= $; ->
+		$; ->
 			IP2 = find_next_match(ip_forward(IP, FungeSpace), $;, FungeSpace),
 			find_next_non_space(ip_forward(IP2, FungeSpace), FungeSpace);
-		true ->
+		Value ->
 			{IP#fip{x = X, y = Y}, Value}
 	end.
 
