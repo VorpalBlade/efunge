@@ -49,16 +49,19 @@ start([_|_] = Filename, Parameters) when is_list(Parameters) ->
 	process_flag(trap_exit, true),
 	ok = application:start(efunge),
 	efunge_global_data:set_cmdline([Filename|Parameters]),
+	%% Load Funge-Space.
 	Space = efunge_fungespace:get_fungespace(),
 	ok = efunge_fungespace:load_initial(Space, Filename),
-	{ok, Pid} = efunge_thread:start(Space),
+	%% Set up thread stuff:
+	{ok, ThreadSupPid} = efunge_supervisor_threads:register_main(),
+	{ok, Pid} = efunge_supervisor_threads:create_thread(Space),
 	%% FIXME: Temp hack until proper fix is done.
 	receive
-		{Pid, shutdown, Retval} ->
+		{ThreadSupPid, shutdown, Retval} ->
 			stop_quiet(),
 			Retval;
 		Other ->
-			io:format("*BUG* Parent got ~p. Thread pid was ~p. Terminating.~n", [Other, Pid]),
+			io:format("*BUG* Main got ~p. Thread pid was ~p. Terminating.~n", [Other, Pid]),
 			stop_quiet(),
 			exit(Pid, kill),
 			127

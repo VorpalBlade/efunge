@@ -15,3 +15,12 @@
   warn_untyped_record,
   warn_unused_import,
   warn_missing_spec_all]}.
+{['lib/*'],
+ [{outdir, ebin},
+  {warn_format,2},
+  warn_export_all,
+  warn_shadow_vars,
+  warn_obsolete_guard,
+  warn_untyped_record,
+  warn_unused_import,
+  warn_missing_spec_all]}.

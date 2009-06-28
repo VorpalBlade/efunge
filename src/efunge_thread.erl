@@ -19,7 +19,7 @@
 -module(efunge_thread).
 
 %% API - OTP stuff
--export([start/1, start_link/1, init/2]).
+-export([start/1, start_link/1, start_link/3, init/4]).
 -export([system_continue/3, system_terminate/4, system_code_change/4]).
 
 
@@ -36,6 +36,9 @@
 -include("funge_types.hrl").
 %% @headerfile "efunge_ip.hrl"
 
+%% exited     @
+%% quit       q
+%% athr_quit  ATHR's Q
 -type quit_types() :: exited | quit | athr_quit.
 -type dead_tuple() :: {dead, {quit_types(), integer()}}.
 %% @type process_instr_ret() = {ip(),stackstack()} | {dead, {Type, integer()}}.
@@ -50,22 +53,27 @@
 
 -spec start(fungespace()) -> {ok, pid()}.
 start(FungeSpace) ->
-	proc_lib:start(?MODULE, init, [self(), FungeSpace]).
+	proc_lib:start(?MODULE, init, [self(), FungeSpace, create_ip(),
+	                               efunge_stackstack:new()]).
 
 -spec start_link(fungespace()) -> {ok, pid()}.
 start_link(FungeSpace) ->
-	proc_lib:start_link(?MODULE, init, [self(), FungeSpace]).
+	proc_lib:start_link(?MODULE, init, [self(), FungeSpace, create_ip(),
+	                                    efunge_stackstack:new()]).
+
+-spec start_link(fungespace(), ip(), stackstack()) -> {ok, pid()}.
+start_link(FungeSpace, IP, StackStack) ->
+	proc_lib:start_link(?MODULE, init, [self(), FungeSpace, IP, StackStack]).
 
 %% dialyzer bug, won't actually return.
--spec init(pid(),fungespace()) -> any().
-init(Parent, FungeSpace) ->
+-spec init(pid(),fungespace(), ip(), stackstack()) -> any().
+init(Parent, FungeSpace, IP, StackStack) ->
 	process_flag(trap_exit, true),
 	Deb = sys:debug_options([]),
 	setup_random(),
 	efunge_fungespace:set_process_bounds_initial(FungeSpace),
-	IP = create_ip(),
 	proc_lib:init_ack(Parent, {ok, self()}),
-	loop(IP, efunge_stackstack:new(), FungeSpace, Parent, Deb).
+	loop(IP, StackStack, FungeSpace, Parent, Deb).
 
 %% dialyzer bug, won't actually return.
 -spec system_continue(pid(),_,state_tuple()) -> any().
@@ -92,6 +100,8 @@ loop(IP, Stack, FungeSpace, Parent, Deb) ->
 	receive
 		code_change ->
 			efunge_thread:loop(IP, Stack, FungeSpace, Parent, Deb);
+		hibernate ->
+			proc_lib:hibernate(?MODULE, loop, [IP,Stack,FungeSpace,Parent,Deb]);
 		stop ->
 			exit(normal);
 		{system, From, Request} ->
@@ -106,10 +116,15 @@ loop(IP, Stack, FungeSpace, Parent, Deb) ->
 			loop(IP, Stack, FungeSpace, Parent, Deb)
 	after 0 ->
 		case run_ip(IP, Stack, FungeSpace) of
-			{dead, {Type, Retval}} ->
-				%% TODO Handle Type and Retval correctly!
-				Parent ! {self(), shutdown, Retval},
-				exit(normal);
+			%% Shutdown efunge.
+			{dead, {quit,Retval}} ->
+				exit({shutdown, {quit,Retval}});
+			%% Shut down this thread.
+			{dead, {athr_quit,_}} ->
+				exit({shutdown, {exited,0}});
+			%% Shut down the IP (no t implemented, so same as one above).
+			{dead, {exited,_}} ->
+				exit({shutdown, {exited,0}});
 			{NewIP, NewStack} ->
 				loop(NewIP, NewStack, FungeSpace, Parent, Deb)
 		end

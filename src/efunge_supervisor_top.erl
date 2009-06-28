@@ -61,13 +61,18 @@ start_in_shell_for_testing() ->
 -spec init([]) -> supervisor_return().
 init([]) ->
 	%% First thing: Insert error handler.
+	%% FIXME: This breaks on code update it seems.
 	efunge_report:register_handler(),
 	SupSpec           = {one_for_one,3,10},
 	ServiceSupervisor = {'efunge_supervisor_services',
 	                     {'efunge_supervisor_services', start_link, []},
 	                     permanent, 2000, supervisor,
 	                     [efunge_supervisor_services]},
-	{ok,{SupSpec, [ServiceSupervisor]}}.
+	ThreadSupervisor  = {'efunge_supervisor_threads',
+	                     {'efunge_supervisor_threads', start_link, []},
+	                     permanent, 2000, supervisor,
+	                     [efunge_supervisor_threads]},
+	{ok,{SupSpec, [ServiceSupervisor, ThreadSupervisor]}}.
 
 %%====================================================================
 %% Internal functions
