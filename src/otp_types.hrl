@@ -16,11 +16,12 @@
 %%% along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %%%----------------------------------------------------------------------
 %%% This files defines generic types used for OTP behaviour -specs in efunge.
+-type chl_startfunc() :: {atom(),atom(),maybe_improper_list()}.
 -type chl_restart() :: permanent | transient | temporary.
 -type chl_shutdown() :: brutal_kill | non_neg_integer() | infinity.
 -type chl_type() :: worker | supervisor.
 -type chl_modules() :: [atom()] | dynamic.
--type child_spec() :: {any(),mfa(),chl_restart(),chl_shutdown(),chl_type(),chl_modules()}.
+-type child_spec() :: {any(),chl_startfunc(),chl_restart(),chl_shutdown(),chl_type(),chl_modules()}.
 -type child_specs() :: [child_spec(),...].
 
 -type sup_restart_strategy() :: one_for_all | one_for_one | rest_for_one | simple_one_for_one.
