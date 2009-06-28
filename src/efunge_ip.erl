@@ -88,7 +88,7 @@ turn_delta_right(#fip{dx=DX, dy=DY} = IP) ->
 
 %% @spec find_next_match(ip(), Value::integer(), fungespace()) -> NewState::ip()
 %% @doc Search in IP's path for the next time value shows up.
--spec find_next_match(ip(),integer(),fungespace()) -> ip().
+-spec find_next_match(ip(), integer(), fungespace()) -> ip().
 find_next_match(#fip{x=X, y=Y} = IP, Match, FungeSpace) ->
 	Value = efunge_fungespace:fetch(FungeSpace, {X, Y}),
 	if
@@ -98,7 +98,7 @@ find_next_match(#fip{x=X, y=Y} = IP, Match, FungeSpace) ->
 
 %% @spec find_next_non_space(ip(), fungespace()) -> {ip(), InstrFound::integer()}
 %% @doc Find next one that isn't a whitespace, and isn't in ;;.
--spec find_next_non_space(ip(),fungespace()) -> {ip(), integer()}.
+-spec find_next_non_space(ip(), fungespace()) -> {ip(), integer()}.
 find_next_non_space(#fip{x=X, y=Y} = IP, FungeSpace) ->
 	Value = efunge_fungespace:fetch(FungeSpace, {X, Y}),
 	if
@@ -130,7 +130,7 @@ is_delta_cardinal(#fip{dx=DX, dy=DY}) ->
 
 %% @spec ip_forward_cardinal(ip(),{coord(),coord()}) -> ip()
 %% @doc Move forward for Cardinal IPs
--spec ip_forward_cardinal(ip(),{coord(),coord()}) -> ip().
+-spec ip_forward_cardinal(ip(), rect()) -> ip().
 ip_forward_cardinal(#fip{x=X, y=Y} = IP, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	if
 		X < MinX -> NewX = MaxX+1;
@@ -146,7 +146,7 @@ ip_forward_cardinal(#fip{x=X, y=Y} = IP, {{MinX, MinY}, {MaxX, MaxY}}) ->
 
 %% @spec ip_forward_flying(ip(),{coord(),coord()}) -> ip()
 %% @doc Move forward for flying IPs.
--spec ip_forward_flying(ip(),{coord(),coord()}) -> ip().
+-spec ip_forward_flying(ip(), rect()) -> ip().
 ip_forward_flying(#fip{x=X, y=Y, dx=DX, dy=DY} = IP, Bounds) ->
 	case efunge_fungespace:is_in_range({X, Y}, Bounds) of
 		false -> rev_delta(IP);

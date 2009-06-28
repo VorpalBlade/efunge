@@ -205,20 +205,20 @@ load(Fungespace, #fip{offX = OffX, offY = OffY}, Filename, IsBinaryMode, {X, Y} 
 
 %% @spec get_bounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
 %% @doc Get Funge Space bounds from global data only.
--spec get_bounds(fungespace()) -> {coord(), coord()}.
+-spec get_bounds(fungespace()) -> rect().
 get_bounds(Fungespace) ->
 	[{_,Min,Max}] = ets:lookup(Fungespace, bounds),
 	{Min, Max}.
 
 %% @spec get_bounds_thread() -> {LeastPoint::coord(), GreatestPoint::coord()}
 %% @doc Get Funge Space bounds from the thread local bounds.
--spec get_bounds_thread() -> {coord(), coord()}.
+-spec get_bounds_thread() -> rect().
 get_bounds_thread() ->
 	get(efunge_bounds).
 
 %% @spec get_bounds_thread_exact(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
 %% @doc Get exact Funge Space bounds, or thread local ones.
--spec get_bounds_thread_exact(fungespace()) -> {coord(), coord()}.
+-spec get_bounds_thread_exact(fungespace()) -> rect().
 get_bounds_thread_exact(Fungespace) ->
 	case get(efunge_bounds_exact) of
 		true ->
@@ -250,7 +250,7 @@ get_block(Fungespace, {MinX, MinY}, {MaxX, MaxY}) ->
 %%====================================================================
 
 %% @doc Is X, Y in range of the box created by the second parameter?
--spec is_in_range(coord(),{coord(),coord()}) -> bool().
+-spec is_in_range(coord(),rect()) -> bool().
 is_in_range({X, Y}, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	if
 		X < MinX -> false;
@@ -384,7 +384,7 @@ find_bounds_max(X, Y) when X > Y -> X;
 find_bounds_max(_X, Y)           -> Y.
 
 %% @doc Find the extreme values in the list.
--spec find_extremes([{cell(),cell()}],cell(),cell(),cell(),cell()) -> {coord(), coord()}.
+-spec find_extremes([{cell(),cell()}],cell(),cell(),cell(),cell()) -> rect().
 find_extremes([], MinX, MinY, MaxX, MaxY) ->
 	{{MinX,MinY},{MaxX,MaxY}};
 find_extremes([{X,Y}|T], MinX, MinY, MaxX, MaxY) ->
@@ -423,7 +423,7 @@ cast_update_bounds(_V, Space, Coord) ->
 			true
 	end.
 
--spec recalculate_bounds_exact(fungespace()) -> {coord(), coord()}.
+-spec recalculate_bounds_exact(fungespace()) -> rect().
 recalculate_bounds_exact(Fungespace) ->
 	% Get first item as base for new bounds.
 	[{FirstX,FirstY}|Coordinates] = ets:select(Fungespace, [{{'$1','$2'},[{'=/=','$2',$\s}],['$1']}]),

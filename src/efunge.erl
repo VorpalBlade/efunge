@@ -17,7 +17,7 @@
 %%%----------------------------------------------------------------------
 %% @doc Main entry point for efunge. Used to start efunge.
 -module(efunge).
--export([run/1, start/1, start/2]).
+-export([run/0, start/1, start/2]).
 -include("efunge_ip.hrl").
 -include("funge_types.hrl").
 
@@ -27,10 +27,11 @@
 
 %% @spec run(list(string())) -> none()
 %% @doc Handler for -run
--spec run([string(),...]) -> no_return().
-run([Filename|Parameters]) when is_list(Filename) ->
+-spec run() -> no_return().
+run()  ->
 	%% HACK: Make unicode IO work.
 	io:setopts(standard_io, [{encoding,unicode}]),
+	[Filename|Parameters] = init:get_plain_arguments(),
 	Retval = start(Filename, Parameters),
 	init:stop(Retval).
 
@@ -42,7 +43,7 @@ start([_|_] = Filename) ->
 
 %% @spec start(string(), list(string())) -> integer()
 %% @doc Load file, set up PRNG, start main loop.
--spec start(string(), [] | [string(),...]) -> integer().
+-spec start(string(), [string()]) -> integer().
 start([_|_] = Filename, Parameters) when is_list(Parameters) ->
 	%% FIXME: This is hackish until the application bit gets properly working.
 	process_flag(trap_exit, true),
