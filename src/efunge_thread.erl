@@ -337,7 +337,7 @@ process_instruction($&, #fip{} = IP, Stack, _Space) ->
 	end;
 
 %% @ Stop
-process_instruction($@, _IP, _Stack, _Space) ->
+process_instruction($@, #fip{} = _IP, _Stack, _Space) ->
 	{dead, {exited, 0}};
 
 
@@ -498,7 +498,7 @@ process_instruction($), #fip{} = IP, StackStack, _Space) ->
 	end;
 
 %% q Quit
-process_instruction($q, _IP, Stack, _Space) ->
+process_instruction($q, #fip{} = _IP, Stack, _Space) ->
 	{_S2, Retval} = pop(Stack),
 	{dead, {quit, Retval}};
 
