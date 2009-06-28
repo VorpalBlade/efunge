@@ -136,6 +136,7 @@ lookup_ip_pid(IpID) when is_integer(IpID) ->
 	gen_server:call(?CALL_NAME, {lookup_ip_pid, IpID}).
 
 %% @doc Get thread PIDs.
+%% TODO: Might be unused.
 -spec get_all_threads() -> [pid()].
 get_all_threads() ->
 	gen_server:call(?CALL_NAME, get_all_threads).
