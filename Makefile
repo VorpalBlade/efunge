@@ -1,4 +1,4 @@
-ERL = erl -boot start_clean
+ERL = erl -pa ebin -boot start_clean
 RM = rm -rf
 all:
 	$(ERL) -make
