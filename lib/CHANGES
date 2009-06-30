@@ -9,6 +9,7 @@ This file describes what was changed in the supervisor:
  * Added handle_info/2 callback.
  * Added handle_call/3 callback.
  * Added handle_cast/2 callback.
+ * Added handle_new_child/3 callback.
  * Added terminate/2 callback. Different semantics than gen_server callback:
    Return value is either kill or nokill, nokill means the callback took care
    of killing the children, kill means the behaviour should handle that.

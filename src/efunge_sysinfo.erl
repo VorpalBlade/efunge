@@ -54,8 +54,8 @@ push_request(6, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 push_request(7, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	push(PushStack, 2);
 %% 8 IP ID
-push_request(8, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
-	push(PushStack, 0);
+push_request(8, #fip{ipID=ID} = _IP, _StackStack, _FungeSpace, PushStack) ->
+	push(PushStack, ID);
 %% 9 Team ID
 push_request(9, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	push(PushStack, 0);

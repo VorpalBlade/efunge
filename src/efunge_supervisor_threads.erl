@@ -28,7 +28,8 @@
 -export([create_thread/1, create_thread/3, get_threads/0]).
 
 %% Supervisor callbacks
--export([init/1, code_change/3, handle_exit/3,handle_call/3,handle_cast/2,handle_info/2,terminate/2]).
+-export([init/1, code_change/3, handle_exit/3,handle_call/3,handle_cast/2,
+         handle_info/2,terminate/2,handle_new_child/3]).
 
 -define(SERVER, ?MODULE).
 %% Scope for distributed Erlang: global or local
@@ -42,13 +43,16 @@
 -define(CALL_NAME, ?SERVER).
 -endif.
 
+-define(DICT, dict).
+
 -include("efunge_ip.hrl").
 -include("funge_types.hrl").
 -include("otp_types.hrl").
 
 -record(state,
 	{
-		main = none :: none | pid()
+		main = none :: none | pid(),
+		threads :: dict()
 	}
 ).
 
@@ -74,6 +78,7 @@ start_in_shell_for_testing() ->
 %% API - Calls
 %%====================================================================
 
+-spec register_main() -> {ok,pid()}.
 register_main() ->
 	extended_supervisor:call(?CALL_NAME, reg_main).
 
@@ -109,45 +114,76 @@ init([]) ->
 	SupSpec = {simple_one_for_one,3,10},
 	Thread  = {'efunge_thread', {'efunge_thread', start_link, []},
 	           temporary, 2000, worker, [efunge_thread]},
-	{ok,{SupSpec,[Thread],#state{}}}.
+	{ok,{SupSpec,[Thread],#state{threads=?DICT:new()}}}.
 
-terminate(_Reason,_State) -> kill.
+-spec terminate(_,state()) -> 'kill'.
+terminate(_Reason, #state{} =_State) -> kill.
 
-
-handle_call(reg_main, {Pid,_Tag}, State) ->
+handle_call(reg_main, {Pid,_Tag}, #state{} = State) ->
 	{reply,{ok,self()},State#state{main=Pid}};
-handle_call(Request, From, State) ->
-	io:format("Unk. call: ~p~n", [{Request,From,State}]),
-	{reply,'wth',State}.
+handle_call(Request, From, #state{} = State) ->
+	log_unknown(handle_call, "call", [{request, Request},{from,From}], State),
+	{reply,{error,unknown_call},State}.
 
-handle_cast(Msg, State) ->
-	io:format("Unk. cast: ~p~n", [{Msg,State}]),
+handle_cast(Msg, #state{} = State) ->
+	log_unknown(handle_cast, "cast", [{msg, Msg}], State),
 	{noreply,State}.
 
-handle_info(Info, State) ->
-	io:format("Unk. info: ~p~n", [{Info,State}]),
+handle_info(Info, #state{} = State) ->
+	log_unknown(handle_info, "info message", [{info, Info}], State),
 	{noreply, State}.
 
-code_change(OldVsn, State, Extra) ->
-	State.
+code_change(OldVsn, #state{} = State, Extra) ->
+	io:format("Unhandled code change from vsn=~p (extra=~p)!~n", [OldVsn, Extra]),
+	{ok,State}.
+
+% -spec handle_new_child(_,pid()|{pid(),integer()},state()) -> {'ok',state()}.
+handle_new_child([_|_]=_Args, {Pid,ThreadID}, #state{threads=Threads} = State)
+                when is_integer(ThreadID) ->
+	NewThreads = ?DICT:store(Pid, ThreadID, Threads),
+	{ok, State#state{threads=NewThreads}};
+handle_new_child([_|_]=Args, {Pid,Extra}, #state{} = State) ->
+	log_unknown(handle_new_child,"new child notification",
+	            [{args,Args},{pid,Pid},{extra,Extra}], State),
+	{ok, State};
+handle_new_child([_|_]=Args, Pid, #state{} = State) ->
+	log_unknown(handle_new_child,"new child notification",
+	            [{args,Args},{pid,Pid}], State),
+	{ok, State}.
 
 % Replies:
 % {Action, State}
 % Action = ok | ignore | shutdown
--spec handle_exit(pid(),_,state()) -> {ok|ignore|shutdown,state()}.
+-spec handle_exit(pid(),{shutdown,{quit|exited,integer()}}|_,state())
+   -> {ok|ignore|shutdown,state()}.
 %% efunge should shut down:
-handle_exit(Pid, {shutdown,{quit,Retval}}, State) ->
+handle_exit(_Pid, {shutdown,{quit,Retval}}, #state{} = State) ->
 	State#state.main ! {self(), shutdown, Retval},
 	{shutdown, State};
-%% TODO: Handle this properly (check if last).
-handle_exit(Pid, {shutdown,{exited,_}}, State) ->
-	State#state.main ! {self(), shutdown, 0},
-	{shutdown, State};
-handle_exit(Pid, Reason, State) ->
-	io:format("handle_exit:~n  Pid: ~p~n  Reason: ~p~n  State: ~p~n", [Pid, Reason, State]),
+%% Shut down if last thread exited.
+handle_exit(Pid, {shutdown,{exited,_}}, #state{threads=Threads} = State) ->
+	ThID = ?DICT:fetch(Pid, Threads),
+	efunge_id_server:free_thread_id(ThID),
+	NewThreads = ?DICT:erase(Pid, Threads),
+	case ?DICT:size(NewThreads) of
+		0 ->
+			State#state.main ! {self(), shutdown, 0},
+			{shutdown, State};
+		_ ->
+			{ok, State#state{threads=NewThreads}}
+	end;
+handle_exit(Pid, Reason, #state{} = State) ->
+	log_unknown(handle_exit, "exit message",
+	            [{pid, Pid}, {reason, Reason}], State),
 	{ok, State}.
 
 
 %%====================================================================
 %% Internal functions
 %%====================================================================
+
+log_unknown(Function, Desc, Parameters, State) ->
+	io:format("ERROR: Thread supervisor received unexpected ~s:~n", [Desc]),
+	io:format("       Function:  ~p~n", [Function]),
+	io:format("       Paramters: ~p~n", [Parameters]),
+	io:format("       State:     ~p~n", [State]).

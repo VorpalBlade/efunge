@@ -25,7 +25,10 @@
 		offY = 0 :: integer(),
 		isStringMode = false :: bool(),
 		lastWasSpace = false :: bool(),
-		fingerOpStacks  :: array()
+		fingerOpStacks  :: array(),
+		%% Will be filled in early on...
+		threadID = -1 :: integer(),
+		ipID = -1 :: integer()
 	}
 ).
 

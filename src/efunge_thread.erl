@@ -72,8 +72,10 @@ init(Parent, FungeSpace, IP, StackStack) ->
 	Deb = sys:debug_options([]),
 	setup_random(),
 	efunge_fungespace:set_process_bounds_initial(FungeSpace),
-	proc_lib:init_ack(Parent, {ok, self()}),
-	loop(IP, StackStack, FungeSpace, Parent, Deb).
+	ThID = efunge_id_server:alloc_thread_id(),
+	IpID = efunge_id_server:alloc_ip_id(ThID),
+	proc_lib:init_ack(Parent, {ok, self(),ThID}),
+	loop(IP#fip{threadID=ThID,ipID=IpID}, StackStack, FungeSpace, Parent, Deb).
 
 %% dialyzer bug, won't actually return.
 -spec system_continue(pid(),_,state_tuple()) -> any().

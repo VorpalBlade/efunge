@@ -105,8 +105,8 @@
 		period :: pos_integer(),
 		restarts = [] :: [time_triple()],
 		callbackstate :: any(),
-	        module :: atom(),
-	        args :: any()}).
+		module :: atom(),
+		args :: any()}).
 
 -define(is_simple(State), State#state.strategy =:= simple_one_for_one).
 
@@ -114,7 +114,7 @@
 -spec behaviour_info(callbacks | any()) -> [{atom(),non_neg_integer()},...] | undefined.
 behaviour_info(callbacks) ->
     [{init,1},{handle_call,3},{handle_cast,2},{handle_info,2},
-     {handle_exit,3},{terminate,2},{code_change,3}];
+     {handle_exit,3},{terminate,2},{code_change,3}, {handle_new_child,3}];
 behaviour_info(_Other) ->
     undefined.
 
@@ -136,7 +136,9 @@ start_link(SupName, Mod, Args) ->
 %%% ---------------------------------------------------
 -spec start_child(supref(), child_spec() | [any()]) ->
       child_start_ok_results()
-      | {error, already_present | {already_started, pid_undef()} | any()}.
+      | {error, already_present | {already_started, pid_undef()} | any()}
+      | {error, {start_child_callback,_}, pid()}
+      | {error, {start_child_callback,_}, pid(), _}.
 start_child(Supervisor, ChildSpec) ->
     call_int(Supervisor, {start_child, ChildSpec}).
 
@@ -359,6 +361,8 @@ do_start_child_i(M, F, A) ->
       {'reply', 'ok'
               | [which_children_result()]
               | {'error',_}
+              | {'error',{start_child_callback,_},pid()}
+              | {'error',{start_child_callback,_},pid(),_}
               | child_start_ok_results(),
               #state{}}
     | {reply, _, #state{}}
@@ -372,13 +376,23 @@ handle_call({start_child, EArgs}, _From, State) when ?is_simple(State) ->
     Args = A ++ EArgs,
     case do_start_child_i(M, F, Args) of
 	{ok, Pid} ->
-	    NState = State#state{dynamics =
-				 ?DICT:store(Pid, Args, State#state.dynamics)},
-	    {reply, {ok, Pid}, NState};
+	    NState = State#state{dynamics = ?DICT:store(Pid, Args, State#state.dynamics)},
+	    case (State#state.module):handle_new_child(Args, Pid, (State#state.callbackstate)) of
+		{ok, CallBackState} ->
+		    {reply, {ok, Pid}, NState#state{callbackstate = CallBackState}};
+		Error ->
+		    %% TODO: Error logging...
+		    {reply, {error, {start_child_callback, Error}, Pid}, NState}
+	    end;
 	{ok, Pid, Extra} ->
-	    NState = State#state{dynamics =
-				 ?DICT:store(Pid, Args, State#state.dynamics)},
-	    {reply, {ok, Pid, Extra}, NState};
+	    NState = State#state{dynamics = ?DICT:store(Pid, Args, State#state.dynamics)},
+	    case (State#state.module):handle_new_child(Args, {Pid,Extra}, (State#state.callbackstate)) of
+		{ok, CallBackState} ->
+		    {reply, {ok, Pid, Extra}, NState#state{callbackstate = CallBackState}};
+		Error ->
+		    %% TODO: Error logging...
+		    {reply, {error, {start_child_callback, Error}, Pid, Extra}, NState}
+	    end;
 	What ->
 	    {reply, What, State}
     end;
