@@ -119,25 +119,30 @@ init([]) ->
 -spec terminate(_,state()) -> 'kill'.
 terminate(_Reason, #state{} =_State) -> kill.
 
+-spec handle_call(reg_main,{pid(),_},state())
+   -> {'reply',{'error','unknown_call'} | {'ok',pid()},state()}.
 handle_call(reg_main, {Pid,_Tag}, #state{} = State) ->
 	{reply,{ok,self()},State#state{main=Pid}};
 handle_call(Request, From, #state{} = State) ->
 	log_unknown(handle_call, "call", [{request, Request},{from,From}], State),
 	{reply,{error,unknown_call},State}.
 
+-spec handle_cast(_,state()) -> {'noreply',state()}.
 handle_cast(Msg, #state{} = State) ->
 	log_unknown(handle_cast, "cast", [{msg, Msg}], State),
 	{noreply,State}.
 
+-spec handle_info(_,state()) -> {'noreply',state()}.
 handle_info(Info, #state{} = State) ->
 	log_unknown(handle_info, "info message", [{info, Info}], State),
 	{noreply, State}.
 
+-spec code_change(_,state(),_) -> {'ok',state()}.
 code_change(OldVsn, #state{} = State, Extra) ->
 	io:format("Unhandled code change from vsn=~p (extra=~p)!~n", [OldVsn, Extra]),
 	{ok,State}.
 
-% -spec handle_new_child(_,pid()|{pid(),integer()},state()) -> {'ok',state()}.
+-spec handle_new_child(list(),pid()|{pid(),integer()},state()) -> {'ok',state()}.
 handle_new_child([_|_]=_Args, {Pid,ThreadID}, #state{threads=Threads} = State)
                 when is_integer(ThreadID) ->
 	NewThreads = ?DICT:store(Pid, ThreadID, Threads),
@@ -182,6 +187,7 @@ handle_exit(Pid, Reason, #state{} = State) ->
 %% Internal functions
 %%====================================================================
 
+-spec log_unknown(atom(),string(),[{atom(),_},...],state()) -> 'ok'.
 log_unknown(Function, Desc, Parameters, State) ->
 	io:format("ERROR: Thread supervisor received unexpected ~s:~n", [Desc]),
 	io:format("       Function:  ~p~n", [Function]),
