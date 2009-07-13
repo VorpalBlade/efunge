@@ -54,7 +54,7 @@ start([_|_] = Filename, Parameters) when is_list(Parameters) ->
 	ok = efunge_fungespace:load_initial(Space, Filename),
 	%% Set up thread stuff:
 	{ok, ThreadSupPid} = efunge_supervisor_threads:register_main(),
-	{ok, _ThreadPid,_ThreadID} = efunge_supervisor_threads:create_thread(Space),
+	{ok, _ThreadPid, _ThreadID} = efunge_supervisor_threads:create_thread(Space),
 	%% FIXME: Temp hack until proper fix is done.
 	receive
 		{ThreadSupPid, shutdown, Retval} ->

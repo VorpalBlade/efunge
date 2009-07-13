@@ -14,7 +14,7 @@ N   signal      Send signal
 P   sput        Synchronous put
 Q   quit        Quit
 R   return      Return book
-S   spawn_thr   Spawn thread
+S   spawn       Spawn thread
 T   try_borrow  Try to borrow
 W   wait        Wait for signal
 %end

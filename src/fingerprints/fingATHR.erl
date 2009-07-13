@@ -28,7 +28,7 @@
          athr_sput/3,
          athr_quit/3,
          athr_return/3,
-         athr_spawn_thr/3,
+         athr_spawn/3,
          athr_try_borrow/3,
          athr_wait/3]).
 
@@ -52,7 +52,7 @@ load(IP) ->
 		{$P, fun ?MODULE:athr_sput/3},
 		{$Q, fun ?MODULE:athr_quit/3},
 		{$R, fun ?MODULE:athr_return/3},
-		{$S, fun ?MODULE:athr_spawn_thr/3},
+		{$S, fun ?MODULE:athr_spawn/3},
 		{$T, fun ?MODULE:athr_try_borrow/3},
 		{$W, fun ?MODULE:athr_wait/3}]),
 	{ok, IP2}.
@@ -114,11 +114,15 @@ athr_quit(_IP, _Stack, _Space) ->
 athr_return(IP, Stack, Space) ->
 	{efunge_ip:rev_delta(IP), Stack}.
 
-%% @spec athr_spawn_thr(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec athr_spawn(ip(), stackstack(), fungespace()) -> execute_return()
 %% @doc S - Spawn thread
--spec athr_spawn_thr(ip(), stackstack(), fungespace()) -> execute_return().
-athr_spawn_thr(IP, Stack, Space) ->
-	{efunge_ip:rev_delta(IP), Stack}.
+-spec athr_spawn(ip(), stackstack(), fungespace()) -> execute_return().
+athr_spawn(IP, Stack, Space) ->
+	ChildIP = efunge_ip:ip_forward(efunge_ip:rev_delta(IP)),
+	case efunge_supervisor_threads:create_thread(Space, ChildIP, Stack) of
+		{ok, _Pid, _ThreadID} -> {IP, Stack};
+		{error, _Reason} -> {efunge_ip:rev_delta(IP), Stack}
+	end.
 
 %% @spec athr_try_borrow(ip(), stackstack(), fungespace()) -> execute_return()
 %% @doc T - Try to borrow

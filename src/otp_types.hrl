@@ -32,7 +32,7 @@
                                 | {already_started, supervisor_child_pid()}
                                 | any().
 -type supervisor_start_child_result() :: {ok, supervisor_child_pid()}
-                                       | {ok,  supervisor_child_pid(), _}
+                                       | {ok, supervisor_child_pid(), _}
                                        | {error, supervisor_child_error()}.
 
 
