@@ -54,16 +54,15 @@ start([_|_] = Filename, Parameters) when is_list(Parameters) ->
 	ok = efunge_fungespace:load_initial(Space, Filename),
 	%% Set up thread stuff:
 	{ok, ThreadSupPid} = efunge_supervisor_threads:register_main(),
-	{ok, Pid,_ThreadID} = efunge_supervisor_threads:create_thread(Space),
+	{ok, _ThreadPid,_ThreadID} = efunge_supervisor_threads:create_thread(Space),
 	%% FIXME: Temp hack until proper fix is done.
 	receive
 		{ThreadSupPid, shutdown, Retval} ->
 			stop_quiet(),
 			Retval;
 		Other ->
-			io:format("*BUG* Main got ~p. Thread pid was ~p. Terminating.~n", [Other, Pid]),
+			io:format("*BUG* Main got ~p. Terminating.~n", [Other]),
 			stop_quiet(),
-			exit(Pid, kill),
 			127
 	end.
 
