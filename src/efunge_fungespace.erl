@@ -33,6 +33,7 @@
 -export([start/0, start_link/0, stop/0]).
 %% API - Calls to server.
 -export([get_fungespace/0, set_atomic/3, fetch_atomic/2, cmpxchg/4]).
+-export([set_atomic/4, fetch_atomic/3]).
 
 %% API - Non-calls
 -export([load_initial/2, set/3, set/4, load/5,
@@ -133,11 +134,24 @@ get_fungespace() ->
 load_initial(Fungespace, Filename) when is_list(Filename) ->
 	gen_server:call(?CALL_NAME, {load_initial, Fungespace, Filename}).
 
+%% @doc Synchronously set a cell in Funge Space with storage offset taken from
+%% IP.
+-spec set_atomic(fungespace(), ip(), coord(), integer()) -> true.
+set_atomic(Fungespace, #fip{offX = OffX, offY = OffY}, {X,Y}, V) ->
+	set_atomic(Fungespace, {X+OffX, Y+OffY}, V).
+
 -spec set_atomic(fungespace(),coord(),integer()) -> true.
 set_atomic(Fungespace, {_X,_Y} = Coord, Value) ->
 	gen_server:call(?CALL_NAME, {set_atomic, Fungespace, Coord, Value}).
 
--spec fetch_atomic(fungespace(),coord()) -> integer().
+%% @doc
+%% Synchronously get a cell from a specific Funge Space. Will use storage offset
+%% of IP.
+-spec fetch_atomic(fungespace(), ip(), coord()) -> cell().
+fetch_atomic(Fungespace, #fip{offX = OffX, offY = OffY}, {X,Y}) ->
+	fetch_atomic(Fungespace, {X+OffX, Y+OffY}).
+
+-spec fetch_atomic(fungespace(),coord()) -> cell().
 fetch_atomic(Fungespace, {_X,_Y} = Coord) ->
 	gen_server:call(?CALL_NAME, {fetch_atomic, Fungespace, Coord}).
 
@@ -296,7 +310,7 @@ handle_call({load_initial, Fungespace, Filename}, _From, State) ->
 	{reply, Reply, State};
 
 handle_call({set_atomic, Fungespace, Coord, Value}, _From, State) ->
-	Reply = set(Fungespace, Coord, Value),
+	Reply = set_server(Fungespace, Coord, Value),
 	{reply, Reply, State};
 
 handle_call({fetch_atomic, Fungespace, Coord}, _From, State) ->
@@ -306,7 +320,7 @@ handle_call({fetch_atomic, Fungespace, Coord}, _From, State) ->
 handle_call({cmpxchg, Fungespace, Coord, OldValue, NewValue}, _From, State) ->
 	case fetch(Fungespace, Coord) of
 		OldValue  ->
-			set(Fungespace, Coord, NewValue),
+			set_server(Fungespace, Coord, NewValue),
 			Reply = {ok, OldValue};
 		RealValue ->
 			Reply = {failed, RealValue}
@@ -464,7 +478,7 @@ load_at_origin(Fungespace, Filename) ->
 	end.
 
 %% @spec set_server(fungespace(), coord(), V::integer()) -> true
-%% @doc Set a cell in Funge Space.
+%% @doc Set a cell in Funge Space without doing update bounds casts.
 -spec set_server(fungespace(), coord(), integer()) -> true.
 set_server(Fungespace, {_X,_Y} = Coord, V) ->
 	ets:insert(Fungespace, {Coord, V}),

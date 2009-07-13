@@ -36,7 +36,7 @@
 -include("../funge_types.hrl").
 
 %% Import common functions:
--import(efunge_stackstack, [push/2, pop/1]).
+-import(efunge_stackstack, [push/2, pop/1, pop_vec/1]).
 
 
 %% @doc Load the ATHR fingerprint.
@@ -82,7 +82,9 @@ athr_flush(IP, Stack, Space) ->
 %% @doc G - Synchronous get
 -spec athr_sget(ip(), stackstack(), fungespace()) -> execute_return().
 athr_sget(IP, Stack, Space) ->
-	{efunge_ip:rev_delta(IP), Stack}.
+	{S1, C} = pop_vec(Stack),
+	V = efunge_fungespace:fetch_atomic(Space, IP, C),
+	{IP, push(S1, V)}.
 
 %% @spec athr_id(ip(), stackstack(), fungespace()) -> execute_return()
 %% @doc I - ID of current thread
@@ -100,7 +102,10 @@ athr_signal(IP, Stack, Space) ->
 %% @doc P - Synchronous put
 -spec athr_sput(ip(), stackstack(), fungespace()) -> execute_return().
 athr_sput(IP, Stack, Space) ->
-	{efunge_ip:rev_delta(IP), Stack}.
+	{S1, C} = pop_vec(Stack),
+	{S2, V} = pop(S1),
+	efunge_fungespace:set_atomic(Space, IP, C, V),
+	{IP, S2}.
 
 %% @spec athr_quit(ip(), stackstack(), fungespace()) -> execute_return()
 %% @doc Q - Quit
