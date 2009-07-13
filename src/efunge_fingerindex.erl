@@ -1,6 +1,6 @@
 %%%----------------------------------------------------------------------
 %%% efunge - a Befunge-98 interpreter in Erlang.
-%%% Copyright (C) 2008-2008 Arvid Norlander <anmaster AT tele2 DOT se>
+%%% Copyright (C) 2008 Arvid Norlander <anmaster AT tele2 DOT se>
 %%%
 %%% This program is free software: you can redistribute it and/or modify
 %%% it under the terms of the GNU General Public License as published by
@@ -32,6 +32,8 @@
 %% @doc Look up loader function and implemented instrs for a fingerprint.
 %% If fingerprint isn't implemented the atom notfound will be returned.
 -spec lookup(integer()) -> {string(), fingerloadingfun()} | notfound.
+%% ATHR - Asynchronous threads for Funge-98
+lookup(16#41544852)  -> { "BCFGINPQRSTW", fun fingATHR:load/1 };
 %% CPLI - Complex Integer extension
 lookup(16#43504c49)  -> { "ADMOSV", fun fingCPLI:load/1 };
 %% DIRF - Directory functions extension

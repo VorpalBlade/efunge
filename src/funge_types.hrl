@@ -23,6 +23,12 @@
 -type rect() :: {coord(), coord()}.
 -type ip() :: #fip{}.
 -type fungespace() :: atom() | tid().
--type fingerfun() :: fun((ip(), stackstack(), fungespace()) -> {ip(), stackstack()}).
+
+-type exit_reason() :: {exited | quit | athr_quit, integer()}.
+-type return_exit() :: {dead, exit_reason()}.
+-type return_normal() :: {ip(), stackstack()}.
+-type execute_return() :: return_normal() | return_exit().
+
+-type fingerfun() :: fun((ip(), stackstack(), fungespace()) -> execute_return()).
 -type fingerloadingfun() :: fun((ip()) -> {ok, ip()} | {error, ip()}).
 -type fingerstack() :: [] | list(fingerfun()).
