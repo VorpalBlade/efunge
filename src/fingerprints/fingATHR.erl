@@ -89,8 +89,8 @@ athr_sget(IP, Stack, Space) ->
 %% @spec athr_id(ip(), stackstack(), fungespace()) -> execute_return()
 %% @doc I - ID of current thread
 -spec athr_id(ip(), stackstack(), fungespace()) -> execute_return().
-athr_id(IP, Stack, Space) ->
-	{efunge_ip:rev_delta(IP), Stack}.
+athr_id(#fip{threadID=ThID} = IP, Stack, _Space) ->
+	{IP, push(Stack, ThID)}.
 
 %% @spec athr_signal(ip(), stackstack(), fungespace()) -> execute_return()
 %% @doc N - Send signal
