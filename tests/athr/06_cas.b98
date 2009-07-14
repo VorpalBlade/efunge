@@ -1,0 +1,20 @@
+a".daerht elgnis a htiw C tset lliW :TSET">:#,_v
+v      ; > na"!dedaol ton RHTA :DAB">:#,_@ ;   <
+                     > na".detcelfer C :DAB">:#,_@
+>"RHTA"4#^( n 'b'a00#^Cv  >>na".deliaf margorp eht fo ecruos laitni eht morf eulav a no C gnisU :DAB">:#,_@
+                       >'aw na".dekrow margorp eht fo ecruos latitni eht morf eulav a no C gnisU :DOOG">:#,_v
+ v       >>             ; >^ ; na".degnahcxe yllautca t'nsaw eulav smialc G :DAB">:#,_@                     >
+v> 00G'b w  na".G gnidrocca degnahcxe yllautca eulaV :DOOG">:#,_
+>v       >^
+   Now check that it fails to overwrite when value doesn't match:
+          > na".deliaf etirw nehw detcelfer C :DAB">:#,_@
+ > 'c'd00#^Cv   >>na".eulav suoiverp gnorw denruter C deliaF :DAB">:#,_@
+ v          > 'bw na".eulav suoiverp tcerroc denruter C deliaF :DOOG">:#,_
+                >^
+         >> na".eulav degnahc C deliaF :DAB">:#,_@
+v> 00G'b w  na".eulav degnahc t'ndid C deliaF :DOOG">:#,_
+>v       >^
+ > na".sdaerht owt htiw C tset lliW :TSET">:#,_                                v
+v                                   S#v                                        <
+ Old                                   New
+><                                    > na"ODOT">:#,_q

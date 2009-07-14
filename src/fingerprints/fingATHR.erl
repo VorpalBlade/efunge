@@ -70,7 +70,11 @@ athr_borrow(IP, Stack, Space) ->
 %% @doc C - Compare and exchange
 -spec athr_cas(ip(), stackstack(), fungespace()) -> execute_return().
 athr_cas(IP, Stack, Space) ->
-	{efunge_ip:rev_delta(IP), Stack}.
+	{S1, C} = pop_vec(Stack),
+	{S2, Old} = pop(S1),
+	{S3, New} = pop(S2),
+	{_, RealOld} = efunge_fungespace:cmpxchg(Space, IP, C, Old, New),
+	{IP, push(S3, RealOld)}.
 
 %% @spec athr_flush(ip(), stackstack(), fungespace()) -> execute_return()
 %% @doc F - Flushes the signal queue

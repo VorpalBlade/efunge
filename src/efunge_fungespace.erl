@@ -33,7 +33,7 @@
 -export([start/0, start_link/0, stop/0]).
 %% API - Calls to server.
 -export([get_fungespace/0, set_atomic/3, fetch_atomic/2, cmpxchg/4]).
--export([set_atomic/4, fetch_atomic/3]).
+-export([set_atomic/4, fetch_atomic/3, cmpxchg/5]).
 
 %% API - Non-calls
 -export([load_initial/2, set/3, set/4, load/5,
@@ -155,7 +155,15 @@ fetch_atomic(Fungespace, #fip{offX = OffX, offY = OffY}, {X,Y}) ->
 fetch_atomic(Fungespace, {_X,_Y} = Coord) ->
 	gen_server:call(?CALL_NAME, {fetch_atomic, Fungespace, Coord}).
 
--spec cmpxchg(fungespace(), coord(), integer(), integer()) -> cmpxchg_return().
+
+%% @doc
+%% Synchronously compare and exchange a cell from a specific Funge Space. Will
+%% use storage offset of IP.
+-spec cmpxchg(fungespace(), ip(), coord(), cell(), cell()) -> cmpxchg_return().
+cmpxchg(Fungespace, #fip{offX = OffX, offY = OffY}, {X,Y}, OldValue, NewValue) ->
+	cmpxchg(Fungespace, {X+OffX, Y+OffY}, OldValue, NewValue).
+
+-spec cmpxchg(fungespace(), coord(), cell(), cell()) -> cmpxchg_return().
 cmpxchg(Fungespace, {_X,_Y} = Coord, OldValue, NewValue) ->
 	gen_server:call(?CALL_NAME, {cmpxchg, Fungespace, Coord, OldValue, NewValue}).
 
