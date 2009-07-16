@@ -97,7 +97,7 @@ push_vec(S, {X, Y})->
 
 %% @spec push_list(stack(), list(integer())) -> stack()
 %% @doc Push a list on the stack.
--spec push_list(stack(), list(integer())) -> stack_non_empty().
+-spec push_list(stack(), [integer()]) -> stack_non_empty().
 push_list(Stack, []) ->
 	Stack;
 push_list(Stack, [H|T]) ->
@@ -105,13 +105,13 @@ push_list(Stack, [H|T]) ->
 
 %% @spec pop_gnirts(stack()) -> {stack(), list(integer())}
 %% @doc Pop a 0gnirts.
--spec pop_gnirts(stack()) -> {stack(), list(integer())}.
+-spec pop_gnirts(stack()) -> {stack(), [integer()]}.
 pop_gnirts(Stack) ->
 	pop_gnirts(Stack, []).
 
 %% @spec pop_gnirts(stack(), list(integer())) -> {stack(), list(integer())}
 %% @doc Pop a 0gnirts, internal helper for pop_gnirts/1.
--spec pop_gnirts(stack(), list()) -> {stack(), list(integer())}.
+-spec pop_gnirts(stack(), list()) -> {stack(), [integer()]}.
 pop_gnirts([], Acc) ->
 	{[], lists:reverse(Acc)};
 pop_gnirts([0|T], Acc) ->
