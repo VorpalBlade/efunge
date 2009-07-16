@@ -66,11 +66,11 @@ init([]) ->
 	SupSpec           = {one_for_one,3,10},
 	ServiceSupervisor = {'efunge_supervisor_services',
 	                     {'efunge_supervisor_services', start_link, []},
-	                     permanent, 2000, supervisor,
+	                     permanent, infinity, supervisor,
 	                     [efunge_supervisor_services]},
 	ThreadSupervisor  = {'efunge_supervisor_threads',
 	                     {'efunge_supervisor_threads', start_link, []},
-	                     permanent, 2000, supervisor,
+	                     permanent, infinity, supervisor,
 	                     [efunge_supervisor_threads]},
 	{ok,{SupSpec, [ServiceSupervisor, ThreadSupervisor]}}.
 
