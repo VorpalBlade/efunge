@@ -72,6 +72,8 @@ init(Parent, FungeSpace, IP, StackStack) ->
 	ThID = efunge_id_server:alloc_thread_id(),
 	IpID = efunge_id_server:alloc_ip_id(ThID),
 	proc_lib:init_ack(Parent, {ok, self(),ThID}),
+	%% Needed in some other places (ATHR):
+	put(efunge_thread_parent, Parent),
 	loop(IP#fip{threadID=ThID,ipID=IpID}, StackStack, FungeSpace, Parent, Deb).
 
 %% dialyzer bug, won't actually return.
@@ -108,11 +110,11 @@ loop(IP, Stack, FungeSpace, Parent, Deb) ->
 			                      {IP, Stack, FungeSpace});
 		{'EXIT', Parent, Reason} ->
 			%% TODO Add cleanup code
-			exit(Reason);
-		%% For debugging.
-		Other ->
-			print_error("Got unknown message ~p~n", [Other]),
-			loop(IP, Stack, FungeSpace, Parent, Deb)
+			exit(Reason)
+		%% For debugging. Breaks ATHR wait signals.
+% 		Other ->
+% 			print_error("Got unknown message ~p~n", [Other]),
+% 			loop(IP, Stack, FungeSpace, Parent, Deb)
 	after 0 ->
 		case run_ip(IP, Stack, FungeSpace) of
 			%% Shutdown efunge.

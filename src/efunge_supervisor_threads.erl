@@ -26,6 +26,8 @@
 -export([register_main/0]).
 %% API - Thread management.
 -export([create_thread/1, create_thread/3, get_threads/0]).
+%% API - ATHR signals
+-export([cast_athr_signal/1]).
 
 %% Supervisor callbacks
 -export([init/1, code_change/3, handle_exit/3,handle_call/3,handle_cast/2,
@@ -99,6 +101,12 @@ create_thread(FungeSpace, BaseIP, BaseStackStack) ->
 -spec get_threads() -> [pid()].
 get_threads() ->
 	[ Pid || {_,Pid,_,_} <- extended_supervisor:which_children(?CALL_NAME)].
+
+-spec cast_athr_signal(integer()) -> ok.
+cast_athr_signal(SigID) ->
+	Pids = get_threads(),
+	lists:foreach(fun(P) -> P ! {athr_wait_sig, SigID} end, Pids).
+
 
 %%====================================================================
 %% Supervisor callbacks

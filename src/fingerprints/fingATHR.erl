@@ -36,8 +36,10 @@
 -include("../funge_types.hrl").
 
 %% Import common functions:
--import(efunge_stackstack, [push/2, pop/1, pop_vec/1]).
+-import(efunge_stackstack, [push/2, pop/1, pop_vec/1, push_list/2]).
 
+
+-define(TIMEOUT_TO_MILLISECS,1000000).
 
 %% @doc Load the ATHR fingerprint.
 -spec load(ip()) -> {ok, ip()}.
@@ -79,8 +81,10 @@ athr_cas(IP, Stack, Space) ->
 %% @spec athr_flush(ip(), stackstack(), fungespace()) -> execute_return()
 %% @doc F - Flushes the signal queue
 -spec athr_flush(ip(), stackstack(), fungespace()) -> execute_return().
-athr_flush(IP, Stack, Space) ->
-	{efunge_ip:rev_delta(IP), Stack}.
+athr_flush(IP, Stack, _Space) ->
+	{Len, SigList} = get_all_wait_sigs(),
+	S1 = push_list(Stack, SigList),
+	{IP, push(S1, Len)}.
 
 %% @spec athr_sget(ip(), stackstack(), fungespace()) -> execute_return()
 %% @doc G - Synchronous get
@@ -99,8 +103,10 @@ athr_id(#fip{threadID=ThID} = IP, Stack, _Space) ->
 %% @spec athr_signal(ip(), stackstack(), fungespace()) -> execute_return()
 %% @doc N - Send signal
 -spec athr_signal(ip(), stackstack(), fungespace()) -> execute_return().
-athr_signal(IP, Stack, Space) ->
-	{efunge_ip:rev_delta(IP), Stack}.
+athr_signal(IP, Stack, _Space) ->
+	{S1, SigID} = pop(Stack),
+	efunge_supervisor_threads:cast_athr_signal(SigID),
+	{IP, S1}.
 
 %% @spec athr_sput(ip(), stackstack(), fungespace()) -> execute_return()
 %% @doc P - Synchronous put
@@ -142,8 +148,42 @@ athr_try_borrow(IP, Stack, Space) ->
 %% @spec athr_wait(ip(), stackstack(), fungespace()) -> execute_return()
 %% @doc W - Wait for signal
 -spec athr_wait(ip(), stackstack(), fungespace()) -> execute_return().
-athr_wait(IP, Stack, Space) ->
-	{efunge_ip:rev_delta(IP), Stack}.
+athr_wait(IP, Stack, _Space) ->
+	{S1, SigID} = pop(Stack),
+	{S2, TimeoutVal} = pop(S1),
+	Parent = get(efunge_thread_parent),
+	Timeout =
+		if
+			TimeoutVal =:= -1 -> infinity;
+			TimeoutVal < -1 -> 0;
+			%% Convert to milliseconds.
+			true ->
+				%% Round upwards.
+				(TimeoutVal+?TIMEOUT_TO_MILLISECS-1) div ?TIMEOUT_TO_MILLISECS
+		end,
+	%% NOTE: Maybe we should instead handle this in efunge_thread?
+	%% TODO: Do we need we handle system messages? If so, how in here?
+	%% Note that we need to handle exit signals from the supervisor here too, or
+	%% there might be issues with shutting down on q.
+	receive
+		{athr_wait_sig, SigID} -> {IP, S2};
+		{'EXIT', Parent, Reason} ->
+			%% TODO? Pass the exit handling up somewhere or?
+			exit(Reason)
+	after Timeout ->
+		{efunge_ip:rev_delta(IP), S2}
+	end.
 
 
 %% Private funtions
+
+get_all_wait_sigs() ->
+	get_all_wait_sigs([], 0).
+
+get_all_wait_sigs(SigList, Len) ->
+	receive
+		{athr_wait_sig, SigID} ->
+			get_all_wait_sigs([SigID|SigList], Len+1)
+	after 0 ->
+		{Len, SigList}
+	end.

@@ -1,0 +1,48 @@
+a".daerht elgnis a htiw slangis tset lliW :TSET">:#,_v
+ v      ; > na"!dedaol ton RHTA :DAB">:#,_@ ;        <
+              >na"!detcelfer N :DAB"^
+x>"RHTA"4#^(n #^ 9N a".9 langis tneS">:#,_ 11
+ >09#vW   a".tcelfer t'ndid W :DOOG" >:#,_ v
+     >na"!.deueuq saw langis nehw detcelfer W :DAB">:#,_@
+ v                                         <
+      Test wait with zero time out for non-sent signal
+    (9 again to also check signal was removed first time).
+ >  09#vW na".langis tnes-non rof tuoemit orez htiw gnitiaw nehw tcelfer t'ndid W :DAB">:#,_@
+ v     > a".langis tnes-non rof tuoemit orez htiw gnitiaw nehw detcelfer W :DOOG">:#,_
+      Now test sending several signal then waiting for it twice to see that we get all of them.
+x> 0N 9N 4N 4N 02-N a".tsol erew enon kcehc ot hcae rof tiaw lliw ,slangis emos tneS">:#,_11
+ v
+      We can wait in another order...
+      Make timeout really long for one of them to test that it works.
+x> '@::*:**2*1-02-#vW 09#vW 04#vW 00#vW 04#vW   11
+ v      v          <     <     <     <     <
+        >na"!detcelfer slangis eht rof kcehc ot W eht fo erom ro enO :DAB">:#,_@
+x> a".slangis eht lla thguac W :DOOG">:#,_  11
+
+ v> na".daerht elgnis a htiw F tset won lliW :TSET">:#,_
+         >na".detcelfer F :DAB">:#,_@
+             >> ;>v   >v;  na".gnorw saw F morf tnuoc langiS :DAB">:#,_@
+x>3N 0f-#^F 1w  3w 0f-w 11
+ v           >^  >>  ;>>v; na".DI langis tcerrocni denruter F :DAB">:#,_@
+v>na".gnitiaw saw langis eno nehw DI langis dna tnuoc langis tcerroc denruter F :DOOG">:#,_
+>v                      > na".detcepxe sa dnuof t'nsaw llac F erofeb kcats no eulav yranaC :DAB">:#,_@
+
+   Now test F with several signals (3 2 3 5).
+   First clear out some counters in funge-space in row 0.
+x>  000p 010p 020p 030p 040p 050p 060p 070p 080p 090p 0a0p 11
+ v                       >>na".)4 dehsup evah dluohs( tnuoc langis gnorw dehsup F :DAB">:#,_@
+ > n 3N 2N 3N 5N f#vF   4w  v
+                   >    ;>^; na".detcelfer F :DAB">:#,_@
+ v                          >
+   Increment counters:
+    Check if loop is done:
+     > v  Now fetch cell, add one and write it back
+ > :fwv> :0g 1+ \ 0p
+     > ^
+ v    <
+  Now check that F really did push the right ones...
+   v    <     <     <     <     <     <     <     <     <     <     <
+v>  00g0w 10g0w 20g1w 30g2w 40g0w 50g1w 60g0w 70g0w 80g0w 90g0w a0g0w
+        <     <     <     <     <     <     <     <     <     <     <
+   > na".N5 N3 N2 N3 retfa slangis thgir eht nruter t'ndid F :DAB">:#,_@
+> a".N5 N3 N2 N3 retfa slangis tcerroc denruter F :DOOG">:#,_ @
