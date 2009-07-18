@@ -33,7 +33,7 @@
 %% If fingerprint isn't implemented the atom notfound will be returned.
 -spec lookup(integer()) -> {string(), fingerloadingfun()} | notfound.
 %% ATHR - Asynchronous threads for Funge-98
-lookup(16#41544852)  -> { "BCFGINPQRSTW", fun fingATHR:load/1 };
+lookup(16#41544852)  -> { "BCFGINOPQRSTW", fun fingATHR:load/1 };
 %% CPLI - Complex Integer extension
 lookup(16#43504c49)  -> { "ADMOSV", fun fingCPLI:load/1 };
 %% DIRF - Directory functions extension

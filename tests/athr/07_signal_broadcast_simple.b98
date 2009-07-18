@@ -1,7 +1,7 @@
-a".daerht elgnis a htiw slangis tset lliW :TSET">:#,_v
- v      ; > na"!dedaol ton RHTA :DAB">:#,_@ ;        <
-              >na"!detcelfer N :DAB"^
-x>"RHTA"4#^(n #^ 9N a".9 langis tneS">:#,_ 11
+a".daerht elgnis a htiw slangis tsacdaorb tset lliW :TSET">:#,_v
+ v      ; > na"!dedaol ton RHTA :DAB">:#,_@ ;                  <
+               >na"!detcelfer O :DAB"^
+x>"RHTA"4#^(n #^ 9O a".9 langis tneS">:#,_ 11
  >09#vW   a".tcelfer t'ndid W :DOOG" >:#,_ v
      >na"!.deueuq saw langis nehw detcelfer W :DAB">:#,_@
  v                                         <
@@ -10,7 +10,7 @@ x>"RHTA"4#^(n #^ 9N a".9 langis tneS">:#,_ 11
  >  09#vW na".langis tnes-non rof tuoemit orez htiw gnitiaw nehw tcelfer t'ndid W :DAB">:#,_@
  v     > a".langis tnes-non rof tuoemit orez htiw gnitiaw nehw detcelfer W :DOOG">:#,_
       Now test sending several signal then waiting for it twice to see that we get all of them.
-x> 0N 9N 4N 4N 02-N a".tsol erew enon kcehc ot hcae rof tiaw lliw ,slangis emos tneS">:#,_11
+x> 0O 9O 4O 4O 02-O a".tsol erew enon kcehc ot hcae rof tiaw lliw ,slangis emos tneS">:#,_11
  v
       We can wait in another order...
       Make timeout really long for one of them to test that it works.
@@ -22,7 +22,7 @@ x> a".slangis eht lla thguac W :DOOG">:#,_  11
  v> na".daerht elgnis a htiw F tset won lliW :TSET">:#,_
          >na".detcelfer F :DAB">:#,_@
              >> ;>v   >v;  na".gnorw saw F morf tnuoc langiS :DAB">:#,_@
-x>3N 0f-#^F 1w  3w 0f-w 11
+x>3O 0f-#^F 1w  3w 0f-w 11
  v           >^  >>  ;>>v; na".DI langis tcerrocni denruter F :DAB">:#,_@
 v>na".gnitiaw saw langis eno nehw DI langis dna tnuoc langis tcerroc denruter F :DOOG">:#,_
 >v                      > na".detcepxe sa dnuof t'nsaw llac F erofeb kcats no eulav yranaC :DAB">:#,_@
@@ -31,7 +31,7 @@ v>na".gnitiaw saw langis eno nehw DI langis dna tnuoc langis tcerroc denruter F 
    First clear out some counters in funge-space in row 0.
 x>  000p 010p 020p 030p 040p 050p 060p 070p 080p 090p 0a0p 11
  v                       >>na".)4 dehsup evah dluohs( tnuoc langis gnorw dehsup F :DAB">:#,_@
- > n 3N 2N 3N 5N f#vF   4w  v
+ > n 3O 2O 3O 5O f#vF   4w  v
                    >    ;>^; na".detcelfer F :DAB">:#,_@
  v                          >
    Increment counters:
@@ -44,5 +44,5 @@ x>  000p 010p 020p 030p 040p 050p 060p 070p 080p 090p 0a0p 11
    v    <     <     <     <     <     <     <     <     <     <     <
 v>  00g0w 10g0w 20g1w 30g2w 40g0w 50g1w 60g0w 70g0w 80g0w 90g0w a0g0w
         <     <     <     <     <     <     <     <     <     <     <
-   > na".N5 N3 N2 N3 retfa slangis thgir eht nruter t'ndid F :DAB">:#,_@
-> a".N5 N3 N2 N3 retfa slangis tcerroc denruter F :DOOG">:#,_ @
+   > na".O5 O3 O2 O3 retfa slangis thgir eht nruter t'ndid F :DAB">:#,_@
+> a".O5 O3 O2 O3 retfa slangis tcerroc denruter F :DOOG">:#,_ @

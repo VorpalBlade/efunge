@@ -11,6 +11,7 @@ F   flush       Flushes the signal queue
 G   sget        Synchronous get
 I   id          ID of current thread
 N   signal      Send signal
+O   broadcast   Broadcast signal
 P   sput        Synchronous put
 Q   quit        Quit
 R   return      Return book

@@ -25,6 +25,7 @@
          athr_sget/3,
          athr_id/3,
          athr_signal/3,
+         athr_broadcast/3,
          athr_sput/3,
          athr_quit/3,
          athr_return/3,
@@ -51,6 +52,7 @@ load(IP) ->
 		{$G, fun ?MODULE:athr_sget/3},
 		{$I, fun ?MODULE:athr_id/3},
 		{$N, fun ?MODULE:athr_signal/3},
+		{$O, fun ?MODULE:athr_broadcast/3},
 		{$P, fun ?MODULE:athr_sput/3},
 		{$Q, fun ?MODULE:athr_quit/3},
 		{$R, fun ?MODULE:athr_return/3},
@@ -104,6 +106,19 @@ athr_id(#fip{threadID=ThID} = IP, Stack, _Space) ->
 %% @doc N - Send signal
 -spec athr_signal(ip(), stackstack(), fungespace()) -> execute_return().
 athr_signal(IP, Stack, _Space) ->
+	{S1, ThID} = pop(Stack),
+	{S2, SigID} = pop(S1),
+	case efunge_id_server:lookup_thread(ThID) of
+		notfound ->
+			{efunge_ip:rev_delta(IP), S2};
+		Pid ->
+			Pid ! {athr_wait_sig, SigID}, {IP, S2}
+	end.
+
+%% @spec athr_broadcast(ip(), stackstack(), fungespace()) -> execute_return()
+%% @doc O - Broadcast signal
+-spec athr_broadcast(ip(), stackstack(), fungespace()) -> execute_return().
+athr_broadcast(IP, Stack, _Space) ->
 	{S1, SigID} = pop(Stack),
 	efunge_supervisor_threads:cast_athr_signal(SigID),
 	{IP, S1}.
