@@ -164,11 +164,11 @@ setup_random() ->
 create_ip() ->
 	efunge_fingermanager:init(#fip{}).
 
--spec print_error(string(),[any(),...]) -> 'ok'.
-print_error(Format, Parameters) ->
-	io:format("Thread ~p: ", [self()]),
-	io:format(Format, Parameters),
-	ok.
+% -spec print_error(string(),[any(),...]) -> 'ok'.
+% print_error(Format, Parameters) ->
+% 	io:format("Thread ~p: ", [self()]),
+% 	io:format(Format, Parameters),
+% 	ok.
 
 
 %%====================================================================

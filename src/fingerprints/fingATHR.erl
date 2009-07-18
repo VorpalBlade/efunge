@@ -191,10 +191,12 @@ athr_wait(IP, Stack, _Space) ->
 
 
 %% Private funtions
-
+-spec get_all_wait_sigs() -> {Length::non_neg_integer(),Signals::[integer()]}.
 get_all_wait_sigs() ->
 	get_all_wait_sigs([], 0).
 
+-spec get_all_wait_sigs([integer()],non_neg_integer())
+   -> {Length::non_neg_integer(),Signals::[integer()]}.
 get_all_wait_sigs(SigList, Len) ->
 	receive
 		{athr_wait_sig, SigID} ->
