@@ -138,9 +138,9 @@ orth_change_y(IP, Stack, _Space) ->
 %% @spec orth_ramp_if_zero(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
 %% @doc Z - Act like trampoline if 0
 -spec orth_ramp_if_zero(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
-orth_ramp_if_zero(IP, Stack, Space) ->
+orth_ramp_if_zero(IP, Stack, _Space) ->
 	{S1, N} = pop(Stack),
 	case N of
-		0 -> {efunge_ip:ip_forward(IP, Space), S1};
+		0 -> {efunge_ip:ip_forward(IP), S1};
 		_ -> {IP, S1}
 	end.
