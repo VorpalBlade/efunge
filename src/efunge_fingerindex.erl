@@ -1,6 +1,6 @@
 %%%----------------------------------------------------------------------
 %%% efunge - a Befunge-98 interpreter in Erlang.
-%%% Copyright (C) 2008 Arvid Norlander <anmaster AT tele2 DOT se>
+%%% Copyright (C) 2008-2009 Arvid Norlander <anmaster AT tele2 DOT se>
 %%%
 %%% This program is free software: you can redistribute it and/or modify
 %%% it under the terms of the GNU General Public License as published by
@@ -44,6 +44,8 @@ lookup(16#46495850)  -> { "ABCDIJNOPQRSTUVX", fun fingFIXP:load/1 };
 lookup(16#4d4f4455)  -> { "MRU", fun fingMODU:load/1 };
 %% NULL - Null
 lookup(16#4e554c4c)  -> { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", fun fingNULL:load/1 };
+%% ORTH - Orthogonal Easement Library
+lookup(16#4f525448)  -> { "AEGOPSVWXYZ", fun fingORTH:load/1 };
 %% ROMA - Roman Numerals
 lookup(16#524f4d41)  -> { "CDILMVX", fun fingROMA:load/1 };
 lookup(_Fingerprint) -> notfound.
