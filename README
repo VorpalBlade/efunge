@@ -94,6 +94,8 @@ other ones are undefined in the Funge-98 standard.
        Since Erlang normally expects the user's terminal to use UTF-8 this means
        invalid UTF-8 will make input (~ and & for example) reflect. Any other
        input on the same line is lost.
+     Both these points also apply to to fingerprint instructions dealing with
+     standard IO (such as S in ORTH).
  * File IO:
    - File IO is byte based (this means loading the program, i and o). Values are
      truncated in an undefined way for o. The bytes are considered unsigned.
