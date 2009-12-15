@@ -33,8 +33,8 @@
 
 -record(state,
 	{
-		enable_warnings = false :: bool(),
-		enable_info     = false :: bool()
+		enable_warnings = false :: boolean(),
+		enable_info     = false :: boolean()
 	}).
 
 -type state() :: #state{}.
@@ -57,7 +57,7 @@ register_handler() ->
 	error_logger:add_report_handler(?MODULE, {false, false}).
 
 %% @doc Register this handler. Special arguments.
--spec register_handler(bool(),bool()) -> any().
+-spec register_handler(boolean(),boolean()) -> any().
 register_handler(Warnings, Info) ->
 	error_logger:add_report_handler(?MODULE, {Warnings, Info}).
 
@@ -90,7 +90,7 @@ info(Report) ->
 %% Description: Whenever a new event handler is added to an event manager,
 %% this function is called to initialize the event handler.
 %%--------------------------------------------------------------------
--spec init({bool(),bool()}) -> {ok,#state{}}.
+-spec init({boolean(),boolean()}) -> {ok,#state{}}.
 init({Warnings, Info}) ->
 	{ok, #state{ enable_warnings = Warnings, enable_info = Info}}.
 

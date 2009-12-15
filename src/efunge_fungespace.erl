@@ -203,9 +203,9 @@ fetch(Fungespace, {_X,_Y} = Coord) ->
 		[{_,Value}] -> Value
 	end.
 
-%% @spec load(fungespace(), ip(), Filename::string(), IsBinaryMode::bool(), coord()) -> error | coord()
+%% @spec load(fungespace(), ip(), Filename::string(), IsBinaryMode::boolean(), coord()) -> error | coord()
 %% @doc Loads a file into an existing Funge Space, returning the max size.
--spec load(fungespace(), ip(), string(), bool(), coord()) -> error | coord().
+-spec load(fungespace(), ip(), string(), boolean(), coord()) -> error | coord().
 load(Fungespace, #fip{offX = OffX, offY = OffY}, Filename, IsBinaryMode, {X, Y} = _Coord) ->
 	{Status, Binary} = file:read_file(Filename),
 	% TODO: Make binary mode work.
@@ -272,7 +272,7 @@ get_block(Fungespace, {MinX, MinY}, {MaxX, MaxY}) ->
 %%====================================================================
 
 %% @doc Is X, Y in range of the box created by the second parameter?
--spec is_in_range(coord(),rect()) -> bool().
+-spec is_in_range(coord(),rect()) -> boolean().
 is_in_range({X, Y}, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	if
 		X < MinX -> false;
@@ -530,7 +530,7 @@ update_bounds(_V, Space, {X,Y}) ->
 %% @spec load_initial(Binary, fungespace(), X, Y, LastWasCR) -> ok
 %% @doc
 %% Load a binary into Funge Space. Loads at 0,0. Assumes no race conditions.
--spec load_initial(binary(),fungespace(),integer(),integer(),bool()) -> ok.
+-spec load_initial(binary(),fungespace(),integer(),integer(),boolean()) -> ok.
 load_initial(<<H,T/binary>>, FungeSpace, X, Y, LastWasCR) ->
 	case H of
 		$\n ->
@@ -556,7 +556,7 @@ load_initial(<<>>, _FungeSpace, _X, _Y, _LastWasCR) ->
 %% Load a binary into Funge Space. MinX is used for knowing what least X
 %% should be used when resetting due to newline, and not loading from 0,0
 %% MaxX is used for making return value work.
--spec load_binary(binary(),fungespace(),integer(),integer(),bool(),integer(),integer_or_undef()) -> coord().
+-spec load_binary(binary(),fungespace(),integer(),integer(),boolean(),integer(),integer_or_undef()) -> coord().
 load_binary(<<H,T/binary>>, FungeSpace, X, Y, LastWasCR, MinX, MaxX) ->
 	case H of
 		$\n ->

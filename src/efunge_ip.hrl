@@ -23,8 +23,8 @@
 		dy = 0 :: integer(),
 		offX = 0 :: integer(),
 		offY = 0 :: integer(),
-		isStringMode = false :: bool(),
-		lastWasSpace = false :: bool(),
+		isStringMode = false :: boolean(),
+		lastWasSpace = false :: boolean(),
 		fingerOpStacks  :: array(),
 		%% Will be filled in early on...
 		threadID = -1 :: integer(),

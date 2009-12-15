@@ -114,9 +114,9 @@ find_next_non_space(#fip{x=X, y=Y} = IP, FungeSpace) ->
 %% Internal functions
 %%====================================================================
 
-%% @spec is_delta_cardinal(ip()) -> bool()
+%% @spec is_delta_cardinal(ip()) -> boolean()
 %% @doc Check if IP is cardinal
--spec is_delta_cardinal(ip()) -> bool().
+-spec is_delta_cardinal(ip()) -> boolean().
 is_delta_cardinal(#fip{dx=DX, dy=DY}) ->
 	case {DX, DY} of
 		{ 0,  1} -> true;

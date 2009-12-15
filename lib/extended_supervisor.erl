@@ -1135,7 +1135,7 @@ add_restart([R|Restarts], Now, Period) ->
 add_restart([], _, _) ->
     [].
 
--spec inPeriod(time_triple(), time_triple(), pos_integer()) -> bool().
+-spec inPeriod(time_triple(), time_triple(), pos_integer()) -> boolean().
 inPeriod(Time, Now, Period) ->
     case difference(Time, Now) of
 	T when T > Period ->
