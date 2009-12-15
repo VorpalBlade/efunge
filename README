@@ -6,7 +6,7 @@ efunge uses arbitrary-sized integers, this is a side effect of Erlang using that
 by default.
 
 To build and run efunge you will need:
-* Erlang. Version R13B-0 is currently recommended. Newer minor versions should
+* Erlang. Version R13B03 is currently recommended. Newer minor versions should
   usually work too (but that is not guaranteed). When a new stable major version
   of Erlang is released, efunge is generally upgraded to it (after a few days or
   weeks) and "support" for the older Erlang version is dropped. Older versions

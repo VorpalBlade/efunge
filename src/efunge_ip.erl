@@ -110,7 +110,7 @@ find_next_non_space(#fip{x=X, y=Y} = IP, FungeSpace) ->
 %%====================================================================
 
 %% @doc Check if IP is cardinal
--spec is_delta_cardinal(ip()) -> bool().
+-spec is_delta_cardinal(ip()) -> boolean().
 is_delta_cardinal(#fip{dx=DX, dy=DY}) ->
 	case {DX, DY} of
 		{ 0,  1} -> true;
@@ -136,7 +136,7 @@ ip_forward_cardinal(#fip{x=X, y=Y} = IP, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	IP#fip{ x=NewX, y=NewY }.
 
 %% @doc Is X, Y in range of the box created by the second parameter?
--spec is_in_range(coord(), rect()) -> bool().
+-spec is_in_range(coord(), rect()) -> boolean().
 is_in_range({X, Y}, {{MinX, MinY}, {MaxX, MaxY}}) ->
 	if
 		X < MinX -> false;
