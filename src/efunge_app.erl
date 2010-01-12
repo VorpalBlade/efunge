@@ -38,8 +38,10 @@
 %% top supervisor of the tree.
 %%--------------------------------------------------------------------
 -spec start(app_start_type(), any()) -> any().
+start(normal, _StartArgs) ->
+	efunge_supervisor_top:start_link();
 start(_Type, _StartArgs) ->
-	efunge_supervisor_top:start_link().
+	{error, "Requested start type not yet supported."}.
 
 %%--------------------------------------------------------------------
 %% Function: stop(State) -> void()
