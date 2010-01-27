@@ -31,7 +31,7 @@
 -spec push_request(1..20,ip(),stackstack(),fungespace(),stack()) -> stack().
 %% 1 Flags
 push_request(1, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
-	push(PushStack, 16#02);
+	push(PushStack, 2#110);
 %% 2 Cell size
 push_request(2, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	push(PushStack, -1);
