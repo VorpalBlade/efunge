@@ -23,7 +23,7 @@
 %% The current implementation also uses the process dictionary key fspacebounds
 %% to store the bounds of the Funge-Space. This may change without prior notice.
 -module(efunge_fungespace).
--export([create/1, set/3, set/4, load/5,
+-export([create/1, set/3, set/4, load/5, save/6,
          fetch/2, fetch/3,
          delete/1, get_bounds/1, get_bounds_exact/1]).
 -include("efunge_ip.hrl").
@@ -99,6 +99,23 @@ load(Fungespace, #fip{offX = OffX, offY = OffY}, Filename, IsBinaryMode, {X, Y} 
 					MaxY = TrueY
 			end,
 			{MaxX - TrueX, MaxY - TrueY}
+	end.
+
+-spec save(fungespace(), ip(), string(), boolean(), coord(), coord()) -> error | ok.
+save(_Fungespace, #fip{}, "", _IsTextFile, {_X, _Y}, {_W, _H}) ->
+	error;
+save(_Fungespace, #fip{}, <<>>, _IsTextFile, {_X, _Y}, {_W, _H}) ->
+	error;
+save(_Fungespace, #fip{offX = _OffX, offY = _OffY}, _Filename, true, {_X, _Y}, {_W,_H}) ->
+	throw({todo, text_file_o});
+save(Fungespace, #fip{offX = OffX, offY = OffY}, Filename, IsTextFile, {X, Y}, {W,H}) ->
+	case save_binary(Fungespace, OffX+X, OffY+Y, OffX+X+W, OffY+Y+H) of
+		error -> error;
+		Bin ->
+			case file:write_file(Filename, Bin) of
+				{error, _} -> error;
+				ok -> ok
+			end
 	end.
 
 %% @spec delete(fungespace()) -> true
@@ -191,6 +208,22 @@ recalculate_bounds_exact(Fungespace) ->
 	put(fspacebounds, NewBounds),
 	put(fspacebounds_exact, true),
 	NewBounds.
+
+-spec save_binary(fungespace(),cell(),cell(),cell(),cell()) -> 'error' | binary().
+save_binary(_Fungespace, MinX, MinY, MaxX, MaxY) when MinX >= MaxX; MinY >= MaxY ->
+	error;
+save_binary(Fungespace, MinX, MinY, MaxX, MaxY) ->
+	save_binary(<<>>, MinX, MinY, Fungespace, MinX, MaxX, MaxY).
+
+-spec save_binary(binary(),cell(),cell(),fungespace(),cell(),cell(),cell()) -> binary().
+save_binary(Bin, _CurX, MaxY, _Fungespace, _MinX, _MaxX, MaxY) ->
+	Bin;
+save_binary(Bin, MaxX, CurY, Fungespace, MinX, MaxX, MaxY) ->
+	save_binary(<<Bin/binary, $\n>>, MinX, CurY+1, Fungespace, MinX, MaxX, MaxY);
+save_binary(Bin, CurX, CurY, Fungespace, MinX, MaxX, MaxY) ->
+	Value = fetch(Fungespace, {CurX, CurY}),
+	save_binary(<<Bin/binary, Value>>, CurX+1, CurY, Fungespace, MinX, MaxX, MaxY).
+
 
 %% @spec load_binary(Binary, fungespace(), X, Y, LastWasCR, MinX, MaxX) -> coord()
 %% @doc
