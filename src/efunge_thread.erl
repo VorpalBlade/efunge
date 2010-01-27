@@ -486,6 +486,20 @@ process_instruction($i, #fip{} = IP, Stack, Space) ->
 		_     -> {IP, push_vec(push_vec(S3, Retval), Vector)}
 	end;
 
+%% o Output file
+process_instruction($o, #fip{} = IP, Stack, Space) ->
+	{S1, Filename} = pop_gnirts(Stack),
+	{S2, Flags} = pop(S1),
+	{S3, Offset} = pop_vec(S2),
+	{S4, Size} = pop_vec(S3),
+	IsTextFile = (Flags band 1) =:= 1,
+	Retval = efunge_fungespace:save(Space, IP, Filename, IsTextFile, Offset, Size),
+	case Retval of
+		error -> {rev_delta(IP), S4};
+		ok    -> {IP, S4}
+	end;
+
+
 %% ( Load Semantics
 process_instruction($(, #fip{} = IP, StackStack, _Space) ->
 	{S1, N} = pop(StackStack),

@@ -36,7 +36,7 @@
 -export([set_atomic/4, fetch_atomic/3, cmpxchg/5]).
 
 %% API - Non-calls
--export([load_initial/2, set/3, set/4, load/5,
+-export([load_initial/2, set/3, set/4, load/5, save/6,
          fetch/2, fetch/3, get_block/3,
          get_bounds_thread/0, get_bounds_thread_exact/1, get_bounds/1]).
 
@@ -223,6 +223,24 @@ load(Fungespace, #fip{offX = OffX, offY = OffY}, Filename, IsBinaryMode, {X, Y} 
 					MaxY = TrueY
 			end,
 			{MaxX - TrueX, MaxY - TrueY}
+	end.
+
+-spec save(fungespace(), ip(), string(), boolean(), coord(), coord()) -> error | ok.
+save(_Fungespace, #fip{}, "", _IsTextFile, {_X, _Y}, {_W, _H}) ->
+	error;
+save(_Fungespace, #fip{}, _Filename, _IsTextFile, {_X, _Y}, {W, H}) when W =< 0; H =< 0 ->
+	error;
+save(Fungespace, #fip{offX = OffX, offY = OffY}, Filename, IsTextFile, {X, Y}, {W,H}) ->
+	TrueX = OffX+X,
+	TrueY = OffY+Y,
+	Bin =
+		case IsTextFile of
+			true -> save_text(Fungespace, TrueX, TrueY, TrueX+W, TrueY+H);
+			false -> save_binary(Fungespace, TrueX, TrueY, TrueX+W, TrueY+H)
+		end,
+	case file:write_file(Filename, Bin) of
+		{error, _} -> error;
+		ok -> ok
 	end.
 
 %% @spec get_bounds(fungespace()) -> {LeastPoint::coord(), GreatestPoint::coord()}
@@ -474,7 +492,6 @@ construct() ->
 delete(Fungespace) ->
 	ets:delete(Fungespace).
 
-
 %% @spec load_at_origin(fungespace(), Filename::string()) -> notfound | ok
 %% @doc Load a Funge Space at 0,0.
 -spec load_at_origin(fungespace(), string()) -> notfound | ok.
@@ -523,9 +540,65 @@ update_bounds(_V, Space, {X,Y}) ->
 
 
 %%====================================================================
-%% Internal functions - Server - Bulk loading.
+%% Internal functions - Client - Writing to file
 %%====================================================================
 
+%% @doc Dump funge space to a binary (binary mode to o)
+-spec save_binary(fungespace(),cell(),cell(),cell(),cell()) -> binary().
+save_binary(Fungespace, MinX, MinY, MaxX, MaxY) ->
+	save_binary(<<>>, MinX, MinY, Fungespace, MinX, MaxX, MaxY).
+
+%% @doc Binary mode o, "main loop"
+-spec save_binary(binary(),cell(),cell(),fungespace(),cell(),cell(),cell()) -> binary().
+save_binary(Bin, _CurX, MaxY, _Fungespace, _MinX, _MaxX, MaxY) ->
+	Bin;
+save_binary(Bin, MaxX, CurY, Fungespace, MinX, MaxX, MaxY) ->
+	save_binary(<<Bin/binary, $\n>>, MinX, CurY+1, Fungespace, MinX, MaxX, MaxY);
+save_binary(Bin, CurX, CurY, Fungespace, MinX, MaxX, MaxY) ->
+	Value = fetch(Fungespace, {CurX, CurY}),
+	save_binary(<<Bin/binary, (Value rem 256):1/integer>>, CurX+1, CurY, Fungespace, MinX, MaxX, MaxY).
+
+%% @doc Dump funge space to a binary (text mode to o)
+-spec save_text(fungespace(),cell(),cell(),cell(),cell()) -> binary().
+save_text(Fungespace, MinX, MinY, MaxX, MaxY) ->
+	save_text([], [], MinX, MinY, Fungespace, MinX, MaxX, MaxY).
+
+%% @doc Helper for text mode o: Strips trailing whitespaces.
+-spec fixup_text_line([integer()]) -> [integer(),...].
+fixup_text_line([]) ->
+	[$\n];
+fixup_text_line([$\s|T]) ->
+	fixup_text_line(T);
+fixup_text_line([_|_] = Str) ->
+	lists:reverse([$\n|Str]).
+
+%% Helper for text mode o: Strips trailing newlines.
+%% Horribly inefficient in part.
+-spec fixup_text_final([[integer(),...]]) -> [[integer()]].
+fixup_text_final([]) ->
+	[];
+fixup_text_final([[$\n]|T]) ->
+	fixup_text_final(T);
+fixup_text_final([H|T]) ->
+	% Remove last newline from here.
+	% We have a logic error if there is none.
+	[$\n|Str] = lists:reverse(H),
+	lists:reverse([lists:reverse(Str)|T]).
+
+%% @doc Text mode o, "main" loop.
+-spec save_text([[integer(),...]],[integer()],cell(),cell(),fungespace(),cell(),cell(),cell()) -> binary().
+save_text(String, _CurLn, _CurX, MaxY, _Fungespace, _MinX, _MaxX, MaxY) ->
+	list_to_binary(fixup_text_final(String));
+save_text(String, CurLn, MaxX, CurY, Fungespace, MinX, MaxX, MaxY) ->
+	save_text([fixup_text_line(CurLn)|String], [], MinX, CurY+1, Fungespace, MinX, MaxX, MaxY);
+save_text(String, CurLn, CurX, CurY, Fungespace, MinX, MaxX, MaxY) ->
+	Value = fetch(Fungespace, {CurX, CurY}),
+	save_text(String, [Value rem 256|CurLn], CurX+1, CurY, Fungespace, MinX, MaxX, MaxY).
+
+
+%%====================================================================
+%% Internal functions - Server - Bulk loading.
+%%====================================================================
 
 %% @spec load_initial(Binary, fungespace(), X, Y, LastWasCR) -> ok
 %% @doc
@@ -549,7 +622,6 @@ load_initial(<<H,T/binary>>, FungeSpace, X, Y, LastWasCR) ->
 	end;
 load_initial(<<>>, _FungeSpace, _X, _Y, _LastWasCR) ->
 	ok.
-
 
 %% @spec load_binary(Binary, fungespace(), X, Y, LastWasCR, MinX, MaxX) -> coord()
 %% @doc
