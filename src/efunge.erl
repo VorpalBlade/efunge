@@ -37,13 +37,13 @@ run()  ->
 
 %% @spec start(string()) -> integer()
 %% @doc Run efunge with a file.
--spec start(string()) -> integer().
+-spec start(nonempty_string()) -> integer().
 start([_|_] = Filename) ->
 	start(Filename, []).
 
 %% @spec start(string(), list(string())) -> integer()
 %% @doc Load file, set up PRNG, start main loop.
--spec start(string(), [string()]) -> integer().
+-spec start(nonempty_string(), [string()]) -> integer().
 start([_|_] = Filename, Parameters) when is_list(Parameters) ->
 	{R1,R2,R3} = now(),
 	put(efungeargs, [Filename|Parameters]),
