@@ -97,8 +97,9 @@ other ones are undefined in the Funge-98 standard.
      Both these points also apply to to fingerprint instructions dealing with
      standard IO (such as S in ORTH).
  * File IO:
-   - File IO is byte based (this means loading the program, i and o). Values are
-     truncated in an undefined way for o. The bytes are considered unsigned.
+   - File IO uses unsigned bytes (this means loading the program, i and o).
+     Values are truncated to the range 0-255 using modulo 256 for o. How
+     negative values are truncated is undefined.
    - In non-binary mode (this includes initial program loading) form feed is
      ignored, not advancing either x or y coordinate. This is due to form feed
      being used to increment z in Trefunge. Ignoring form feed in Befunge is
