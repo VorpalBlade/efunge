@@ -223,7 +223,7 @@ save_binary(Bin, MaxX, CurY, Fungespace, MinX, MaxX, MaxY) ->
 	save_binary(<<Bin/binary, $\n>>, MinX, CurY+1, Fungespace, MinX, MaxX, MaxY);
 save_binary(Bin, CurX, CurY, Fungespace, MinX, MaxX, MaxY) ->
 	Value = fetch(Fungespace, {CurX, CurY}),
-	save_binary(<<Bin/binary, (Value rem 256):1/integer>>, CurX+1, CurY, Fungespace, MinX, MaxX, MaxY).
+	save_binary(<<Bin/binary, (Value rem 256)/integer>>, CurX+1, CurY, Fungespace, MinX, MaxX, MaxY).
 
 %% @doc Dump funge space to a binary (text mode to o)
 -spec save_text(fungespace(),cell(),cell(),cell(),cell()) -> binary().
