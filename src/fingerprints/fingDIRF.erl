@@ -19,8 +19,7 @@
 -module(fingDIRF).
 -export([load/1]).
 %% The implemented functions
--export([
-         dirf_chdir/3,
+-export([dirf_chdir/3,
          dirf_mkdir/3,
          dirf_rmdir/3]).
 
