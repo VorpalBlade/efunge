@@ -22,13 +22,23 @@
 
 %% API
 -export([start_link/0, start_in_shell_for_testing/0]).
+-export([add_service/1]).
 
 %% Supervisor callbacks
 -export([init/1]).
 
 -define(SERVER, ?MODULE).
-%% Scope for distributed Erlang: global or local
--define(SCOPE, local).
+%% Define for global server (in distributed Erlang).
+%-define(GLOBAL, true).
+
+-ifdef(GLOBAL).
+-define(REGISTER_NAME, {global, ?SERVER}).
+-define(CALL_NAME, {global, ?SERVER}).
+-else.
+-define(REGISTER_NAME, {local, ?SERVER}).
+-define(CALL_NAME, ?SERVER).
+-endif.
+
 
 -include("otp_types.hrl").
 
@@ -40,14 +50,31 @@
 %% @doc Starts the supervisor.
 -spec start_link() -> otp_start_return_no_ignore().
 start_link() ->
-	supervisor:start_link({?SCOPE, ?SERVER}, ?MODULE, []).
+	supervisor:start_link(?REGISTER_NAME, ?MODULE, []).
 
 -spec start_in_shell_for_testing() -> pid().
 start_in_shell_for_testing() ->
-	{ok, Pid} = supervisor:start_link({?SCOPE, ?SERVER}, ?MODULE, []),
+	{ok, Pid} = supervisor:start_link(?REGISTER_NAME, ?MODULE, []),
 	unlink(Pid),
 	Pid.
 
+
+%% @doc
+%% Adds a new service (intended for start on demand services).
+%% Be careful when using!
+%%
+%% This function is just a wrapper providing the first parameter and
+%% handling {error,already_present).
+%% The caller is responsible for handling any other errors.
+%% For already_present: will return {already_present,RestartResult}
+%%
+%% For details see documentation for supervisor:start_child.
+add_service(ChildSpec = {Id,_StartFunc,_Restart,_Shutdown,_Type,_Modules}) ->
+	case supervisor:start_child(?CALL_NAME, ChildSpec) of
+		{error,already_present} ->
+			{already_present, supervisor:restart_child(Id)};
+		Result -> Result
+	end.
 
 %%====================================================================
 %% Supervisor callbacks

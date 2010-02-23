@@ -1,28 +1,31 @@
 This file describes the overall design of efunge.
 
 Modules:
-* efunge         - Handles command line arguments and startup.
+* efunge                - Handles command line arguments and startup.
 
-* efunge_fingerindex   - Looks up loading fun for a fingerprint. Should only be
-                         used by efunge_fingermanager. Automatically generated
-                         by tools/gen_fprint_list.sh.
-* efunge_fingermanager - Handles loading and unloading of fingerprints, and
-                         executing fingerprint instructions.
-* efunge_fingerstack   - Implements fingerprint instruction stacks (used in
-                         efunge_fingermanager).
-* efunge_fungespace    - Funge space.
-* efunge_input         - STDIO in the Funge way. Is a gen_server.
-* efunge_interpreter   - Handle core instructions, main loop.
-* efunge_ip            - IP functions, like: reverse, turn, finding next
-                         non-space, wrapping. In future also things like getting
-                         and setting fingerprint specific data.
-* efunge_stack         - Funge stack.
-* efunge_stackstack    - Funge stack-stack.
-* efunge_sysinfo       - Implements y.
-* fingerprints/        - Fingerprints should be in this subdirectory.
-                         One fingerprint per file. The spec files are in the
-                         same format as for cfunge. See documentation of it
-                         included with cfunge.
+* efunge_fingerindex    - Looks up loading fun for a fingerprint. Should only be
+                          used by efunge_fingermanager. Automatically generated
+                          by tools/gen_fprint_list.sh.
+* efunge_fingermanager  - Handles loading and unloading of fingerprints, and
+                          executing fingerprint instructions.
+* efunge_fingerstack    - Implements fingerprint instruction stacks (used in
+                          efunge_fingermanager).
+* efunge_fungespace     - Funge space.
+* efunge_input          - STDIO in the Funge way. Is a gen_server.
+* efunge_interpreter    - Handle core instructions, main loop.
+* efunge_ip             - IP functions, like: reverse, turn, finding next
+                          non-space, wrapping. In future also things like getting
+                          and setting fingerprint specific data.
+* efunge_stack          - Funge stack.
+* efunge_stackstack     - Funge stack-stack.
+* efunge_sysinfo        - Implements y.
+* fingerprints/         - Fingerprints should be in this subdirectory.
+                          One fingerprint per file. The spec files are in the
+                          same format as for cfunge. See documentation of it
+                          included with cfunge.
+* fingerprints/support/ - Extra files for complex fingerprints.
+                          Example: TURT's turtle gen_server process.
+                          Should not be used if it can be avoided.
 
 Process dictionary:
 * The process dictionary got two uses currently:

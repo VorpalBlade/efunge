@@ -48,4 +48,6 @@ lookup(16#4e554c4c)  -> { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", fun fingNULL:load/1 };
 lookup(16#4f525448)  -> { "AEGOPSVWXYZ", fun fingORTH:load/1 };
 %% ROMA - Roman Numerals
 lookup(16#524f4d41)  -> { "CDILMVX", fun fingROMA:load/1 };
+%% TURT - Simple Turtle Graphics Library
+lookup(16#54555254)  -> { "ABCDEFHILNPQRTU", fun fingTURT:load/1 };
 lookup(_Fingerprint) -> notfound.
