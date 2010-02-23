@@ -28,11 +28,13 @@
 -type supervisor_spec() :: {sup_restart_strategy(),non_neg_integer(),non_neg_integer()}.
 
 -type supervisor_child_pid() :: pid() | undefined.
+-type supervisor_child_error_basic() :: {already_started, supervisor_child_pid()}
+                                      | any().
 -type supervisor_child_error() :: already_present
-                                | {already_started, supervisor_child_pid()}
-                                | any().
--type supervisor_start_child_result() :: {ok, supervisor_child_pid()}
-                                       | {ok, supervisor_child_pid(), _}
+                                | supervisor_child_error_basic().
+-type supervisor_child_ok() :: {ok, supervisor_child_pid()}
+                             | {ok, supervisor_child_pid(), _}.
+-type supervisor_start_child_result() :: supervisor_child_ok()
                                        | {error, supervisor_child_error()}.
 
 

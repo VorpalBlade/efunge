@@ -69,6 +69,10 @@ start_in_shell_for_testing() ->
 %% For already_present: will return {already_present,RestartResult}
 %%
 %% For details see documentation for supervisor:start_child.
+-spec add_service(child_spec()) -> supervisor_child_ok()
+                                 | {error, supervisor_child_error_basic()}
+                                 | {already_present, supervisor_child_ok()
+                                                   | {error, supervisor_child_error()}}.
 add_service(ChildSpec = {Id,_StartFunc,_Restart,_Shutdown,_Type,_Modules}) ->
 	case supervisor:start_child(?CALL_NAME, ChildSpec) of
 		{error,already_present} ->
