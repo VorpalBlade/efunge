@@ -215,6 +215,7 @@ turt_query_bounds(IP, Stack, _Space) ->
 %% Private funtions
 
 %% Start the turtle process if required.
+-spec start_turtle() -> 'ok' | {'error',{'supervisor',_}}.
 start_turtle() ->
 	ChildSpec = {'efunge_turtle', {'efunge_turtle', start_link, []},
 	             permanent, 2000, worker, [efunge_turtle]},
