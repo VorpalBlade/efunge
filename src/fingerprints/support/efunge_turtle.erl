@@ -212,8 +212,11 @@ init([]) ->
 handle_call(get_info, _From, {T,D} = State) ->
 	{reply, {T#turtle.pos, T#turtle.heading, T#turtle.pen, D#drawing.bounds}, State};
 
-handle_call(clear, _From, {T,_D}) ->
+%% Clear. Add a circle straight away if pen is down.
+handle_call(clear, _From, {T=#turtle{pen=false},_D}) ->
 	{reply, ok, {T, #drawing{}}};
+handle_call(clear, _From, {T=#turtle{pen=true},_D}) ->
+	{reply, ok, {T, add_circle(T,#drawing{})}};
 
 handle_call({render,Format}, _From, {T,D}) ->
 	ND = prune_circles(D),
@@ -228,7 +231,6 @@ handle_call({set_heading,Angle}, _From, {T,D}) ->
 	{reply, ok, {set_heading(T,Angle), D}};
 
 %% Move and jump
-
 handle_call({jump,Position}, _From, {T,D}) ->
 	NT = T#turtle{pos=Position},
 	{reply, ok, {NT,add_circle(NT,D)}};
