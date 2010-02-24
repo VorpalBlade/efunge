@@ -94,17 +94,16 @@
 -include("../../otp_types.hrl").
 
 %% FIXME!
--type call_return_replies() :: ok | turtle_info().
+-type call_return_replies() :: ok | turtle_info() | drawing().
 -type call_return_reply()   :: {reply, call_return_replies(), state()}.
 -type call_return_stop()    :: {stop,normal,stopped,state()}.
 -type call_return()         :: call_return_reply() | call_return_stop().
 %% Grouped by type of parameters.
--type call_op_none()        :: get_info | clear | stop.
+-type call_op_none()        :: get_info | clear | stop | get_drawing.
 -type call_op_colour()      :: set_bg_colour | set_pen_colour.
 -type call_op_heading()     :: set_heading | rotate.
 -type call_op_misc()        :: {set_pen_state, Down::boolean()}
-                             | {jump, tcoord()}
-                             | {render, image_formats()}.
+                             | {jump, tcoord()}.
 -type call_op()             :: call_op_none()
                              | {call_op_colour(), colour()}
                              | {call_op_heading(), Degrees::angle_deg()}
@@ -188,10 +187,12 @@ set_pen_state(Down) when is_boolean(Down) ->
 %% Currently supported formats: svg, raw.
 %% Raw is just a dump for debugging purposes.
 -spec render(image_formats()) -> {svg,iolist()}|{raw,[tnode()]}.
-render(svg) ->
-	gen_server:call(?CALL_NAME, {render,svg});
-render(raw) ->
-	gen_server:call(?CALL_NAME, {render,raw}).
+render(ImageFormat) ->
+	Drawing = gen_server:call(?CALL_NAME, get_drawing),
+	case ImageFormat of
+		svg -> {svg, render_svg(Drawing)};
+		raw -> {raw, Drawing}
+	end.
 
 
 %%====================================================================
@@ -218,10 +219,9 @@ handle_call(clear, _From, {T=#turtle{pen=false},_D}) ->
 handle_call(clear, _From, {T=#turtle{pen=true},_D}) ->
 	{reply, ok, {T, add_circle(T,#drawing{})}};
 
-handle_call({render,Format}, _From, {T,D}) ->
+handle_call(get_drawing, _From, {T,D}) ->
 	ND = prune_circles(D),
-	Image = render(Format, ND),
-	{reply, Image, {T, ND}};
+	{reply, ND, {T, ND}};
 
 %% Rotate/heading
 handle_call({rotate,Angle}, _From, {T,D}) ->
@@ -325,12 +325,6 @@ move_draw(#turtle{pos=Pos,colour=Colour},Drawing=#drawing{nodes=[NH|NT]}) ->
 			update_bounds(Drawing#drawing{nodes=[Node1,Node2|NT]},Pos)
 	end.
 
--spec render(image_formats(),drawing()) ->
-	{'raw',[tnode()]} | {'svg',iolist()}.
-render(svg, Drawing) ->
-	{svg,render_svg(Drawing)};
-render(raw, #drawing{nodes=Nodes}) ->
-	{raw,Nodes}.
 
 %%====================================================================
 %% Helper functions - Server - Heading and moving.
