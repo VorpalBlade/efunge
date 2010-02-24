@@ -455,11 +455,11 @@ svg_render_nodes([], Output) ->
 	Output;
 svg_render_nodes([{line,Colour,PathNodes}|T], Output) ->
 	S = [<<" <path d=\"">>,svg_render_path(PathNodes, []),
-	     <<"\" style=\"stroke:">>,hexcolour(Colour),<<"\" />\n">>],
+	     <<"\" style=\"stroke:">>,svg_colour(Colour),<<"\"/>\n">>],
 	svg_render_nodes(T, [S|Output]);
 svg_render_nodes([{circle,Colour,{X,Y}}|T], Output) ->
-	S = io_lib:format(" <circle cx=\"~p\" cy=\"~p\" fill=\"~s\" r=\"0.25\" />\n",
-	                  [X,Y,hexcolour(Colour)]),
+	S = io_lib:format(" <circle cx=\"~b\" cy=\"~b\" fill=\"~s\" r=\"0.25\"/>\n",
+	                  [X,Y,svg_colour(Colour)]),
 	svg_render_nodes(T, [S|Output]).
 
 -spec svg_render_path([tcoord(),...],iolist()) -> iolist().
@@ -478,17 +478,33 @@ svg_render_path([{X,Y}|T], Output) ->
 svg_bg(none, _Bounds) -> [];
 svg_bg(Colour, Bounds) ->
 	[X,Y,W,H] = svg_bounds(Bounds),
-	io_lib:format(" <rect x=\"~b\" y=\"~b\" width=\"~b\" height=\"~b\" style=\"fill:~s;stroke:none\" />\n",
-	              [X,Y,W,H,hexcolour(Colour)]).
+	io_lib:format(" <rect x=\"~b\" y=\"~b\" width=\"~b\" height=\"~b\" style=\"fill:~s;stroke:none\"/>\n",
+	              [X,Y,W,H,svg_colour(Colour)]).
+
+%% Converts a colour to a colour usable in CSS or SVG.
+%% Tries to use a compact representation.
+-spec svg_colour(colour()) -> iolist().
+svg_colour({0    ,0    ,16#80}) -> <<"navy">>;
+svg_colour({0    ,16#80,    0}) -> <<"green">>;
+svg_colour({0    ,16#80,16#80}) -> <<"teal">>;
+svg_colour({16#80,    0,    0}) -> <<"maroon">>;
+svg_colour({16#80,    0,16#80}) -> <<"purple">>;
+svg_colour({16#80,16#80,    0}) -> <<"olive">>;
+svg_colour({16#80,16#80,16#80}) -> <<"gray">>;
+svg_colour({16#C0,16#C0,16#C0}) -> <<"silver">>;
+svg_colour({16#ff,0    ,    0}) -> <<"red">>;
+svg_colour({R,G,B}) ->
+	C = lists:flatten(io_lib:format("#~2.16.0b~2.16.0b~2.16.0b", [R,G,B])),
+	% Try to shorten it if possible:
+	case C of
+		[$#,X,X,Y,Y,Z,Z] -> [$#,X,Y,Z];
+		_ -> C
+	end.
+
 
 %%====================================================================
 %% Helper functions - Rendering
 %%====================================================================
-
--spec hexcolour(colour()) -> iolist().
-hexcolour({R,G,B}) ->
-	io_lib:format("#~2.16.0b~2.16.0b~2.16.0b", [R,G,B]).
-
 
 %% Newest node should be first!
 -spec prune_circles(drawing()) -> drawing().
