@@ -112,7 +112,8 @@ athr_signal(IP, Stack, _Space) ->
 		notfound ->
 			{efunge_ip:rev_delta(IP), S2};
 		Pid ->
-			Pid ! {athr_wait_sig, SigID}, {IP, S2}
+			Pid ! {athr_wait_sig, SigID},
+			{IP, S2}
 	end.
 
 %% @spec athr_broadcast(ip(), stackstack(), fungespace()) -> execute_return()
