@@ -53,11 +53,6 @@
 -type gen_server_start_error() :: {error,{already_started, pid()} | any()}.
 -type gen_server_start() :: {ok,pid()} | ignore | gen_server_start_error().
 
--type call_return_reply() :: {reply, error_replies() | integer() | char(), state()}.
--type call_return_stop()  :: {stop,normal,stopped,state()}.
--type call_return()       :: call_return_reply() | call_return_stop().
-
-
 %%====================================================================
 %% API - Generic start/stop stuff
 %%====================================================================
@@ -112,7 +107,9 @@ init([]) ->
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} | {stop, Reason, Reply, State}
 %% @hidden
 %% @doc Handling call messages
--spec handle_call(read_char | read_integer | stop,_,state()) -> call_return().
+-spec handle_call(read_char, _, state()) -> {reply, error_replies() | char(), state()}
+               ; (read_integer, _, state()) -> {reply, error_replies() | integer(), state()}
+               ; (stop, _, state()) -> {stop,normal,stopped,state()}.
 handle_call(read_char, _From, State) ->
 	{NewState, Reply} = read_char(State),
 	{reply, Reply, NewState};
