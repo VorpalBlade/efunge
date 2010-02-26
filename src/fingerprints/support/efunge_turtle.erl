@@ -64,8 +64,6 @@
 -type line()   :: {line,colour(),[tcoord()]}.
 -type tnode()  :: circle() | line().
 
--type image_formats() :: svg | raw.
-
 -record(turtle,
 	{
 		pos     = {0,0}   :: tcoord(),
@@ -186,7 +184,9 @@ set_pen_state(Down) when is_boolean(Down) ->
 %% Renders image to a given image format.
 %% Currently supported formats: svg, raw.
 %% Raw is just a dump for debugging purposes.
--spec render(image_formats()) -> {svg,iolist()}|{raw,[tnode()]}.
+% -spec render(image_formats()) -> {svg,iolist()}|{raw,[tnode()]}.
+-spec render(svg) -> {svg,iolist()}
+          ; (raw) -> {raw,[tnode()]}.
 render(ImageFormat) ->
 	Drawing = gen_server:call(?CALL_NAME, get_drawing),
 	case ImageFormat of
@@ -259,7 +259,7 @@ handle_call({set_pen_colour, Colour}, _From, {T,D}) ->
 handle_call({set_bg_colour, Colour}, _From, {T,D}) ->
 	{reply, ok, {T, D#drawing{bgcolour=Colour}}};
 
-handle_call(stop, _From, State) ->
+handle_call(stop, _From, {_T,_D} = State) ->
 	{stop, normal, stopped, State}.
 
 %% @spec handle_cast(Msg, State) -> {noreply, State} | {noreply, State, Timeout} | {stop, Reason, State}
