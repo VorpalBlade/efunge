@@ -21,7 +21,7 @@
 -export([clear/1, pop_vec_SOSS/1, push_vec_SOSS/2]).
 %% Wrappers for working on TOSS. Calls functions from the efunge_stack module:
 -export([push/2, peek/1, pop/1, pop_vec/1, push_vec/2]).
--export([dup/1, swap/1, pop_gnirts/1]).
+-export([dup/1, swap/1, pop_gnirts/1, push_gnirts/2]).
 
 
 %%====================================================================
@@ -88,6 +88,13 @@ swap([TOSS|T]) ->
 pop_gnirts([TOSS|T]) ->
 	{NewTOSS, V} = efunge_stack:pop_gnirts(TOSS),
 	{[NewTOSS|T], V}.
+%% @doc Push a 0"gnirts" onto TOSS.
+%% @see efunge_stack:push_gnirts/2
+-spec push_gnirts(stackstack(), [integer()]) -> stackstack().
+push_gnirts([TOSS|T],String) ->
+	NewTOSS = efunge_stack:push_gnirts(TOSS, String),
+	[NewTOSS|T].
+
 
 
 %% @doc Clear TOSS.
