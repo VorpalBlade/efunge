@@ -123,7 +123,7 @@ file_fopen(IP, Stack, _Space) ->
 	{S2, ModeNumber} = pop(S1),
 	{S3, Vect} = pop_vec(S2),
 	try
-		Modes = [raw|map_mode(ModeNumber)],
+		Modes = [raw,read_ahead|map_mode(ModeNumber)],
 		case file:open(Filename, Modes) of
 			{ok, IoDev} ->
 				fixup_file(ModeNumber, IoDev),
