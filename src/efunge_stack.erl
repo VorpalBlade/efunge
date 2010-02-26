@@ -130,7 +130,7 @@ pop_gnirts([H|T] = _Stack, Acc) ->
 push_gnirtses(Stack, []) ->
 	Stack;
 push_gnirtses(Stack, [H|T]) ->
-	push_gnirtses(push_list(Stack, [0|lists:reverse(H)]), T).
+	push_gnirtses(H ++ [0|Stack], T).
 
 %% @spec pop_drop(integer(), stack()) -> stack()
 %% @doc Pop N items from a stack.
