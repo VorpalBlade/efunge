@@ -25,7 +25,8 @@
 		offY = 0 :: integer(),
 		isStringMode = false :: boolean(),
 		lastWasSpace = false :: boolean(),
-		fingerOpStacks  :: array()
+		fingerOpStacks  :: array(),
+		fingerprintdata :: dict()
 	}
 ).
 
