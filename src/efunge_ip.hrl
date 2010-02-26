@@ -26,6 +26,7 @@
 		isStringMode = false :: boolean(),
 		lastWasSpace = false :: boolean(),
 		fingerOpStacks  :: array(),
+		fingerprintdata :: dict(),
 		%% Will be filled in early on...
 		threadID = -1 :: integer(),
 		ipID = -1 :: integer()

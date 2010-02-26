@@ -21,6 +21,8 @@
 -export([init/1, load/2, unload/2, execute/4]).
 %% These are called from fingerprint loading functions.
 -export([push_fun/3, push_funs/2]).
+%% These are called from fingerprints to extract IP-specific data
+-export([get_data/2, set_data/3]).
 
 %%====================================================================
 %% Types
@@ -46,7 +48,8 @@
 -spec init(ip()) -> ip().
 init(#fip{} = IP) ->
 	OpArray = array:new(26, [{fixed, true}, {default, []}]),
-	IP#fip{ fingerOpStacks = OpArray }.
+	FingerData = dict:new(),
+	IP#fip{ fingerOpStacks = OpArray, fingerprintdata = FingerData }.
 
 %% @doc Load a fingerprint.
 -spec load(ip(), integer()) -> {ok | error, ip()}.
@@ -96,6 +99,20 @@ push_funs(IP, [{Instr,Fun}|T]) ->
 	IP2 = push_fun(Instr, IP, Fun),
 	push_funs(IP2, T).
 
+%% @doc
+%% Read fingerprint data for a given IP. Fingerprint should be an atom like
+%% 'QUUX', that is the actual fingerprint. Nothing else is allowed.
+-spec get_data(atom(),ip()) -> 'error' | {'ok',_}.
+get_data(Fingerprint, IP) ->
+	dict:find(Fingerprint, IP#fip.fingerprintdata).
+
+%% @doc
+%% Set fingerprint data for a given IP. Fingerprint should be an atom like
+%% 'QUUX', that is the actual fingerprint. Nothing else is allowed.
+-spec set_data(atom(),any(),ip()) -> ip().
+set_data(Fingerprint, Value, IP) ->
+	D = dict:store(Fingerprint, Value, IP#fip.fingerprintdata),
+	IP#fip{fingerprintdata=D}.
 
 %%====================================================================
 %% Internal functions

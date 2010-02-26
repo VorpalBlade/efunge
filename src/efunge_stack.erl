@@ -23,7 +23,7 @@
 -export([push/2, peek/1, pop/1]).
 -export([dup/1, swap/1]).
 -export([pop_vec/1, push_vec/2]).
--export([push_list/2, pop_gnirts/1, push_gnirtses/2]).
+-export([push_list/2, pop_gnirts/1, push_gnirts/2, push_gnirtses/2]).
 -export([pop_drop/2, stack_to_stack/3]).
 
 %% @type cell() = integer().
@@ -108,6 +108,11 @@ push_list(Stack, [H|T]) ->
 -spec pop_gnirts(stack()) -> {stack(), [integer()]}.
 pop_gnirts(Stack) ->
 	pop_gnirts(Stack, []).
+
+%% @doc Push a 0gnirts.
+-spec push_gnirts(stack(), [integer()]) -> stack().
+push_gnirts(Stack, String) ->
+	String ++ [0|Stack].
 
 %% @spec pop_gnirts(stack(), list(integer())) -> {stack(), list(integer())}
 %% @doc Pop a 0gnirts, internal helper for pop_gnirts/1.

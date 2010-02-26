@@ -38,6 +38,8 @@ lookup(16#41544852)  -> { "BCFGINOPQRSTW", fun fingATHR:load/1 };
 lookup(16#43504c49)  -> { "ADMOSV", fun fingCPLI:load/1 };
 %% DIRF - Directory functions extension
 lookup(16#44495246)  -> { "CMR", fun fingDIRF:load/1 };
+%% FILE - File I/O functions
+lookup(16#46494c45)  -> { "CDGLOPRSW", fun fingFILE:load/1 };
 %% FIXP - Some useful math functions
 lookup(16#46495850)  -> { "ABCDIJNOPQRSTUVX", fun fingFIXP:load/1 };
 %% MODU - Modulo Arithmetic
