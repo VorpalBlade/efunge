@@ -1,7 +1,7 @@
 %%
 %% %CopyrightBegin%
 %%
-%% Copyright Ericsson AB 1996-2009. All Rights Reserved.
+%% Copyright Ericsson AB 1996-2010. All Rights Reserved.
 %%
 %% The contents of this file are subject to the Erlang Public License,
 %% Version 1.1, (the "License"); you may not use this file except in
@@ -24,7 +24,7 @@
 -export([start_link/2,start_link/3,
 	 start_child/2, restart_child/2,
 	 delete_child/2, terminate_child/2,
-	 which_children/1,
+	 which_children/1, count_children/1,
 	 check_childspecs/1]).
 
 %% Extended supervisor API
@@ -77,6 +77,7 @@
 % -type init_result() :: {ok, {sup_spec(), [child_spec()]},_} | ignore.
 
 -type call_types() :: 'which_children'
+                    | 'count_children'
                     | {'delete_child',_}
                     | {'restart_child',_}
                     | {'start_child',child_spec() | [any()]}
@@ -207,6 +208,13 @@ terminate_child(Supervisor, Name) ->
 -spec which_children(supref()) -> [which_children_result()].
 which_children(Supervisor) ->
     call_int(Supervisor, which_children).
+
+-spec  count_children(supref()) -> [{specs, ChildSpecCount::integer()}
+                                  | {active, ActiveProcessCount::integer()}
+                                  | {supervisors, ChildSupervisorCount::integer()}
+                                  | {workers, ChildWorkerCount::integer()},...].
+count_children(Supervisor) ->
+    call_int(Supervisor, count_children).
 
 -spec call_int(supref(),call_types()) -> any().
 call_int(Supervisor, Req) ->
@@ -480,7 +488,50 @@ handle_call(which_children, _From, State) ->
 		    {Name, Pid, ChildType, Mods}
 		  end,
 		  State#state.children),
-    {reply, Resp, State}.
+    {reply, Resp, State};
+
+handle_call(count_children, _From, State) when ?is_simple(State) ->
+    [#child{child_type = CT}] = State#state.children,
+    {Active, Count} =
+	?DICT:fold(fun(Pid, _Val, {Alive, Tot}) ->
+			   if is_pid(Pid) -> {Alive+1, Tot +1};
+			      true -> {Alive, Tot + 1} end
+		   end, {0, 0}, State#state.dynamics),
+    Reply = case CT of
+		supervisor -> [{specs, 1}, {active, Active},
+			       {supervisors, Count}, {workers, 0}];
+		worker -> [{specs, 1}, {active, Active},
+			   {supervisors, 0}, {workers, Count}]
+	    end,
+    {reply, Reply, State};
+
+handle_call(count_children, _From, State) ->
+
+    %% Specs and children are together on the children list...
+    {Specs, Active, Supers, Workers} =
+	lists:foldl(fun(Child, Counts) ->
+			   count_child(Child, Counts)
+		   end, {0,0,0,0}, State#state.children),
+
+    %% Reformat counts to a property list.
+    Reply = [{specs, Specs}, {active, Active},
+	     {supervisors, Supers}, {workers, Workers}],
+    {reply, Reply, State}.
+
+-spec count_child(#child{},{integer(),integer(),integer(),integer()})
+   -> {integer(),integer(),integer(),integer()}.
+count_child(#child{pid = Pid, child_type = worker},
+	    {Specs, Active, Supers, Workers}) ->
+    case is_pid(Pid) andalso is_process_alive(Pid) of
+	true ->  {Specs+1, Active+1, Supers, Workers+1};
+	false -> {Specs+1, Active, Supers, Workers+1}
+    end;
+count_child(#child{pid = Pid, child_type = supervisor},
+	    {Specs, Active, Supers, Workers}) ->
+    case is_pid(Pid) andalso is_process_alive(Pid) of
+	true ->  {Specs+1, Active+1, Supers+1, Workers};
+	false -> {Specs+1, Active, Supers+1, Workers}
+    end.
 
 
 %%%
@@ -1033,9 +1084,9 @@ check_startspec(Children) -> check_startspec(Children, []).
 check_startspec([ChildSpec|T], Res) ->
     case check_childspec(ChildSpec) of
 	{ok, Child} ->
-	    case lists:keysearch(Child#child.name, #child.name, Res) of
-		{value, _} -> {duplicate_child_name, Child#child.name};
-		_ -> check_startspec(T, [Child | Res])
+	    case lists:keymember(Child#child.name, #child.name, Res) of
+		true -> {duplicate_child_name, Child#child.name};
+		false -> check_startspec(T, [Child | Res])
 	    end;
 	Error -> Error
     end;
@@ -1061,9 +1112,9 @@ check_childspec(Name, Func, RestartType, Shutdown, ChildType, Mods) ->
 		shutdown = Shutdown, child_type = ChildType, modules = Mods}}.
 
 -spec validChildType(child_type()) -> true.
-validChildType(supervisor)  -> true;
+validChildType(supervisor) -> true;
 validChildType(worker) -> true;
-validChildType(What)  -> throw({invalid_child_type, What}).
+validChildType(What) -> throw({invalid_child_type, What}).
 
 -spec validName(_) -> 'true'.
 validName(_Name) -> true.
