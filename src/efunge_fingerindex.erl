@@ -50,4 +50,6 @@ lookup(16#4e554c4c)  -> { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", fun fingNULL:load/1 };
 lookup(16#4f525448)  -> { "AEGOPSVWXYZ", fun fingORTH:load/1 };
 %% ROMA - Roman Numerals
 lookup(16#524f4d41)  -> { "CDILMVX", fun fingROMA:load/1 };
+%% STRN - String functions
+lookup(16#5354524e)  -> { "ACDFGILMNPRSV", fun fingSTRN:load/1 };
 lookup(_Fingerprint) -> notfound.
