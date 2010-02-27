@@ -70,32 +70,32 @@ load(IP) ->
 
 %% The fingerprint functions
 
-%% @spec turt_query_heading(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec turt_query_heading(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc A - Query Position (x, y coordinates)
--spec turt_query_heading(ip(), stackstack(), fungespace()) -> execute_return().
+-spec turt_query_heading(ip(), stackstack(), fungespace()) -> return_normal().
 turt_query_heading(IP, Stack, _Space) ->
 	{_Pos, Heading, _PenDown, _Bounds} = efunge_turtle:get_info(),
 	{IP, push(Stack, Heading)}.
 
-%% @spec turt_back(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec turt_back(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc B - Back (distance in pixles)
--spec turt_back(ip(), stackstack(), fungespace()) -> execute_return().
+-spec turt_back(ip(), stackstack(), fungespace()) -> return_normal().
 turt_back(IP, Stack, _Space) ->
 	{S1, Distance} = pop(Stack),
 	ok = efunge_turtle:move(-Distance),
 	{IP, S1}.
 
-%% @spec turt_pen_colour(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec turt_pen_colour(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc C - Pen Colour (24-bit RGB)
--spec turt_pen_colour(ip(), stackstack(), fungespace()) -> execute_return().
+-spec turt_pen_colour(ip(), stackstack(), fungespace()) -> return_normal().
 turt_pen_colour(IP, Stack, _Space) ->
 	{S1, Colour} = pop(Stack),
 	ok = efunge_turtle:set_pen_colour(integer_to_colour(Colour)),
 	{IP, S1}.
 
-%% @spec turt_show_display(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec turt_show_display(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc D - Show Display (0 = no, 1 = yes)
--spec turt_show_display(ip(), stackstack(), fungespace()) -> execute_return().
+-spec turt_show_display(ip(), stackstack(), fungespace()) -> return_normal().
 turt_show_display(IP, Stack, _Space) ->
 	{S1, Value} = pop(Stack),
 	%% Since we don't implement any display, just ignore the valid values, and
@@ -105,9 +105,9 @@ turt_show_display(IP, Stack, _Space) ->
 		true -> {efunge_ip:rev_delta(IP), S1}
 	end.
 
-%% @spec turt_query_pen(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec turt_query_pen(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc E - Query Pen (0 = up, 1 = down)
--spec turt_query_pen(ip(), stackstack(), fungespace()) -> execute_return().
+-spec turt_query_pen(ip(), stackstack(), fungespace()) -> return_normal().
 turt_query_pen(IP, Stack, _Space) ->
 	{_Pos, _Heading, PenDown, _Bounds} = efunge_turtle:get_info(),
 	case PenDown of
@@ -115,25 +115,25 @@ turt_query_pen(IP, Stack, _Space) ->
 		false -> {IP, push(Stack, 0)}
 	end.
 
-%% @spec turt_forward(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec turt_forward(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc F - Forward (distance in pixels)
--spec turt_forward(ip(), stackstack(), fungespace()) -> execute_return().
+-spec turt_forward(ip(), stackstack(), fungespace()) -> return_normal().
 turt_forward(IP, Stack, _Space) ->
 	{S1, Distance} = pop(Stack),
 	ok = efunge_turtle:move(Distance),
 	{IP, S1}.
 
-%% @spec turt_set_heading(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec turt_set_heading(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc H - Set Heading (angle in degrees, relative to 0deg, east)
--spec turt_set_heading(ip(), stackstack(), fungespace()) -> execute_return().
+-spec turt_set_heading(ip(), stackstack(), fungespace()) -> return_normal().
 turt_set_heading(IP, Stack, _Space) ->
 	{S1, Angle} = pop(Stack),
 	ok = efunge_turtle:set_heading(Angle),
 	{IP, S1}.
 
-%% @spec turt_print_drawing(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec turt_print_drawing(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc I - Print current Drawing (if possible)
--spec turt_print_drawing(ip(), stackstack(), fungespace()) -> execute_return().
+-spec turt_print_drawing(ip(), stackstack(), fungespace()) -> return_normal().
 turt_print_drawing(IP, Stack, _Space) ->
 	{svg,Image} = efunge_turtle:render(svg),
 	case file:write_file("efunge_TURT.svg", Image) of
@@ -141,17 +141,17 @@ turt_print_drawing(IP, Stack, _Space) ->
 		{error,_} -> {efunge_ip:rev_delta(IP), Stack}
 	end.
 
-%% @spec turt_turn_left(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec turt_turn_left(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc L - Turn Left (angle in degrees)
--spec turt_turn_left(ip(), stackstack(), fungespace()) -> execute_return().
+-spec turt_turn_left(ip(), stackstack(), fungespace()) -> return_normal().
 turt_turn_left(IP, Stack, _Space) ->
 	{S1, Angle} = pop(Stack),
 	ok = efunge_turtle:rotate(-Angle),
 	{IP, S1}.
 
-%% @spec turt_clear_paper(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec turt_clear_paper(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc N - Clear Paper with Colour (24-bit RGB)
--spec turt_clear_paper(ip(), stackstack(), fungespace()) -> execute_return().
+-spec turt_clear_paper(ip(), stackstack(), fungespace()) -> return_normal().
 turt_clear_paper(IP, Stack, _Space) ->
 	{S1, Colour} = pop(Stack),
 	ok = efunge_turtle:clear(),
@@ -159,9 +159,9 @@ turt_clear_paper(IP, Stack, _Space) ->
 	{IP, S1}.
 
 
-%% @spec turt_pen_position(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec turt_pen_position(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc P - Pen Position (0 = up, 1 = down)
--spec turt_pen_position(ip(), stackstack(), fungespace()) -> execute_return().
+-spec turt_pen_position(ip(), stackstack(), fungespace()) -> return_normal().
 turt_pen_position(IP, Stack, _Space) ->
 	{S1, Position} = pop(Stack),
 	P = case Position of
@@ -171,34 +171,34 @@ turt_pen_position(IP, Stack, _Space) ->
 	ok = efunge_turtle:set_pen_state(P),
 	{IP, S1}.
 
-%% @spec turt_query_position(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec turt_query_position(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc Q - Query Position (x, y coordinates)
--spec turt_query_position(ip(), stackstack(), fungespace()) -> execute_return().
+-spec turt_query_position(ip(), stackstack(), fungespace()) -> return_normal().
 turt_query_position(IP, Stack, _Space) ->
 	{{X,Y}, _Heading, _PenDown, _Bounds} = efunge_turtle:get_info(),
 	S1 = push(Stack, X),
 	{IP, push(S1, Y)}.
 
-%% @spec turt_turn_right(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec turt_turn_right(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc R - Turn Right (angle in degrees)
--spec turt_turn_right(ip(), stackstack(), fungespace()) -> execute_return().
+-spec turt_turn_right(ip(), stackstack(), fungespace()) -> return_normal().
 turt_turn_right(IP, Stack, _Space) ->
 	{S1, Angle} = pop(Stack),
 	ok = efunge_turtle:rotate(Angle),
 	{IP, S1}.
 
-%% @spec turt_teleport(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec turt_teleport(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc T - Teleport (x, y coords relative to origin; 00T = home)
--spec turt_teleport(ip(), stackstack(), fungespace()) -> execute_return().
+-spec turt_teleport(ip(), stackstack(), fungespace()) -> return_normal().
 turt_teleport(IP, Stack, _Space) ->
 	{S1, Y} = pop(Stack),
 	{S2, X} = pop(S1),
 	ok = efunge_turtle:jump({X,Y}),
 	{IP, S2}.
 
-%% @spec turt_query_bounds(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec turt_query_bounds(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc U - Query Bounds (two pairs of x, y coordinates)
--spec turt_query_bounds(ip(), stackstack(), fungespace()) -> execute_return().
+-spec turt_query_bounds(ip(), stackstack(), fungespace()) -> return_normal().
 turt_query_bounds(IP, Stack, _Space) ->
 	{_Pos, _Heading, _PenDown, Bounds} = efunge_turtle:get_info(),
 	{{X1,Y1},{X2,Y2}} =

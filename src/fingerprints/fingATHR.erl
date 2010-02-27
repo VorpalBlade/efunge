@@ -64,15 +64,15 @@ load(IP) ->
 
 %% The fingerprint functions
 
-%% @spec athr_borrow(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec athr_borrow(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc B - Borrow book
--spec athr_borrow(ip(), stackstack(), fungespace()) -> execute_return().
+-spec athr_borrow(ip(), stackstack(), fungespace()) -> return_normal().
 athr_borrow(IP, Stack, Space) ->
 	{efunge_ip:rev_delta(IP), Stack}.
 
-%% @spec athr_cas(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec athr_cas(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc C - Compare and exchange
--spec athr_cas(ip(), stackstack(), fungespace()) -> execute_return().
+-spec athr_cas(ip(), stackstack(), fungespace()) -> return_normal().
 athr_cas(IP, Stack, Space) ->
 	{S1, C} = pop_vec(Stack),
 	{S2, Old} = pop(S1),
@@ -80,31 +80,31 @@ athr_cas(IP, Stack, Space) ->
 	{_, RealOld} = efunge_fungespace:cmpxchg(Space, IP, C, Old, New),
 	{IP, push(S3, RealOld)}.
 
-%% @spec athr_flush(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec athr_flush(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc F - Flushes the signal queue
--spec athr_flush(ip(), stackstack(), fungespace()) -> execute_return().
+-spec athr_flush(ip(), stackstack(), fungespace()) -> return_normal().
 athr_flush(IP, Stack, _Space) ->
 	{Len, SigList} = get_all_wait_sigs(),
 	S1 = push_list(Stack, SigList),
 	{IP, push(S1, Len)}.
 
-%% @spec athr_sget(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec athr_sget(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc G - Synchronous get
--spec athr_sget(ip(), stackstack(), fungespace()) -> execute_return().
+-spec athr_sget(ip(), stackstack(), fungespace()) -> return_normal().
 athr_sget(IP, Stack, Space) ->
 	{S1, C} = pop_vec(Stack),
 	V = efunge_fungespace:fetch_atomic(Space, IP, C),
 	{IP, push(S1, V)}.
 
-%% @spec athr_id(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec athr_id(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc I - ID of current thread
--spec athr_id(ip(), stackstack(), fungespace()) -> execute_return().
+-spec athr_id(ip(), stackstack(), fungespace()) -> return_normal().
 athr_id(#fip{threadID=ThID} = IP, Stack, _Space) ->
 	{IP, push(Stack, ThID)}.
 
-%% @spec athr_signal(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec athr_signal(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc N - Send signal
--spec athr_signal(ip(), stackstack(), fungespace()) -> execute_return().
+-spec athr_signal(ip(), stackstack(), fungespace()) -> return_normal().
 athr_signal(IP, Stack, _Space) ->
 	{S1, ThID} = pop(Stack),
 	{S2, SigID} = pop(S1),
@@ -116,17 +116,17 @@ athr_signal(IP, Stack, _Space) ->
 			{IP, S2}
 	end.
 
-%% @spec athr_broadcast(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec athr_broadcast(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc O - Broadcast signal
--spec athr_broadcast(ip(), stackstack(), fungespace()) -> execute_return().
+-spec athr_broadcast(ip(), stackstack(), fungespace()) -> return_normal().
 athr_broadcast(IP, Stack, _Space) ->
 	{S1, SigID} = pop(Stack),
 	efunge_supervisor_threads:cast_athr_signal(SigID),
 	{IP, S1}.
 
-%% @spec athr_sput(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec athr_sput(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc P - Synchronous put
--spec athr_sput(ip(), stackstack(), fungespace()) -> execute_return().
+-spec athr_sput(ip(), stackstack(), fungespace()) -> return_normal().
 athr_sput(IP, Stack, Space) ->
 	{S1, C} = pop_vec(Stack),
 	{S2, V} = pop(S1),
@@ -139,15 +139,15 @@ athr_sput(IP, Stack, Space) ->
 athr_quit(_IP, _Stack, _Space) ->
 	{dead, {athr_quit, 0}}.
 
-%% @spec athr_return(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec athr_return(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc R - Return book
--spec athr_return(ip(), stackstack(), fungespace()) -> execute_return().
+-spec athr_return(ip(), stackstack(), fungespace()) -> return_normal().
 athr_return(IP, Stack, Space) ->
 	{efunge_ip:rev_delta(IP), Stack}.
 
-%% @spec athr_spawn(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec athr_spawn(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc S - Spawn thread
--spec athr_spawn(ip(), stackstack(), fungespace()) -> execute_return().
+-spec athr_spawn(ip(), stackstack(), fungespace()) -> return_normal().
 athr_spawn(IP, Stack, Space) ->
 	ChildIP = efunge_ip:ip_forward(efunge_ip:rev_delta(IP)),
 	case efunge_supervisor_threads:create_thread(Space, ChildIP, Stack) of
@@ -155,9 +155,9 @@ athr_spawn(IP, Stack, Space) ->
 		{error, _Reason} -> {efunge_ip:rev_delta(IP), Stack}
 	end.
 
-%% @spec athr_try_borrow(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec athr_try_borrow(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc T - Try to borrow
--spec athr_try_borrow(ip(), stackstack(), fungespace()) -> execute_return().
+-spec athr_try_borrow(ip(), stackstack(), fungespace()) -> return_normal().
 athr_try_borrow(IP, Stack, Space) ->
 	{efunge_ip:rev_delta(IP), Stack}.
 
