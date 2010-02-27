@@ -32,8 +32,6 @@
 -include("../efunge_ip.hrl").
 -include("../funge_types.hrl").
 
--type execute_return() :: {ip(), stackstack()}.
-
 %% We use this type for our fingerprint specific data:
 -type fp_file_key() :: integer().
 -type fp_file() :: {IoDev::file:io_device(), BufVec::coord()}.
