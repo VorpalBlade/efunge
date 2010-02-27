@@ -191,9 +191,9 @@ for (( i = 0; i < ${#fp_OPCODES}; i++ )); do
 	ord number "${fp_OPCODES:$i:1}"
 	funname="${FPRINTLOW}_${fp_OPCODE_NAMES[$number]}"
 
-	addtoerl "%% @spec ${funname}(ip(), stackstack(), fungespace()) -> execute_return()"
+	addtoerl "%% @spec ${funname}(ip(), stackstack(), fungespace()) -> return_normal()"
 	addtoerl "%% @doc ${fp_OPCODES:$i:1} - ${fp_OPCODE_DESC[$number]}"
-	addtoerl "-spec ${funname}(ip(), stackstack(), fungespace()) -> execute_return()."
+	addtoerl "-spec ${funname}(ip(), stackstack(), fungespace()) -> return_normal()."
 	addtoerl "${funname}(IP, Stack, Space) ->"
 	addtoerl "	{efunge_ip:rev_delta(IP), Stack}."
 	addtoerl ''
