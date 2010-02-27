@@ -168,7 +168,7 @@ handle_new_child([_|_]=Args, Pid, #state{} = State) ->
 % {Action, State}
 % Action = ok | ignore | shutdown
 -spec handle_exit(pid(),{shutdown,{quit|exited,integer()}}|_,state())
-   -> {ok|ignore|shutdown,state()}.
+   -> {ok|shutdown,state()}.
 %% efunge should shut down:
 handle_exit(_Pid, {shutdown,{quit,Retval}}, #state{} = State) ->
 	State#state.main ! {self(), shutdown, Retval},

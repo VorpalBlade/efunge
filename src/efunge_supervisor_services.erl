@@ -76,7 +76,7 @@ start_in_shell_for_testing() ->
 add_service(ChildSpec = {Id,_StartFunc,_Restart,_Shutdown,_Type,_Modules}) ->
 	case supervisor:start_child(?CALL_NAME, ChildSpec) of
 		{error,already_present} ->
-			{already_present, supervisor:restart_child(Id)};
+			{already_present, supervisor:restart_child(?CALL_NAME, Id)};
 		Result -> Result
 	end.
 
@@ -89,7 +89,7 @@ add_service(ChildSpec = {Id,_StartFunc,_Restart,_Shutdown,_Type,_Modules}) ->
 %% @doc Whenever a supervisor is started using supervisor:start_link/[2,3],
 %% this function is called by the new process to find out about restart
 %% strategy, maximum restart frequency and child specifications.
--spec init([]) -> supervisor_return().
+-spec init([]) -> supervisor_return_no_ignore().
 init([]) ->
 	SupSpec     = {one_for_one,3,10},
 	FungeSpace  = {'efunge_fungespace', {'efunge_fungespace', start_link, []},
