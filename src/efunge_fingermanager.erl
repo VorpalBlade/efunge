@@ -21,8 +21,10 @@
 -export([init/1, load/2, unload/2, execute/4]).
 %% These are called from fingerprint loading functions.
 -export([push_fun/3, push_funs/2]).
-%% These are called from fingerprints to extract IP-specific data
+%% These are called from fingerprints to extract IP-specific data.
 -export([get_data/2, set_data/3]).
+%% This is required for FING.
+-export([pop_fun/2]).
 
 %%====================================================================
 %% Types
@@ -113,6 +115,15 @@ get_data(Fingerprint, IP) ->
 set_data(Fingerprint, Value, IP) ->
 	D = dict:store(Fingerprint, Value, IP#fip.fingerprintdata),
 	IP#fip{fingerprintdata=D}.
+
+-spec pop_fun(fingeropcode(),ip()) -> {ip(),fingerfun()}.
+pop_fun(Instr, IP=#fip{fingerOpStacks=Array}) when Instr >= $A, Instr =< $Z ->
+	Idx = Instr - $A,
+	OpStack = array:get(Idx, Array),
+	{S2, Fun} = efunge_fingerstack:pop(OpStack),
+	Array2 = array:set(Idx, S2, Array),
+	{IP#fip{fingerOpStacks = Array2}, Fun}.
+
 
 %%====================================================================
 %% Internal functions

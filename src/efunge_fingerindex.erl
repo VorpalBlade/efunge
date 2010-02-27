@@ -38,6 +38,8 @@ lookup(16#43504c49)  -> { "ADMOSV", fun fingCPLI:load/1 };
 lookup(16#44495246)  -> { "CMR", fun fingDIRF:load/1 };
 %% FILE - File I/O functions
 lookup(16#46494c45)  -> { "CDGLOPRSW", fun fingFILE:load/1 };
+%% FING - Operate on single fingerprint semantics
+lookup(16#46494e47)  -> { "XYZ", fun fingFING:load/1 };
 %% FIXP - Some useful math functions
 lookup(16#46495850)  -> { "ABCDIJNOPQRSTUVX", fun fingFIXP:load/1 };
 %% MODU - Modulo Arithmetic
