@@ -26,9 +26,6 @@
 -include("funge_types.hrl").
 %% @headerfile "efunge_ip.hrl"
 
-%% @type process_instr_ret() = {ip(),stackstack()} | {dead, integer()}.
--type process_instr_ret() :: {ip(),stackstack()} | {dead, integer()}.
-
 %% @spec loop(ip(), stackstack(), tid()) -> integer()
 %% @doc Main loop. Do not call from anywhere but efunge:start/2!
 -spec loop(ip(), stackstack(), fungespace()) -> integer().
@@ -69,9 +66,8 @@ handle_string_mode(Instr, #fip{ lastWasSpace = LastSpace } = IP, Stack) ->
 
 %% Finally, process instruction:
 
-%% @spec process_instruction(integer(), ip(), stackstack(), Space) -> process_instr_ret()
 %% @doc Process an instruction.
--spec process_instruction(integer(),ip(),stackstack(), fungespace()) -> process_instr_ret().
+-spec process_instruction(integer(),ip(),stackstack(), fungespace()) -> execute_return().
 
 %%   Space
 process_instruction($\s, #fip{} = IP, Stack, _Space) ->
@@ -429,9 +425,9 @@ process_instruction(_Instr, #fip{} = IP, Stack, _Space) ->
 	{rev_delta(IP), Stack}.
 
 
-%% @spec iterate(Count, Instr, IP, Stack, Space) -> process_instr_ret()
+%% @spec iterate(Count, Instr, IP, Stack, Space) -> execute_return()
 %% @doc Iterate helper. Calls the relevant process_instruction Count times.
--spec iterate(non_neg_integer(),integer(),ip()|dead,stackstack()|integer(),fungespace()) -> process_instr_ret().
+-spec iterate(non_neg_integer(),integer(),ip()|dead,stackstack()|integer(),fungespace()) -> execute_return().
 iterate(0, _Instr, IP, Stack, _Space) ->
 	{IP, Stack};
 %% For @ and q.

@@ -42,9 +42,9 @@ load(IP) ->
 
 %% The fingerprint functions
 
-%% @spec dirf_chdir(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec dirf_chdir(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc C - change directory
--spec dirf_chdir(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec dirf_chdir(ip(), stackstack(), fungespace()) -> return_normal().
 dirf_chdir(IP, Stack, _Space) ->
 	{S2, Dir} = pop_gnirts(Stack),
 	case file:set_cwd(Dir) of
@@ -52,9 +52,9 @@ dirf_chdir(IP, Stack, _Space) ->
 		{error, _Reason} -> {efunge_ip:rev_delta(IP), S2}
 	end.
 
-%% @spec dirf_mkdir(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec dirf_mkdir(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc M - make directory
--spec dirf_mkdir(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec dirf_mkdir(ip(), stackstack(), fungespace()) -> return_normal().
 dirf_mkdir(IP, Stack, _Space) ->
 	{S2, Dir} = pop_gnirts(Stack),
 	case file:make_dir(Dir) of
@@ -62,9 +62,9 @@ dirf_mkdir(IP, Stack, _Space) ->
 		{error, _Reason} -> {efunge_ip:rev_delta(IP), S2}
 	end.
 
-%% @spec dirf_rmdir(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec dirf_rmdir(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc R - remove directory
--spec dirf_rmdir(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec dirf_rmdir(ip(), stackstack(), fungespace()) -> return_normal().
 dirf_rmdir(IP, Stack, _Space) ->
 	{S2, Dir} = pop_gnirts(Stack),
 	case file:del_dir(Dir) of

@@ -47,18 +47,18 @@ load(IP) ->
 
 %% The fingerprint functions
 
-%% @spec cpli_add(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec cpli_add(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc A - add
--spec cpli_add(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec cpli_add(ip(), stackstack(), fungespace()) -> return_normal().
 cpli_add(IP, Stack, _Space) ->
 	{S2, Br, Bi} = pop_complex(Stack),
 	{S3, Ar, Ai} = pop_complex(S2),
 	S4 = push_complex(S3, Ar + Br, Ai + Bi),
 	{IP, S4}.
 
-%% @spec cpli_div(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec cpli_div(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc D - divide
--spec cpli_div(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec cpli_div(ip(), stackstack(), fungespace()) -> return_normal().
 cpli_div(IP, Stack, _Space) ->
 	{S2, Br, Bi} = pop_complex(Stack),
 	{S3, Ar, Ai} = pop_complex(S2),
@@ -71,18 +71,18 @@ cpli_div(IP, Stack, _Space) ->
 	end,
 	{IP, S4}.
 
-%% @spec cpli_mul(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec cpli_mul(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc M - multiply
--spec cpli_mul(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec cpli_mul(ip(), stackstack(), fungespace()) -> return_normal().
 cpli_mul(IP, Stack, _Space) ->
 	{S2, Br, Bi} = pop_complex(Stack),
 	{S3, Ar, Ai} = pop_complex(S2),
 	S4 = push_complex(S3, Ar*Br - Ai*Bi, Ar*Bi + Ai*Br),
 	{IP, S4}.
 
-%% @spec cpli_out(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec cpli_out(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc O - output
--spec cpli_out(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec cpli_out(ip(), stackstack(), fungespace()) -> return_normal().
 cpli_out(IP, Stack, _Space) ->
 	{S2, R, I} = pop_complex(Stack),
 	io:format("~w", [R]),
@@ -93,18 +93,18 @@ cpli_out(IP, Stack, _Space) ->
 	io:format("~wi ", [I]),
 	{IP, S2}.
 
-%% @spec cpli_sub(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec cpli_sub(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc S - substract
--spec cpli_sub(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec cpli_sub(ip(), stackstack(), fungespace()) -> return_normal().
 cpli_sub(IP, Stack, _Space) ->
 	{S2, Br, Bi} = pop_complex(Stack),
 	{S3, Ar, Ai} = pop_complex(S2),
 	S4 = push_complex(S3, Ar - Br, Ai - Bi),
 	{IP, S4}.
 
-%% @spec cpli_abs(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec cpli_abs(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc V - absolute value
--spec cpli_abs(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec cpli_abs(ip(), stackstack(), fungespace()) -> return_normal().
 cpli_abs(IP, Stack, _Space) ->
 	{S2, R, I} = pop_complex(Stack),
 	try

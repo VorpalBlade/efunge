@@ -58,86 +58,86 @@ load(IP) ->
 
 %% The fingerprint functions
 
-%% @spec orth_bit_and(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec orth_bit_and(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc A - bitwise and
--spec orth_bit_and(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec orth_bit_and(ip(), stackstack(), fungespace()) -> return_normal().
 orth_bit_and(IP, Stack, _Space) ->
 	{S1, B} = pop(Stack),
 	{S2, A} = pop(S1),
 	{IP, push(S2, A band B)}.
 
-%% @spec orth_bit_xor(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec orth_bit_xor(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc E - bitwise xor
--spec orth_bit_xor(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec orth_bit_xor(ip(), stackstack(), fungespace()) -> return_normal().
 orth_bit_xor(IP, Stack, _Space) ->
 	{S1, B} = pop(Stack),
 	{S2, A} = pop(S1),
 	{IP, push(S2, A bxor B)}.
 
-%% @spec orth_get(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec orth_get(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc G - Get cell (ortho style)
--spec orth_get(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec orth_get(ip(), stackstack(), fungespace()) -> return_normal().
 orth_get(IP, Stack, Space) ->
 	{S1, {Y, X}} = pop_vec(Stack),
 	{IP, push(S1, efunge_fungespace:fetch(Space, {X, Y}))}.
 
-%% @spec orth_bit_or(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec orth_bit_or(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc O - bitwise or
--spec orth_bit_or(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec orth_bit_or(ip(), stackstack(), fungespace()) -> return_normal().
 orth_bit_or(IP, Stack, _Space) ->
 	{S1, B} = pop(Stack),
 	{S2, A} = pop(S1),
 	{IP, push(S2, A bor B)}.
 
-%% @spec orth_put(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec orth_put(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc P - Put cell (ortho style)
--spec orth_put(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec orth_put(ip(), stackstack(), fungespace()) -> return_normal().
 orth_put(IP, Stack, Space) ->
 	{S1, {Y, X}} = pop_vec(Stack),
 	{S2, V} = pop(S1),
 	efunge_fungespace:set(Space, {X, Y}, V),
 	{IP, S2}.
 
-%% @spec orth_output_string(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec orth_output_string(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc S - Output string
--spec orth_output_string(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec orth_output_string(ip(), stackstack(), fungespace()) -> return_normal().
 orth_output_string(IP, Stack, _Space) ->
 	{S1, Str} = pop_gnirts(Stack),
 	%% Output it
 	io:format("~ts", [Str]),
 	{IP, S1}.
 
-%% @spec orth_change_dx(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec orth_change_dx(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc V - Change delta x
--spec orth_change_dx(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec orth_change_dx(ip(), stackstack(), fungespace()) -> return_normal().
 orth_change_dx(IP, Stack, _Space) ->
 	{S1, DX} = pop(Stack),
 	{IP#fip{ dx = DX }, S1}.
 
-%% @spec orth_change_dy(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec orth_change_dy(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc W - Change delta y
--spec orth_change_dy(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec orth_change_dy(ip(), stackstack(), fungespace()) -> return_normal().
 orth_change_dy(IP, Stack, _Space) ->
 	{S1, DY} = pop(Stack),
 	{IP#fip{ dy = DY }, S1}.
 
-%% @spec orth_change_x(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec orth_change_x(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc X - Change x position
--spec orth_change_x(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec orth_change_x(ip(), stackstack(), fungespace()) -> return_normal().
 orth_change_x(IP, Stack, _Space) ->
 	{S1, X} = pop(Stack),
 	{IP#fip{ x = X }, S1}.
 
-%% @spec orth_change_y(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec orth_change_y(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc Y - Change y position
--spec orth_change_y(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec orth_change_y(ip(), stackstack(), fungespace()) -> return_normal().
 orth_change_y(IP, Stack, _Space) ->
 	{S1, Y} = pop(Stack),
 	{IP#fip{ y = Y }, S1}.
 
-%% @spec orth_ramp_if_zero(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}
+%% @spec orth_ramp_if_zero(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc Z - Act like trampoline if 0
--spec orth_ramp_if_zero(ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec orth_ramp_if_zero(ip(), stackstack(), fungespace()) -> return_normal().
 orth_ramp_if_zero(IP, Stack, Space) ->
 	{S1, N} = pop(Stack),
 	case N of

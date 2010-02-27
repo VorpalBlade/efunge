@@ -39,7 +39,7 @@ load(IP) ->
 %% Private funtions
 
 %% @doc Return a fingerprint fun that push Amount.
--spec make_pusher(integer()) -> fun((ip(),stackstack(),fungespace()) -> {ip(),stackstack()}).
+-spec make_pusher(integer()) -> fun((ip(),stackstack(),fungespace()) -> return_normal()).
 make_pusher(Amount) ->
 	fun(IP, Stack, _Space) ->
 		{IP, efunge_stackstack:push(Stack, Amount)}

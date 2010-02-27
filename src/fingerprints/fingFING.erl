@@ -44,9 +44,9 @@ load(IP) ->
 
 %% The fingerprint functions
 
-%% @spec fing_swap(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec fing_swap(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc X - Swap two semantics
--spec fing_swap(ip(), stackstack(), fungespace()) -> execute_return().
+-spec fing_swap(ip(), stackstack(), fungespace()) -> return_normal().
 fing_swap(IP, Stack, _Space) ->
 	{S1, First} = pop_op_spec(Stack),
 	{S2, Second} = pop_op_spec(S1),
@@ -61,9 +61,9 @@ fing_swap(IP, Stack, _Space) ->
 			{IP4, S2}
 	end.
 
-%% @spec fing_drop(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec fing_drop(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc Y - Drop semantic
--spec fing_drop(ip(), stackstack(), fungespace()) -> execute_return().
+-spec fing_drop(ip(), stackstack(), fungespace()) -> return_normal().
 fing_drop(IP, Stack, _Space) ->
 	case pop_op_spec(Stack) of
 		{S1, error} -> {efunge_ip:rev_delta(IP), S1};
@@ -72,9 +72,9 @@ fing_drop(IP, Stack, _Space) ->
 			{IP1, S1}
 	end.
 
-%% @spec fing_push(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec fing_push(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc Z - Push source semantic onto dst
--spec fing_push(ip(), stackstack(), fungespace()) -> execute_return().
+-spec fing_push(ip(), stackstack(), fungespace()) -> return_normal().
 fing_push(IP, Stack, _Space) ->
 	{S1, Dest} = pop_op_spec(Stack),
 	{S2, Src} = pop_op_spec(S1),

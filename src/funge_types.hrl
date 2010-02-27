@@ -24,7 +24,9 @@
 -type ip() :: #fip{}.
 -type fungespace() :: atom() | tid().
 
--type execute_return() :: {ip(), stackstack()}.
+-type return_exit() :: {dead, integer()}.
+-type return_normal() :: {ip(), stackstack()}.
+-type execute_return() :: return_normal() | return_exit().
 
 -type fingerfun() :: fun((ip(), stackstack(), fungespace()) -> execute_return()).
 -type fingerloadingfun() :: fun((ip()) -> {ok, ip()} | {error, ip()}).

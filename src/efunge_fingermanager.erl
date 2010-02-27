@@ -77,7 +77,7 @@ unload(#fip{} = IP, Fingerprint) ->
 
 %% @private For use from efunge_interpreter only.
 %% @doc Execute a fingerprint op.
--spec execute(fingeropcode(), ip(), stackstack(), fungespace()) -> {ip(), stackstack()}.
+-spec execute(fingeropcode(), ip(), stackstack(), fungespace()) -> execute_return().
 execute(Instr, #fip{ fingerOpStacks = Array } = IP, StackStack, FungeSpace) ->
 	Idx = Instr - $A,
 	OpStack = array:get(Idx, Array),
