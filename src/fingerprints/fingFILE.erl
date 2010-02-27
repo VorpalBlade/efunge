@@ -60,9 +60,9 @@ load(IP) ->
 
 %% The fingerprint functions
 
-%% @spec file_fclose(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec file_fclose(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc C - Close a file
--spec file_fclose(ip(), stackstack(), fungespace()) -> execute_return().
+-spec file_fclose(ip(), stackstack(), fungespace()) -> return_normal().
 file_fclose(IP, Stack, _Space) ->
 	{S1, Handle} = pop(Stack),
 	case get_file(IP, Handle) of
@@ -75,9 +75,9 @@ file_fclose(IP, Stack, _Space) ->
 			end
 	end.
 
-%% @spec file_delete(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec file_delete(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc D - Delete specified file
--spec file_delete(ip(), stackstack(), fungespace()) -> execute_return().
+-spec file_delete(ip(), stackstack(), fungespace()) -> return_normal().
 file_delete(IP, Stack, _Space) ->
 	{S1, FileName} = pop_gnirts(Stack),
 	case file:delete(FileName) of
@@ -85,9 +85,9 @@ file_delete(IP, Stack, _Space) ->
 		{error,_} -> {efunge_ip:rev_delta(IP), S1}
 	end.
 
-%% @spec file_fgets(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec file_fgets(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc G - Get string from file (like c fgets)
--spec file_fgets(ip(), stackstack(), fungespace()) -> execute_return().
+-spec file_fgets(ip(), stackstack(), fungespace()) -> return_normal().
 file_fgets(IP, Stack, _Space) ->
 	Handle = peek(Stack),
 	try
@@ -102,9 +102,9 @@ file_fgets(IP, Stack, _Space) ->
 		error:{badmatch,_} -> {efunge_ip:rev_delta(IP), Stack}
 	end.
 
-%% @spec file_ftell(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec file_ftell(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc L - Get current location in file
--spec file_ftell(ip(), stackstack(), fungespace()) -> execute_return().
+-spec file_ftell(ip(), stackstack(), fungespace()) -> return_normal().
 file_ftell(IP, Stack, _Space) ->
 	Handle = peek(Stack),
 	try
@@ -115,9 +115,9 @@ file_ftell(IP, Stack, _Space) ->
 		error:{badmatch,_} -> {efunge_ip:rev_delta(IP), Stack}
 	end.
 
-%% @spec file_fopen(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec file_fopen(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc O - Open a file (Va = i/o buffer vector)
--spec file_fopen(ip(), stackstack(), fungespace()) -> execute_return().
+-spec file_fopen(ip(), stackstack(), fungespace()) -> return_normal().
 file_fopen(IP, Stack, _Space) ->
 	{S1, Filename} = pop_gnirts(Stack),
 	{S2, ModeNumber} = pop(S1),
@@ -136,9 +136,9 @@ file_fopen(IP, Stack, _Space) ->
 		{efunge_file,_} -> {efunge_ip:rev_delta(IP), S3}
 	end.
 
-%% @spec file_fputs(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec file_fputs(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc P - Put string to file (like c fputs)
--spec file_fputs(ip(), stackstack(), fungespace()) -> execute_return().
+-spec file_fputs(ip(), stackstack(), fungespace()) -> return_normal().
 file_fputs(IP, Stack, _Space) ->
 	{S1, String} = pop_gnirts(Stack),
 	% FIXME: Negative values
@@ -152,9 +152,9 @@ file_fputs(IP, Stack, _Space) ->
 		error:{badmatch,_} -> {efunge_ip:rev_delta(IP), S1}
 	end.
 
-%% @spec file_fread(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec file_fread(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc R - Read n bytes from file to i/o buffer
--spec file_fread(ip(), stackstack(), fungespace()) -> execute_return().
+-spec file_fread(ip(), stackstack(), fungespace()) -> return_normal().
 file_fread(IP, Stack, Space) ->
 	{S1, Bytes} = pop(Stack),
 	Handle = peek(S1),
@@ -168,9 +168,9 @@ file_fread(IP, Stack, Space) ->
 		error:{badmatch,_} -> {efunge_ip:rev_delta(IP), S1}
 	end.
 
-%% @spec file_fseek(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec file_fseek(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc S - Seek to position in file
--spec file_fseek(ip(), stackstack(), fungespace()) -> execute_return().
+-spec file_fseek(ip(), stackstack(), fungespace()) -> return_normal().
 file_fseek(IP, Stack, _Space) ->
 	{S1, Pos} = pop(Stack),
 	{S2, Operation} = pop(S1),
@@ -191,9 +191,9 @@ file_fseek(IP, Stack, _Space) ->
 		error:{badmatch,_} -> {efunge_ip:rev_delta(IP), S2}
 	end.
 
-%% @spec file_fwrite(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec file_fwrite(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc W - Write n bytes from i/o buffer to file
--spec file_fwrite(ip(), stackstack(), fungespace()) -> execute_return().
+-spec file_fwrite(ip(), stackstack(), fungespace()) -> return_normal().
 file_fwrite(IP, Stack, Space) ->
 	{S1, Bytes} = pop(Stack),
 	Handle = peek(S1),
@@ -245,7 +245,7 @@ get_file(IP, Handle) ->
 
 
 %% @doc Map the mode numbers to modes.
--spec map_mode(0 | 1 | 2 | 3 | 4 | 5) -> ['append' | 'read' | 'write',...].
+-spec map_mode(0..5) -> ['append' | 'read' | 'write',...].
 map_mode(0) -> [read];        % r
 map_mode(1) -> [write];       % w
 map_mode(2) -> [append];      % a

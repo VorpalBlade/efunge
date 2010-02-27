@@ -64,17 +64,17 @@ load(IP) ->
 
 %% The fingerprint functions
 
-%% @spec strn_append(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec strn_append(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc A - Append bottom string to upper string
--spec strn_append(ip(), stackstack(), fungespace()) -> execute_return().
+-spec strn_append(ip(), stackstack(), fungespace()) -> return_normal().
 strn_append(IP, Stack, _Space) ->
 	{S1, Top} = pop_gnirts(Stack),
 	{S2, Bottom} = pop_gnirts(S1),
 	{IP, push_gnirts(S2, Top ++ Bottom)}.
 
-%% @spec strn_compare(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec strn_compare(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc C - Compare strings
--spec strn_compare(ip(), stackstack(), fungespace()) -> execute_return().
+-spec strn_compare(ip(), stackstack(), fungespace()) -> return_normal().
 strn_compare(IP, Stack, _Space) ->
 	{S1, A} = pop_gnirts(Stack),
 	{S2, B} = pop_gnirts(S1),
@@ -84,17 +84,17 @@ strn_compare(IP, Stack, _Space) ->
 		true  -> {IP, push(S2, 0)}
 	end.
 
-%% @spec strn_display(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec strn_display(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc D - Display a string
--spec strn_display(ip(), stackstack(), fungespace()) -> execute_return().
+-spec strn_display(ip(), stackstack(), fungespace()) -> return_normal().
 strn_display(IP, Stack, _Space) ->
 	{S1, Str} = pop_gnirts(Stack),
 	io:put_chars(Str),
 	{IP, S1}.
 
-%% @spec strn_search(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec strn_search(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc F - Search for bottom string in upper string
--spec strn_search(ip(), stackstack(), fungespace()) -> execute_return().
+-spec strn_search(ip(), stackstack(), fungespace()) -> return_normal().
 strn_search(IP, Stack, _Space) ->
 	{S1, Top} = pop_gnirts(Stack),
 	{S2, Bottom} = pop_gnirts(S1),
@@ -103,9 +103,9 @@ strn_search(IP, Stack, _Space) ->
 		Idx -> {IP, push_gnirts(S2, string:substr(Top,Idx))}
 	end.
 
-%% @spec strn_get(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec strn_get(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc G - Get string from specified position
--spec strn_get(ip(), stackstack(), fungespace()) -> execute_return().
+-spec strn_get(ip(), stackstack(), fungespace()) -> return_normal().
 strn_get(IP=#fip{offX = OffX, offY = OffY}, Stack, Space) ->
 	{{MinX,MinY},{MaxX,MaxY}} = efunge_fungespace:get_bounds(Space),
 	{S1, {RX,RY}} = pop_vec(Stack),
@@ -119,9 +119,9 @@ strn_get(IP=#fip{offX = OffX, offY = OffY}, Stack, Space) ->
 			{IP, push_gnirts(S1, Str)}
 	end.
 
-%% @spec strn_input(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec strn_input(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc I - Input a string
--spec strn_input(ip(), stackstack(), fungespace()) -> execute_return().
+-spec strn_input(ip(), stackstack(), fungespace()) -> return_normal().
 strn_input(IP, Stack, _Space) ->
 	case efunge_input:read_line() of
 		eof -> {efunge_ip:rev_delta(IP), Stack};
@@ -136,9 +136,9 @@ strn_input(IP, Stack, _Space) ->
 			end
 	end.
 
-%% @spec strn_left(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec strn_left(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc L - Leftmost n characters of string
--spec strn_left(ip(), stackstack(), fungespace()) -> execute_return().
+-spec strn_left(ip(), stackstack(), fungespace()) -> return_normal().
 strn_left(IP, Stack, _Space) ->
 	{S1, N} = pop(Stack),
 	{S2, Str} = pop_gnirts(S1),
@@ -149,9 +149,9 @@ strn_left(IP, Stack, _Space) ->
 			{IP, push_gnirts(S2, string:substr(Str, 1, N))}
 	end.
 
-%% @spec strn_slice(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec strn_slice(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc M - n characters starting at position s
--spec strn_slice(ip(), stackstack(), fungespace()) -> execute_return().
+-spec strn_slice(ip(), stackstack(), fungespace()) -> return_normal().
 strn_slice(IP, Stack, _Space) ->
 	{S1, N} = pop(Stack),
 	{S2, P} = pop(S1),
@@ -163,16 +163,16 @@ strn_slice(IP, Stack, _Space) ->
 			{IP, push_gnirts(S3, string:substr(Str, P+1, N))}
 	end.
 
-%% @spec strn_length(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec strn_length(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc N - Get length of string
--spec strn_length(ip(), stackstack(), fungespace()) -> execute_return().
+-spec strn_length(ip(), stackstack(), fungespace()) -> return_normal().
 strn_length(IP, Stack, _Space) ->
 	{_, Str} = pop_gnirts(Stack),
 	{IP, push(Stack, length(Str))}.
 
-%% @spec strn_put(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec strn_put(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc P - Put string at specified position
--spec strn_put(ip(), stackstack(), fungespace()) -> execute_return().
+-spec strn_put(ip(), stackstack(), fungespace()) -> return_normal().
 strn_put(IP=#fip{offX = OffX, offY = OffY}, Stack, Space) ->
 	{S1, {RX,RY}} = pop_vec(Stack),
 	X = RX + OffX,
@@ -180,9 +180,9 @@ strn_put(IP=#fip{offX = OffX, offY = OffY}, Stack, Space) ->
 	S2 = write_fspace_str(S1, X, Y, Space),
 	{IP, S2}.
 
-%% @spec strn_right(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec strn_right(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc R - Rightmost n characters of string
--spec strn_right(ip(), stackstack(), fungespace()) -> execute_return().
+-spec strn_right(ip(), stackstack(), fungespace()) -> return_normal().
 strn_right(IP, Stack, _Space) ->
 	{S1, N} = pop(Stack),
 	{S2, Str} = pop_gnirts(S1),
@@ -194,16 +194,16 @@ strn_right(IP, Stack, _Space) ->
 			{IP, push_gnirts(S2, string:substr(Str, L-N+1))}
 	end.
 
-%% @spec strn_itoa(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec strn_itoa(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc S - String representation of a number
--spec strn_itoa(ip(), stackstack(), fungespace()) -> execute_return().
+-spec strn_itoa(ip(), stackstack(), fungespace()) -> return_normal().
 strn_itoa(IP, Stack, _Space) ->
 	{S1, N} = pop(Stack),
 	{IP, push_gnirts(S1,integer_to_list(N))}.
 
-%% @spec strn_atoi(ip(), stackstack(), fungespace()) -> execute_return()
+%% @spec strn_atoi(ip(), stackstack(), fungespace()) -> return_normal()
 %% @doc V - Retrieve value from string
--spec strn_atoi(ip(), stackstack(), fungespace()) -> execute_return().
+-spec strn_atoi(ip(), stackstack(), fungespace()) -> return_normal().
 strn_atoi(IP, Stack, _Space) ->
 	{S1, Str} = pop_gnirts(Stack),
 	case string:to_integer(Str) of
