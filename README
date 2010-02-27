@@ -131,6 +131,5 @@ Real bugs or issues:
  * Better code documentation would be useful.
 
 Missing features:
- * o isn't supported yet.
  * = isn't supported yet, and won't use the system() paradigm.
  * t isn't supported yet, and may never be supported.
