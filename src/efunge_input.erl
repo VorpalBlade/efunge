@@ -23,7 +23,7 @@
 
 %% API
 -export([start/0, start_link/0, stop/0]).
--export([read_char/0, read_integer/0]).
+-export([read_char/0, read_integer/0, read_line/0]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -92,6 +92,13 @@ read_char() ->
 read_integer() ->
 	gen_server:call(?CALL_NAME, read_integer, infinity).
 
+%% @doc
+%% Get an entire line. If there is anything in the buffer that is what will be
+%% returned. If buffer is empty, new line will be fetched.
+-spec read_line() -> error_replies() | string().
+read_line() ->
+	gen_server:call(?CALL_NAME, read_line, infinity).
+
 
 %%====================================================================
 %% gen_server callbacks
@@ -108,10 +115,14 @@ init([]) ->
 %% @hidden
 %% @doc Handling call messages
 -spec handle_call(read_char, _, state()) -> {reply, error_replies() | char(), state()}
+               ; (read_line, _, state()) -> {reply, error_replies() | string(), state()}
                ; (read_integer, _, state()) -> {reply, error_replies() | integer(), state()}
                ; (stop, _, state()) -> {stop,normal,stopped,state()}.
 handle_call(read_char, _From, State) ->
 	{NewState, Reply} = read_char(State),
+	{reply, Reply, NewState};
+handle_call(read_line, _From, State) ->
+	{NewState, Reply} = read_line(State),
 	{reply, Reply, NewState};
 handle_call(read_integer, _From, State) ->
 	{NewState, Reply} = read_integer(State),
@@ -182,6 +193,18 @@ read_char(State) ->
 		ok ->
 			[H|T] = NewState,
 			{T, H}
+	end.
+
+
+
+%% @doc Get an entire line.
+-spec read_line(state()) -> {state(), string() | error_replies()}.
+read_line(State) ->
+	{Result, NewState} = fill_buffer(State),
+	case Result of
+		eof   -> {NewState, eof};
+		error -> {NewState, error};
+		ok    -> {[], NewState}
 	end.
 
 %% @spec parse_integer(string()) -> {integer(), Rest::string()} | error
