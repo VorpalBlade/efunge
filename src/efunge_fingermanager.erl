@@ -117,8 +117,9 @@ set_data(Fingerprint, Value, IP) ->
 	IP#fip{fingerprintdata=D}.
 
 %% @doc
-%% Read fingerprint data for a given IP. Fingerprint should be an atom like
-%% 'QUUX', that is the actual fingerprint. Nothing else is allowed.
+%% Delete fingerprint data for a given fingerprint from a given IP. Fingerprint
+%% should be an atom like 'QUUX', that is the actual fingerprint. Nothing else
+%% is allowed.
 -spec delete_data(atom(),ip()) -> ip().
 delete_data(Fingerprint, IP) ->
 	D = dict:erase(Fingerprint, IP#fip.fingerprintdata),
