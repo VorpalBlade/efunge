@@ -150,7 +150,11 @@ athr_return(IP, Stack, Space) ->
 -spec athr_spawn(ip(), stackstack(), fungespace()) -> return_normal().
 athr_spawn(IP, Stack, Space) ->
 	ChildIP = efunge_ip:ip_forward(efunge_ip:rev_delta(IP)),
-	case efunge_supervisor_threads:create_thread(Space, ChildIP, Stack) of
+	%% FIXME: Should not be hard coded in here which data to remove!
+	ChildIP2 = lists:foldl(
+		fun(X, CIP) -> efunge_fingermanager:delete_data(X, CIP) end,
+		ChildIP, ['FILE']),
+	case efunge_supervisor_threads:create_thread(Space, ChildIP2, Stack) of
 		{ok, _Pid, _ThreadID} -> {IP, Stack};
 		{error, _Reason} -> {efunge_ip:rev_delta(IP), Stack}
 	end.

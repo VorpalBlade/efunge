@@ -22,7 +22,7 @@
 %% These are called from fingerprint loading functions.
 -export([push_fun/3, push_funs/2]).
 %% These are called from fingerprints to extract IP-specific data.
--export([get_data/2, set_data/3]).
+-export([get_data/2, set_data/3, delete_data/2]).
 %% This is required for FING.
 -export([pop_fun/2]).
 
@@ -116,6 +116,16 @@ set_data(Fingerprint, Value, IP) ->
 	D = dict:store(Fingerprint, Value, IP#fip.fingerprintdata),
 	IP#fip{fingerprintdata=D}.
 
+%% @doc
+%% Read fingerprint data for a given IP. Fingerprint should be an atom like
+%% 'QUUX', that is the actual fingerprint. Nothing else is allowed.
+-spec delete_data(atom(),ip()) -> ip().
+delete_data(Fingerprint, IP) ->
+	D = dict:erase(Fingerprint, IP#fip.fingerprintdata),
+	IP#fip{fingerprintdata=D}.
+
+
+%% @doc Pop a function from a stack, returns new ip and the fun. Used for FING.
 -spec pop_fun(fingeropcode(),ip()) -> {ip(),fingerfun()}.
 pop_fun(Instr, IP=#fip{fingerOpStacks=Array}) when Instr >= $A, Instr =< $Z ->
 	Idx = Instr - $A,
