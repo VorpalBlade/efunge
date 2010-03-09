@@ -97,8 +97,8 @@ push_request(19, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
 	efunge_stack:push_gnirtses(PushStack2, Args);
 %% 20 Environment
 push_request(20, #fip{} = _IP, _StackStack, _FungeSpace, PushStack) ->
-	push(PushStack, 0),
-	efunge_stack:push_gnirtses(PushStack, os:getenv()).
+	S2 = push(PushStack, 0),
+	efunge_stack:push_gnirtses(S2, os:getenv()).
 
 
 %% @spec system_info(RequestID, IP, StackStack, FungeSpace) -> stackstack()
