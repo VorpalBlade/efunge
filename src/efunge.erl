@@ -33,7 +33,8 @@ run()  ->
 	io:setopts(standard_io, [{encoding,unicode}]),
 	[Filename|Parameters] = init:get_plain_arguments(),
 	Retval = start(Filename, Parameters),
-	init:stop(Retval).
+	%% init:stop takes only positive parameters.
+	init:stop(abs(Retval)).
 
 %% @spec start(string()) -> integer()
 %% @doc Run efunge with a file.
