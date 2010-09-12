@@ -21,7 +21,7 @@ This file describes what was changed in the supervisor:
    abcast/2,3
    multi_call/2,3,4
    reply/2
- * Merged in changes from stock supervisor in R14B04.
+ * Merged in changes from stock supervisor in R13B04.
 
 This is based on the supervisor module from R13B-0 stdlib.
 
