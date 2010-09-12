@@ -616,6 +616,9 @@ load_initial(<<H,T/binary>>, FungeSpace, X, Y, LastWasCR) ->
 		%% Spaces shouldn't replace.
 		$\s ->
 			load_initial(T, FungeSpace, X+1, Y, false);
+		%% Form feed is ignored.
+		$\f ->
+			load_initial(T, FungeSpace, X, Y, false);
 		_ ->
 			set_server(FungeSpace, {X, Y}, H),
 			load_initial(T, FungeSpace, X+1, Y, false)
