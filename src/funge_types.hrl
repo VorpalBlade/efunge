@@ -22,7 +22,7 @@
 -type coord() :: {cell(), cell()}.
 -type rect() :: {coord(), coord()}.
 -type ip() :: #fip{}.
--type fungespace() :: atom() | tid().
+-type fungespace() :: atom() | ets:tid().
 
 -type exit_reason() :: {exited | quit | athr_quit, integer()}.
 -type return_exit() :: {dead, exit_reason()}.

@@ -6,13 +6,12 @@ efunge uses arbitrary-sized integers, this is a side effect of Erlang using that
 by default.
 
 To build and run efunge you will need:
-* Erlang. Version R13B03 is currently recommended. Newer minor versions should
+* Erlang. Version R14B is currently recommended. Newer minor versions should
   usually work too (but that is not guaranteed). When a new stable major version
   of Erlang is released, efunge is generally upgraded to it (after a few days or
   weeks) and "support" for the older Erlang version is dropped. Older versions
   may still work (if you are lucky) but are neither tested nor "supported".
-  Warning: R12B-3 and older versions most certainly not work due to the bug
-  OTP-7526 (fixed in R12B-4).
+  Warning: Any version older than R14A is unlikely to work currently.
 * A *nix make (or you could compile efunge manually, but details about that is
   undocumented).
 * Optional: A POSIX compatible shell for the wrapper script. You can also run
@@ -65,7 +64,7 @@ Remember to also include:
  * Erlang version. (You are looking for something like "R13B-0" here)
  * Runtime variant. (Run erl and copy the entire first line of output, will be
    a long line beginning with something similar to:
-   "Erlang R13B (erts-5.7.1) [source] [64-bit] [rq:1] [hipe]".)
+   "Erlang R14B (erts-5.8.1) [source] [64-bit] [rq:1] [hipe]".)
  * efunge version or branch and revision.
  * And if the bug causes a crash don't forget the backtrace (as described above).
 
