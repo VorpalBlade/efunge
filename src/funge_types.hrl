@@ -22,7 +22,7 @@
 -type coord() :: {cell(), cell()}.
 -type rect() :: {coord(), coord()}.
 -type ip() :: #fip{}.
--type fungespace() :: atom() | tid().
+-type fungespace() :: atom() | ets:tid().
 
 -type return_exit() :: {dead, integer()}.
 -type return_normal() :: {ip(), stackstack()}.
