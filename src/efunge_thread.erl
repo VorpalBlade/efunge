@@ -555,7 +555,8 @@ process_instruction(_Instr, #fip{} = IP, Stack, _Space) ->
 
 %% @spec iterate(Count, Instr, IP, Stack, Space) -> execute_return()
 %% @doc Iterate helper. Calls the relevant process_instruction Count times.
--spec iterate(non_neg_integer(),integer(),ip()|dead,stackstack()|exit_reason(),fungespace()) -> execute_return().
+-spec iterate(non_neg_integer(),integer(),ip(),stackstack(),fungespace()) -> execute_return()
+           ; (non_neg_integer(),integer(),dead,exit_reason(),fungespace()) -> return_exit().
 iterate(0, _Instr, IP, Stack, _Space) ->
 	{IP, Stack};
 %% For @ and q.
