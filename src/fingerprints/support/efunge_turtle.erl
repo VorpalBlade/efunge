@@ -478,7 +478,7 @@ svg_bg(Colour, Bounds) ->
 %% Converts a colour to a colour usable in CSS or SVG.
 %% Tries to use a compact representation.
 -spec svg_colour(colour()) -> iolist().
-svg_colour({0    ,0    ,16#80}) -> <<"navy">>;
+svg_colour({0    ,    0,16#80}) -> <<"navy">>;
 svg_colour({0    ,16#80,    0}) -> <<"green">>;
 svg_colour({0    ,16#80,16#80}) -> <<"teal">>;
 svg_colour({16#80,    0,    0}) -> <<"maroon">>;
@@ -486,7 +486,7 @@ svg_colour({16#80,    0,16#80}) -> <<"purple">>;
 svg_colour({16#80,16#80,    0}) -> <<"olive">>;
 svg_colour({16#80,16#80,16#80}) -> <<"gray">>;
 svg_colour({16#C0,16#C0,16#C0}) -> <<"silver">>;
-svg_colour({16#ff,0    ,    0}) -> <<"red">>;
+svg_colour({16#ff,    0,    0}) -> <<"red">>;
 svg_colour({R,G,B}) ->
 	C = lists:flatten(io_lib:format("#~2.16.0b~2.16.0b~2.16.0b", [R,G,B])),
 	% Try to shorten it if possible:
