@@ -25,8 +25,8 @@
 		offY = 0 :: integer(),
 		isStringMode = false :: boolean(),
 		lastWasSpace = false :: boolean(),
-		fingerOpStacks  :: array(),
-		fingerprintdata :: dict(),
+		fingerOpStacks  :: array:array(),
+		fingerprintdata :: dict:dict(),
 		%% Will be filled in early on...
 		threadID = -1 :: integer(),
 		ipID = -1 :: integer()

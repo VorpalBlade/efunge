@@ -35,7 +35,7 @@
 %% We use this type for our fingerprint specific data:
 -type fp_file_key() :: integer().
 -type fp_file() :: {IoDev::file:io_device(), BufVec::coord()}.
--type fp_file_data() :: {NextHandle::integer(), Files::dict()}.
+-type fp_file_data() :: {NextHandle::integer(), Files::dict:dict()}.
 
 %% Import common functions:
 -import(efunge_stackstack, [push/2, pop/1, peek/1, pop_vec/1,
