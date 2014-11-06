@@ -37,7 +37,7 @@
 %% OTP design principles as a supervision tree, this means starting the
 %% top supervisor of the tree.
 %%--------------------------------------------------------------------
--spec start(app_start_type(), any()) -> any().
+-spec start(app_start_type(), any()) -> {ok, pid()} | {ok, pid(), _} | {error, _}.
 start(normal, _StartArgs) ->
 	efunge_supervisor_top:start_link();
 start(_Type, _StartArgs) ->

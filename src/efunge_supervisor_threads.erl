@@ -117,7 +117,7 @@ cast_athr_signal(SigID) ->
 %% @doc Whenever a supervisor is started using supervisor:start_link/[2,3],
 %% this function is called by the new process to find out about restart
 %% strategy, maximum restart frequency and child specifications.
--spec init([]) -> {ok,{supervisor_spec(),[child_spec()], state()}}.
+-spec init([]) -> {ok,{supervisor_spec(),[supervisor:child_spec()], state()}}.
 init([]) ->
 	SupSpec = {simple_one_for_one,3,10},
 	Thread  = {'efunge_thread', {'efunge_thread', start_link, []},
