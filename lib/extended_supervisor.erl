@@ -101,7 +101,7 @@
 -record(state, {name :: supname_pid(),
 		strategy :: sup_restart(),
 		children = [] :: [#child{}],
-		dynamics = ?DICT:new() :: dict(),
+		dynamics = ?DICT:new() :: dict:dict(),
 		intensity :: non_neg_integer(),
 		period :: pos_integer(),
 		restarts = [] :: [time_triple()],

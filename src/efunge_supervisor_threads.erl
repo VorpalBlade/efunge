@@ -54,7 +54,7 @@
 -record(state,
 	{
 		main = none :: none | pid(),
-		threads :: dict()
+		threads :: dict:dict()
 	}
 ).
 

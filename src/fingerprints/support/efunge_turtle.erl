@@ -506,13 +506,13 @@ prune_circles(D=#drawing{nodes=Nodes}) ->
 	NewNodes = prune_circles(Nodes, [], sets:new()),
 	D#drawing{nodes=NewNodes}.
 
--spec add_line_points([tcoord()],set()) -> set().
+-spec add_line_points([tcoord()],sets:set(tcoord())) -> sets:set(tcoord()).
 add_line_points([], Coords) ->
 	Coords;
 add_line_points([H|T], Coords) ->
 	add_line_points(T, sets:add_element(H,Coords)).
 
--spec prune_circles([tnode()],[tnode()],set()) -> [tnode()].
+-spec prune_circles([tnode()],[tnode()],sets:set(tcoord())) -> [tnode()].
 prune_circles([], Output, _Coords) ->
 	lists:reverse(Output);
 prune_circles([H={circle,_Colour,Pos}|T], Output, Coords) ->
