@@ -1,4 +1,7 @@
 # efunge
+
+[![Build Status](https://travis-ci.org/VorpalBlade/efunge.svg?branch=master)](https://travis-ci.org/VorpalBlade/efunge)
+
 This is a simple Befunge-98 interpreter coded in Erlang.
 
 efunge uses arbitrary-sized integers, this is a side effect of Erlang using that
