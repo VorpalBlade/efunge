@@ -1,2 +1,4 @@
 *.beam
+*.sublime-project
+*.sublime-workspace
 erl_crash.dump
