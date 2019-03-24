@@ -46,9 +46,10 @@ start([_|_] = Filename) ->
 %% @doc Load file, set up PRNG, start main loop.
 -spec start(nonempty_string(), [string()]) -> integer().
 start([_|_] = Filename, Parameters) when is_list(Parameters) ->
-	{R1,R2,R3} = now(),
 	put(efungeargs, [Filename|Parameters]),
-	random:seed(R1, R2, R3),
+	random:seed(erlang:phash2([node()]),
+	            erlang:monotonic_time(),
+	            erlang:unique_integer()),
 	Space = efunge_fungespace:create(Filename),
 	IP = #fip{},
 	IP2 = efunge_fingermanager:init(IP),

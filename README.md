@@ -9,12 +9,12 @@ by default.
 
 To build and run efunge you will need:
 
-* Erlang. Version 17 is currently recommended. Newer minor versions should
+* Erlang. Version 18 is currently recommended. Newer minor versions should
   usually work too (but that is not guaranteed). When a new stable major version
   of Erlang is released, efunge is generally upgraded to it (after a few days or
   weeks) and "support" for the older Erlang version is dropped. Older versions
   may still work (if you are lucky) but are neither tested nor "supported".
-  **Warning**: Any version older than 17.0 is unlikely to work currently.
+  **Warning**: Any version older than 18.0 is unlikely to work currently.
 * A *nix make (or you could compile efunge manually, but details about that is
   undocumented).
 * Optional: A POSIX compatible shell for the wrapper script. You can also run
