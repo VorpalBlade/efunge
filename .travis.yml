@@ -9,7 +9,7 @@ otp_release:
   #- 19.3 Not yet supported by Travis CI?
 
 before_script:
-  - kerl list installation
+  - kerl list installations
 
 script:
   - make
