@@ -1,13 +1,9 @@
+dist: bionic
 language: erlang
 sudo: false
 otp_release:
-  - 18.0
-  - 18.3
-  - 19.0
-  - 19.1
-  - 19.2
-  #- 19.3 Not yet supported by Travis CI?
-
+  - 24.1.2
+  - 21.1
 before_script:
   - kerl list installations
 
