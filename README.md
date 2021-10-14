@@ -1,6 +1,6 @@
 # efunge
 
-[![Build Status](https://travis-ci.org/VorpalBlade/efunge.svg?branch=master)](https://travis-ci.org/VorpalBlade/efunge)
+[![Build Status](https://app.travis-ci.com/VorpalBlade/efunge.svg?branch=master)](https://app.travis-ci.com/VorpalBlade/efunge)
 
 This is a simple Befunge-98 interpreter coded in Erlang.
 
